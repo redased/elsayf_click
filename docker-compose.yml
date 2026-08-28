@@ -1,0 +1,77 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: e-learning-db
+    restart: always
+    environment:
+      POSTGRES_USER: elsayf
+      POSTGRES_PASSWORD: elsayf_secure_2026
+      POSTGRES_DB: elsayf
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U elsayf"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runner
+    platform: linux/amd64
+    container_name: e-learning-web
+    ports:
+      - "3001:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgresql://elsayf:elsayf_secure_2026@db:5432/elsayf
+      - NODE_ENV=production
+      - AUTH_SECRET=${AUTH_SECRET}
+      - AUTH_URL=${AUTH_URL}
+      - NEXTAUTH_URL=${AUTH_URL}
+      - AUTH_TRUST_HOST=true
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - Z_AI_API_KEY=${Z_AI_API_KEY}
+      - PUSHER_APP_ID=${PUSHER_APP_ID}
+      - NEXT_PUBLIC_PUSHER_KEY=${NEXT_PUBLIC_PUSHER_KEY}
+      - PUSHER_SECRET=${PUSHER_SECRET}
+      - NEXT_PUBLIC_PUSHER_CLUSTER=${NEXT_PUBLIC_PUSHER_CLUSTER}
+      - CHARGILY_API_KEY=${CHARGILY_API_KEY}
+      - CHARGILY_SECRET_KEY=${CHARGILY_SECRET_KEY}
+      - CHARGILY_MODE=${CHARGILY_MODE}
+      - NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+      - PYTHON_BACKEND_URL=http://bot-engine:8000
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - EMAIL_FROM=${EMAIL_FROM}
+    restart: always
+
+  bot-engine:
+    build:
+      context: ./backend-python
+      dockerfile: Dockerfile
+    container_name: e-learning-bot-engine
+    ports:
+      - "8002:8000"
+    volumes:
+      - ./backend-python:/app
+    environment:
+      - DEBUG=1
+      - ALLOWED_HOSTS=*
+      - CORS_ORIGIN_WHITELIST=https://elsayf.statlabo.com,http://localhost:3000
+    restart: always
+
+volumes:
+  postgres_data:

@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+:root {
+  --bg-color: #050a14;
+  --bg-gradient: linear-gradient(135deg, #050a14 0%, #0d1222 100%);
+  --primary-color: #a78bfa;
+  --primary-hover: #8b5cf6;
+  --text-main: #ffffff;
+  --text-muted: #9ca3af;
+  --glass-bg: rgba(20, 25, 40, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --card-bg: rgba(30, 35, 55, 0.5);
+  --accent-glow: rgba(167, 139, 250, 0.2);
+}
+
+@layer base {
+  body {
+    @apply bg-[#050a14] text-white font-sans min-h-screen overflow-x-hidden;
+    background: var(--bg-gradient);
+  }
+}
+
+@layer components {
+
+  /* Glassmorphism Utilities */
+  .glass {
+    @apply bg-[#141928]/70 backdrop-blur-md border border-white/10;
+  }
+
+  .glass-card {
+    @apply bg-[#1e2337]/50 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg transition-all duration-300;
+  }
+
+  .glass-card:hover {
+    @apply -translate-y-1 border-[#a78bfa];
+    box-shadow: 0 10px 40px rgba(167, 139, 250, 0.2);
+  }
+
+  /* Buttons */
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-semibold cursor-pointer transition-all duration-200 border-0 text-base;
+  }
+
+  .btn-primary {
+    @apply bg-[#a78bfa] text-black;
+    box-shadow: 0 0 15px rgba(167, 139, 250, 0.2);
+  }
+
+  .btn-primary:hover {
+    @apply bg-[#8b5cf6] scale-105;
+    box-shadow: 0 0 25px rgba(167, 139, 250, 0.4);
+  }
+
+  .btn-outline {
+    @apply bg-transparent border border-[#a78bfa] text-[#a78bfa];
+  }
+
+  .btn-outline:hover {
+    @apply bg-[#a78bfa]/10;
+  }
+
+  /* Form Elements */
+  .input-field {
+    @apply w-full p-3 bg-black/20 border border-white/10 rounded-lg text-white mb-4 transition-colors;
+  }
+
+  .input-field:focus {
+    @apply outline-none border-[#a78bfa];
+  }
+
+  .label {
+    @apply block mb-2 text-sm text-gray-400;
+  }
+}
+
+.text-gradient {
+  background: linear-gradient(to right, #fff, var(--primary-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes navSlideDown {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mobileMenuSlideIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

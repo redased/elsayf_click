@@ -1,0 +1,86 @@
+{
+  "name": "elsayf-desktop",
+  "version": "1.0.0",
+  "description": "Elsayf - Application Desktop E-Learning",
+  "main": "electron/main.js",
+  "author": "Elsayf",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "NODE_ENV=production electron .",
+    "start:windows": "set NODE_ENV=production && electron .",
+    "pack": "electron-builder --dir",
+    "dist": "npm run build && electron-builder",
+    "dist:windows": "npm run build && electron-builder --win",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:linux": "npm run build && electron-builder --linux",
+    "postinstall": "electron-builder install-app-deps"
+  },
+  "build": {
+    "appId": "com.elsayf.desktop",
+    "productName": "Elsayf",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      ".next/**/*",
+      "public/**/*",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": ["x64", "arm64"]
+        },
+        {
+          "target": "portable",
+          "arch": ["x64"]
+        }
+      ],
+      "icon": "public/logo.png",
+      "artifactName": "${productName}-${version}-${os}.${ext}"
+    },
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "public/logo.png",
+      "category": "public.app-category.education",
+      "artifactName": "${productName}-${version}-${os}.${ext}"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb",
+        "rpm"
+      ],
+      "icon": "public/logo.png",
+      "category": "Education",
+      "artifactName": "${productName}-${version}-${os}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "public/logo.png",
+      "uninstallerIcon": "public/logo.png",
+      "installerHeaderIcon": "public/logo.png",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Elsayf"
+    }
+  },
+  "dependencies": {
+    "electron-is-dev": "^3.0.1",
+    "electron-updater": "^6.1.7"
+  },
+  "devDependencies": {
+    "electron": "^32.2.7",
+    "electron-builder": "^25.1.8"
+  }
+}

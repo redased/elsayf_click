@@ -1,0 +1,13 @@
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../node_modules/.prisma/client-sqlite"
+  binaryTargets = ["native", "linux-musl-openssl-3.0.x", "linux-musl"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Copy all models from schema.prisma here...
+// For now, I'll use a simpler approach with pg_dump

@@ -1,0 +1,36 @@
+# Exclude large zip and backup files
+*.zip
+*.tar.gz
+*.tgz
+*.rar
+
+# Exclude backend python
+backend-python/
+
+# Exclude dependencies and build outputs
+node_modules/
+.next/
+out/
+build/
+dist/
+
+# Exclude media folder (backups and uploads)
+media/
+
+# Exclude git and IDE settings
+.git/
+.vscode/
+.idea/
+.agent/
+.claude/
+.github/
+
+# Exclude temp files and logs
+*.log
+*.tmp
+*.temp
+temp/
+tmp/
+*.ps1
+*.sh
+*.bat
