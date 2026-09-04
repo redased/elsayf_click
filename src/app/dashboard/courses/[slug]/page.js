@@ -23,6 +23,7 @@ import InteractiveTable from '@/components/InteractiveTable';
 import ThreeDScatterPlot from '@/components/ThreeDScatterPlot';
 import PythonCodeTutor from '@/components/PythonCodeTutor';
 import PythonExcelGenerator from '@/components/PythonExcelGenerator';
+import ExcelFormulaExpert from '@/components/ExcelFormulaExpert';
 import VSCodePopup from '@/components/VSCodePopup';
 import CyberTerminal from '@/components/CyberTerminal';
 import RealTerminalPlayground from '@/components/RealTerminalPlayground';
@@ -272,6 +273,10 @@ function RichText({ content }) {
                     }
                     if (lang === 'excelgenerator') {
                         return <PythonExcelGenerator config={content} />;
+                    }
+
+                    if (lang === 'excelformula') {
+                        return <ExcelFormulaExpert config={content} />;
                     }
 
                     if (lang === 'cyberterminal') {

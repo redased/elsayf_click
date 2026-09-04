@@ -6,7 +6,8 @@ import {
     Play, Download, Loader2, CheckCircle2, AlertTriangle, RefreshCw,
     FileSpreadsheet, Terminal, Lightbulb, RotateCcw, Cpu, Copy, Check,
     Table, Maximize2, Minimize2, Search, Layers, FileText, Sparkles,
-    BarChart3, DollarSign, Package, Users, Filter, ChevronRight, HelpCircle
+    BarChart3, DollarSign, Package, Users, Filter, ChevronRight, HelpCircle,
+    Calculator
 } from 'lucide-react';
 
 // ==============================================================================
@@ -676,6 +677,213 @@ for col, w in widths.items():
 wb.save('clients_nettoyes.xlsx')
 print("✅ Fichier nettoyé 'clients_nettoyes.xlsx' généré !")
 print("🧹 Données normalisées : noms propres, emails en minuscules, numéros +213.")`
+    },
+
+    xlookup_pro: {
+        id: 'xlookup_pro',
+        name: '🔍 RECHERCHEX & Rapprochement',
+        badge: 'Formules Pro / XLOOKUP',
+        category: 'Formules Avancées',
+        icon: Search,
+        description: 'Rapprochement automatisé entre une table de commandes et un catalogue articles avec les formules RECHERCHEX (XLOOKUP) et calcul de marge par formule.',
+        code: `import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+wb = openpyxl.Workbook()
+ws = wb.active
+ws.title = "Rapprochement_Commandes"
+ws.views.sheetView[0].showGridLines = True
+
+# Styles
+f_cat = PatternFill(start_color="1E3A8A", fill_type="solid")
+f_cmd = PatternFill(start_color="065F46", fill_type="solid")
+f_calc = PatternFill(start_color="047857", fill_type="solid")
+font_titre = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
+font_hdr = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+font_bold = Font(name="Calibri", size=10, bold=True)
+font_norm = Font(name="Calibri", size=10)
+
+thin = Side(border_style="thin", color="CBD5E1")
+border_cell = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+ws['A1'] = "TABLEAU DE BORD : RAPPROCHEMENT PAR FORMULE RECHERCHEX (XLOOKUP)"
+ws['A1'].font = font_titre
+
+# 1. TABLE SOURCE : CATALOGUE DE RÉFÉRENCE (Colonnes A à C)
+ws['A3'] = "CATALOGUE ARTICLES (SOURCE)"
+ws['A3'].font = Font(name="Calibri", size=11, bold=True, color="1E3A8A")
+
+headers_cat = ["Réf Article", "Désignation Produit", "Prix Unitaire HT"]
+for i, h in enumerate(headers_cat, 1):
+    c = ws.cell(row=4, column=i, value=h)
+    c.font = font_hdr; c.fill = f_cat; c.alignment = Alignment(horizontal="center"); c.border = border_cell
+
+catalogue = [
+    ("ART-101", "Serveur Dell PowerEdge T150", 230000),
+    ("ART-102", "Licence Microsoft 365 Business", 36000),
+    ("ART-103", "Routeur Cisco Gigabit VPN", 59000),
+    ("ART-104", "Bobine Câble RJ45 Cat6 305m", 18000),
+    ("ART-105", "Onduleur APC Smart-UPS 1500VA", 89000),
+]
+
+for idx, (ref, desig, pu) in enumerate(catalogue, 5):
+    ws.cell(row=idx, column=1, value=ref).alignment = Alignment(horizontal="center")
+    ws.cell(row=idx, column=2, value=desig)
+    c_pu = ws.cell(row=idx, column=3, value=pu)
+    c_pu.number_format = '#,##0 DZD'
+    c_pu.alignment = Alignment(horizontal="right")
+    for col in range(1, 4):
+        ws.cell(row=idx, column=col).border = border_cell
+
+# 2. TABLE COMMANDES AVEC FORMULES D'ENRICHISSEMENT (Colonnes E à I)
+ws['E3'] = "COMMANDES CLIENTS AVEC RAPPROCHEMENT AUTOMATIQUE"
+ws['E3'].font = Font(name="Calibri", size=11, bold=True, color="065F46")
+
+headers_cmd = ["N° Cmd", "Réf Commandée", "Qté", "Désignation (RECHERCHEX)", "Total HT (Formule)"]
+for i, h in enumerate(headers_cmd, 5):
+    c = ws.cell(row=4, column=i, value=h)
+    c.font = font_hdr; c.fill = f_cmd; c.alignment = Alignment(horizontal="center"); c.border = border_cell
+
+commandes = [
+    ("CMD-2026-01", "ART-103", 3),
+    ("CMD-2026-02", "ART-101", 1),
+    ("CMD-2026-03", "ART-105", 2),
+    ("CMD-2026-04", "ART-102", 5),
+    ("CMD-2026-05", "ART-104", 10),
+]
+
+for idx, (n_cmd, ref, qte) in enumerate(commandes, 5):
+    ws.cell(row=idx, column=5, value=n_cmd).alignment = Alignment(horizontal="center")
+    ws.cell(row=idx, column=6, value=ref).alignment = Alignment(horizontal="center")
+    ws.cell(row=idx, column=7, value=qte).alignment = Alignment(horizontal="center")
+    
+    # FORMULE 1 : XLOOKUP pour trouver la désignation depuis le catalogue A5:C9
+    c_des = ws.cell(row=idx, column=8, value=f'=XLOOKUP(F{idx}, A$5:A$9, B$5:B$9, "Réf Inconnue", 0)')
+    c_des.font = font_bold
+    
+    # FORMULE 2 : Qté * XLOOKUP pour chercher le Prix Unitaire et calculer le total
+    c_tot = ws.cell(row=idx, column=9, value=f'=G{idx}*XLOOKUP(F{idx}, A$5:A$9, C$5:C$9, 0, 0)')
+    c_tot.number_format = '#,##0 DZD'
+    c_tot.font = font_bold
+    c_tot.alignment = Alignment(horizontal="right")
+    
+    for col in range(5, 10):
+        ws.cell(row=idx, column=col).border = border_cell
+
+# Ligne de Total Général par formule SUM
+ws.cell(row=11, column=8, value="TOTAL GÉNÉRAL VENTES :").font = Font(bold=True)
+ws.cell(row=11, column=8).alignment = Alignment(horizontal="right")
+c_g = ws.cell(row=11, column=9, value="=SUM(I5:I9)")
+c_g.font = Font(bold=True, color="065F46", size=11)
+c_g.number_format = '#,##0 DZD'
+c_g.alignment = Alignment(horizontal="right")
+c_g.border = Border(top=thin, bottom=Side(style="double", color="065F46"))
+
+widths = {'A': 14, 'B': 30, 'C': 18, 'D': 4, 'E': 14, 'F': 16, 'G': 10, 'H': 32, 'I': 22}
+for col, w in widths.items():
+    ws.column_dimensions[col].width = w
+
+wb.save('rapprochement_xlookup.xlsx')
+print("✅ Classeur 'rapprochement_xlookup.xlsx' généré avec succès !")
+print("🔍 Formules RECHERCHEX / XLOOKUP appliquées sans rupture de lien.")`
+    },
+
+    kpi_multicriteres: {
+        id: 'kpi_multicriteres',
+        name: '🧮 SOMME.SI.ENS & Multi-Critères',
+        badge: 'Finance / Contrôle',
+        category: 'Formules Avancées',
+        icon: Calculator,
+        description: 'Agrégation avancée de données volumineuses avec SOMME.SI.ENS, NB.SI.ENS et calcul conditionnel des alertes de stock.',
+        code: `import openpyxl
+from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+
+wb = openpyxl.Workbook()
+ws = wb.active
+ws.title = "Synthese_Multicriteres"
+ws.views.sheetView[0].showGridLines = True
+
+# Styles
+f_head = PatternFill(start_color="312E81", fill_type="solid")
+f_kpi = PatternFill(start_color="4338CA", fill_type="solid")
+font_titre = Font(name="Segoe UI", size=14, bold=True, color="312E81")
+font_hdr = Font(name="Segoe UI", size=10, bold=True, color="FFFFFF")
+font_bold = Font(name="Segoe UI", size=10, bold=True)
+font_norm = Font(name="Segoe UI", size=10)
+
+thin = Side(border_style="thin", color="E2E8F0")
+border_cell = Border(left=thin, right=thin, top=thin, bottom=thin)
+
+ws['A1'] = "CONSOLIDATION FINANCIÈRE & ANALYSE MULTI-CRITÈRES (SOMME.SI.ENS)"
+ws['A1'].font = font_titre
+
+# 1. Base des Ventes
+headers_base = ["Date", "Agence", "Catégorie", "Commercial", "Montant HT (DZD)", "Statut"]
+for col_num, h in enumerate(headers_base, 1):
+    c = ws.cell(row=3, column=col_num, value=h)
+    c.font = font_hdr; c.fill = f_head; c.alignment = Alignment(horizontal="center"); c.border = border_cell
+
+ventes = [
+    ("12/08/2026", "Alger", "Matériel", "Amine M.", 450000, "Validé"),
+    ("13/08/2026", "Oran", "Logiciel", "Karim B.", 120000, "Validé"),
+    ("14/08/2026", "Alger", "Réseau", "Amine M.", 280000, "Validé"),
+    ("15/08/2026", "Constantine", "Matériel", "Sara H.", 310000, "En Attente"),
+    ("16/08/2026", "Alger", "Logiciel", "Nadia C.", 95000, "Validé"),
+    ("17/08/2026", "Oran", "Matériel", "Karim B.", 540000, "Validé"),
+    ("18/08/2026", "Alger", "Matériel", "Amine M.", 620000, "Validé"),
+]
+
+for idx, (dt, ag, cat, com, mnt, st) in enumerate(ventes, 4):
+    ws.cell(row=idx, column=1, value=dt).alignment = Alignment(horizontal="center")
+    ws.cell(row=idx, column=2, value=ag).alignment = Alignment(horizontal="center")
+    ws.cell(row=idx, column=3, value=cat)
+    ws.cell(row=idx, column=4, value=com)
+    c_m = ws.cell(row=idx, column=5, value=mnt)
+    c_m.number_format = '#,##0'
+    c_m.alignment = Alignment(horizontal="right")
+    ws.cell(row=idx, column=6, value=st).alignment = Alignment(horizontal="center")
+    for c in range(1, 7): ws.cell(row=idx, column=c).border = border_cell
+
+# 2. TABLEAU RÉCAPITULATIF CROISÉ PAR FORMULES AUTOMATIQUES
+ws['H3'] = "AGRÉGATION PAR FORMULES DYNAMIQUES"
+ws['H3'].font = Font(name="Segoe UI", size=11, bold=True, color="312E81")
+
+headers_kpi = ["Agence", "Catégorie", "Total Validé (SOMME.SI.ENS)", "Nb Ventes (NB.SI.ENS)"]
+for col_num, h in enumerate(headers_kpi, 8):
+    c = ws.cell(row=4, column=col_num, value=h)
+    c.font = font_hdr; c.fill = f_kpi; c.alignment = Alignment(horizontal="center"); c.border = border_cell
+
+criteres = [
+    ("Alger", "Matériel"),
+    ("Alger", "Logiciel"),
+    ("Alger", "Réseau"),
+    ("Oran", "Matériel"),
+    ("Oran", "Logiciel"),
+]
+
+for idx, (ag, cat) in enumerate(criteres, 5):
+    ws.cell(row=idx, column=8, value=ag).alignment = Alignment(horizontal="center")
+    ws.cell(row=idx, column=9, value=cat)
+    
+    # Formule SOMME.SI.ENS : Plage Somme E4:E10 si Agence B=H et Catégorie C=I et Statut F="Validé"
+    c_sum = ws.cell(row=idx, column=10, value=f'=SUMIFS(E$4:E$10, B$4:B$10, H{idx}, C$4:C$10, I{idx}, F$4:F$10, "Validé")')
+    c_sum.number_format = '#,##0 DZD'
+    c_sum.alignment = Alignment(horizontal="right")
+    c_sum.font = font_bold
+    
+    # Formule NB.SI.ENS : Nombre de transactions correspondantes
+    c_cnt = ws.cell(row=idx, column=11, value=f'=COUNTIFS(B$4:B$10, H{idx}, C$4:C$10, I{idx}, F$4:F$10, "Validé")')
+    c_cnt.alignment = Alignment(horizontal="center")
+    c_cnt.font = font_bold
+    
+    for c in range(8, 12): ws.cell(row=idx, column=c).border = border_cell
+
+widths = {'A': 14, 'B': 14, 'C': 16, 'D': 18, 'E': 18, 'F': 14, 'G': 4, 'H': 14, 'I': 16, 'J': 24, 'K': 20}
+for col, w in widths.items(): ws.column_dimensions[col].width = w
+
+wb.save('synthese_multicriteres.xlsx')
+print("✅ Classeur 'synthese_multicriteres.xlsx' généré !")
+print("📊 Formules SOMME.SI.ENS (SUMIFS) et NB.SI.ENS (COUNTIFS) calculées en temps réel.")`
     },
 
     libre: {
@@ -1395,43 +1603,79 @@ export default function PythonExcelGenerator({ config }) {
                         </div>
                     )}
 
-                    {/* VUE 3 : GUIDE & ASTUCES DE FORMULES */}
+                    {/* VUE 3 : GUIDE & FORMULES AVANCÉES OPENPYXL */}
                     {activeViewTab === 'guide' && (
-                        <div className="flex-1 min-h-[380px] bg-[#070b14] p-5 overflow-auto text-xs text-gray-300 leading-relaxed">
-                            <h4 className="text-sm font-bold text-emerald-300 mb-3 flex items-center gap-2">
-                                <Lightbulb size={16} className="text-amber-400" />
-                                Formules et Bonnes Pratiques OpenPyXL
-                            </h4>
+                        <div className="flex-1 min-h-[380px] bg-[#070b14] p-5 overflow-auto text-xs text-gray-300 leading-relaxed space-y-4">
+                            <div className="flex items-center justify-between">
+                                <h4 className="text-sm font-bold text-emerald-300 flex items-center gap-2">
+                                    <Lightbulb size={16} className="text-amber-400" />
+                                    Boîte à Outils : Formules Excel Pro en Python
+                                </h4>
+                                <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-mono">
+                                    openpyxl 100% Natif
+                                </span>
+                            </div>
 
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                                <div className="p-3.5 rounded-xl bg-white/3 border border-white/5">
-                                    <h5 className="font-bold text-white text-xs mb-1.5">📐 Formules dynamiques</h5>
-                                    <p className="text-gray-400 text-[11px] mb-2">
-                                        Toujours insérer les formules avec les noms de fonctions en anglais (SUM, AVERAGE, IF, COUNTIF) :
-                                    </p>
-                                    <code className="block p-2 rounded bg-black/40 text-emerald-300 font-mono text-[11px]">
-                                        ws['D10'] = "=SUM(D2:D9)"
-                                    </code>
-                                </div>
-
-                                <div className="p-3.5 rounded-xl bg-white/3 border border-white/5">
-                                    <h5 className="font-bold text-white text-xs mb-1.5">🎨 Mise en forme des nombres</h5>
-                                    <p className="text-gray-400 text-[11px] mb-2">
-                                        Appliquer des formats monétaires ou pourcentages professionnels :
-                                    </p>
-                                    <code className="block p-2 rounded bg-black/40 text-blue-300 font-mono text-[11px]">
-                                        cell.number_format = '#,##0.00 DZD'
-                                    </code>
-                                </div>
+                            {/* Recettes de formules prêtes à copier */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                {[
+                                    {
+                                        titre: '🔍 RECHERCHEX / XLOOKUP',
+                                        excel: '=XLOOKUP(A2, Catalogue!A:A, Catalogue!B:B, "Inconnu", 0)',
+                                        py: `ws['D2'] = f'=XLOOKUP(A{row}, Catalogue!A:A, Catalogue!B:B, "Inconnu", 0)'`,
+                                        note: 'Remplace RECHERCHEV et cherche vers la gauche sans risque d\'erreur.'
+                                    },
+                                    {
+                                        titre: '📊 SOMME.SI.ENS / SUMIFS',
+                                        excel: '=SUMIFS(E:E, B:B, "Alger", F:F, "Validé")',
+                                        py: `ws['H5'] = '=SUMIFS(E:E, B:B, "Alger", F:F, "Validé")'`,
+                                        note: 'Additionne la colonne E selon 2 ou plusieurs critères simultanés.'
+                                    },
+                                    {
+                                        titre: '⚡ NB.SI.ENS / COUNTIFS',
+                                        excel: '=COUNTIFS(B:B, "Alger", F:F, "Validé")',
+                                        py: `ws['H6'] = '=COUNTIFS(B:B, "Alger", F:F, "Validé")'`,
+                                        note: 'Compte le nombre de lignes répondant à des critères stricts.'
+                                    },
+                                    {
+                                        titre: '🛡️ SIERREUR / IFERROR',
+                                        excel: '=IFERROR(C2/D2, 0)',
+                                        py: `ws['E2'] = f'=IFERROR(C{row}/D{row}, 0)'`,
+                                        note: 'Neutralise les erreurs de division par zéro (#DIV/0!) et #N/A.'
+                                    }
+                                ].map((recette, i) => (
+                                    <div key={i} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-bold text-white text-xs">{recette.titre}</span>
+                                            <button
+                                                onClick={() => {
+                                                    navigator.clipboard.writeText(recette.py);
+                                                    setCopied(true);
+                                                    setTimeout(() => setCopied(false), 2000);
+                                                }}
+                                                className="text-[10px] text-gray-400 hover:text-white flex items-center gap-1 px-1.5 py-0.5 rounded bg-white/5 hover:bg-white/10"
+                                            >
+                                                <Copy size={10} /> Copier Python
+                                            </button>
+                                        </div>
+                                        <code className="block p-1.5 rounded bg-black/50 text-blue-300 font-mono text-[10px] truncate">
+                                            {recette.excel}
+                                        </code>
+                                        <code className="block p-1.5 rounded bg-black/50 text-yellow-300 font-mono text-[10px] truncate">
+                                            {recette.py}
+                                        </code>
+                                        <p className="text-[10px] text-gray-400 leading-tight">
+                                            {recette.note}
+                                        </p>
+                                    </div>
+                                ))}
                             </div>
 
                             <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-500/20">
-                                <h5 className="font-bold text-emerald-300 text-xs mb-1">🚀 Défis à tester :</h5>
-                                <ul className="list-disc list-inside space-y-1 text-gray-300 text-[11px] mt-2">
-                                    <li>Modifiez la TVA dans le code de la facture pour passer de 19% à 9%.</li>
-                                    <li>Ajoutez un nouvel article dans le tableau des ventes et relancez le code.</li>
-                                    <li>Créez une formule conditionnelle pour colorer les stocks critiques.</li>
-                                </ul>
+                                <h5 className="font-bold text-emerald-300 text-xs mb-1">💡 Règle d'or absolue avec openpyxl :</h5>
+                                <p className="text-gray-300 text-[11px] leading-relaxed">
+                                    Toujours rédiger les noms de formules avec la <strong>terminologie anglaise</strong> (<code className="text-emerald-300 font-bold">SUM</code>, <code className="text-emerald-300 font-bold">AVERAGE</code>, <code className="text-emerald-300 font-bold">IF</code>, <code className="text-emerald-300 font-bold">XLOOKUP</code>, <code className="text-emerald-300 font-bold">INDEX</code>, <code className="text-emerald-300 font-bold">MATCH</code>). Lorsque votre collègue ouvrira le fichier sous un Excel français, le logiciel traduira la formule en <code className="text-blue-300">SOMME</code> ou <code className="text-blue-300">RECHERCHEX</code> de manière 100% transparente !
+                                </p>
                             </div>
                         </div>
                     )}

@@ -80,5 +80,6 @@ elsayf/
 .claude/
 vercel-env-setup.ps1
 media/
+documentation/
 *.bak
 *.key
