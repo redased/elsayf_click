@@ -2,13 +2,66 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import * as XLSX from 'xlsx';
+import dynamic from 'next/dynamic';
 import {
     Play, Download, Loader2, CheckCircle2, AlertTriangle, RefreshCw,
     FileSpreadsheet, Terminal, Lightbulb, RotateCcw, Cpu, Copy, Check,
     Table, Maximize2, Minimize2, Search, Layers, FileText, Sparkles,
     BarChart3, DollarSign, Package, Users, Filter, ChevronRight, HelpCircle,
-    Calculator
+    Calculator, ZoomIn, ZoomOut, Type, AlignLeft, Sun, Moon, Braces,
+    Sliders, Keyboard, PlusCircle, CheckCheck
 } from 'lucide-react';
+
+const Editor = dynamic(() => import('@monaco-editor/react'), {
+    ssr: false,
+    loading: () => (
+        <div className="flex-1 flex flex-col items-center justify-center bg-[#0d1322] text-gray-400 p-8 min-h-[380px]">
+            <Loader2 size={26} className="animate-spin text-emerald-400 mb-3" />
+            <span className="text-xs font-mono font-bold text-gray-300">
+                Initialisation de l'éditeur VS Code Python haute visibilité...
+            </span>
+            <span className="text-[11px] text-gray-500 mt-1">
+                Coloration syntaxique, autocomplétion & zoom ergonomique
+            </span>
+        </div>
+    )
+});
+
+// ==============================================================================
+// PALETTE DE SNIPPETS RAPIDES POUR ÉCRIRE DU CODE OPENPYXL PRO
+// ==============================================================================
+export const OPENPYXL_SNIPPETS = [
+    {
+        label: '🔍 RECHERCHEX',
+        title: 'Formule XLOOKUP',
+        code: `ws['D2'] = f'=XLOOKUP(A{row}, Catalogue!A:A, Catalogue!B:B, "Inconnu", 0)'\n`
+    },
+    {
+        label: '📊 SOMME.SI.ENS',
+        title: 'Formule SUMIFS',
+        code: `ws['H5'] = '=SUMIFS(E:E, B:B, "Alger", F:F, "Validé")'\n`
+    },
+    {
+        label: '🎨 Style Fond & Texte',
+        title: 'PatternFill + Font',
+        code: `cell.fill = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")\ncell.font = Font(name="Calibri", size=11, bold=True, color="FFFFFF")\n`
+    },
+    {
+        label: '💰 Format DZD',
+        title: 'Format Monétaire Dinars',
+        code: `cell.number_format = '#,##0.00 DZD'\ncell.alignment = Alignment(horizontal="right")\n`
+    },
+    {
+        label: '🔄 Boucle Lignes',
+        title: 'Parcourir les lignes du tableau',
+        code: `for r in range(2, ws.max_row + 1):\n    val = ws[f'A{r}'].value\n`
+    },
+    {
+        label: '💾 Sauvegarder',
+        title: 'Sauvegarder le classeur',
+        code: `wb.save('mon_fichier_genere.xlsx')\nprint("✅ Fichier Excel généré avec succès !")\n`
+    }
+];
 
 // ==============================================================================
 // 7 MODÈLES CONCRETS & CAS PRATIQUES D'ENTREPRISE
@@ -1000,6 +1053,44 @@ export default function PythonExcelGenerator({ config }) {
     const [copied, setCopied] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
+    // Ergonomie et lisibilité du code Python (Monaco Editor Pro)
+    const [editorFontSize, setEditorFontSize] = useState(14);
+    const [editorTheme, setEditorTheme] = useState('vs-dark'); // 'vs-dark' | 'hc-black' | 'vs'
+    const [editorWordWrap, setEditorWordWrap] = useState('on'); // 'on' | 'off'
+    const [editorMinimap, setEditorMinimap] = useState(false);
+    const [cursorPos, setCursorPos] = useState({ line: 1, col: 1 });
+    const editorRef = useRef(null);
+
+    // Zoom avant / arrière police de code
+    const handleZoomIn = () => setEditorFontSize(s => Math.min(24, s + 1));
+    const handleZoomOut = () => setEditorFontSize(s => Math.max(11, s - 1));
+    const handleToggleWrap = () => setEditorWordWrap(w => (w === 'on' ? 'off' : 'on'));
+    const handleToggleMinimap = () => setEditorMinimap(m => !m);
+    const handleCycleTheme = () => {
+        setEditorTheme(curr => {
+            if (curr === 'vs-dark') return 'hc-black';
+            if (curr === 'hc-black') return 'vs';
+            return 'vs-dark';
+        });
+    };
+
+    // Insérer un snippet à la position du curseur
+    const insertSnippet = (snippetText) => {
+        if (editorRef.current) {
+            const editor = editorRef.current;
+            const selection = editor.getSelection();
+            const op = {
+                range: selection,
+                text: snippetText,
+                forceMoveMarkers: true
+            };
+            editor.executeEdits('snippet', [op]);
+            editor.focus();
+        } else {
+            setCode(prev => prev + '\n' + snippetText);
+        }
+    };
+
     // Quitter le plein écran avec la touche Escape
     useEffect(() => {
         const handleKeyDown = (e) => {
@@ -1168,6 +1259,21 @@ export default function PythonExcelGenerator({ config }) {
         }
     }, [code, running]);
 
+    // Initialisation et liaison de l'éditeur Monaco
+    const handleEditorDidMount = useCallback((editor, monaco) => {
+        editorRef.current = editor;
+
+        // Raccourci clavier Ctrl+Entrée / Cmd+Entrée pour exécuter immédiatement
+        editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+            runCode();
+        });
+
+        // Suivre la position du curseur
+        editor.onDidChangeCursorPosition(e => {
+            setCursorPos({ line: e.position.lineNumber, col: e.position.column });
+        });
+    }, [runCode]);
+
     const handleCopyCode = () => {
         navigator.clipboard.writeText(code);
         setCopied(true);
@@ -1302,49 +1408,153 @@ export default function PythonExcelGenerator({ config }) {
                 
                 {/* COLONNE GAUCHE : Éditeur de code Python (5 cols) */}
                 <div className={`lg:col-span-5 flex flex-col border-r border-white/10 bg-[#080c14] ${isFullscreen ? 'overflow-hidden' : ''}`}>
-                    {/* Header éditeur */}
-                    <div className="flex items-center justify-between px-4 py-2.5 bg-[#0f172a] border-b border-white/10">
+                    {/* Header éditeur & Barre de Contrôle Lisibilité */}
+                    <div className="px-3.5 py-2.5 bg-[#0e1626] border-b border-white/10 flex flex-wrap items-center justify-between gap-2 text-xs">
                         <div className="flex items-center gap-2">
-                            <span className="flex gap-1.5">
+                            <span className="flex gap-1">
                                 <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444]" />
                                 <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b]" />
                                 <span className="w-2.5 h-2.5 rounded-full bg-[#10b981]" />
                             </span>
-                            <span className="text-xs font-mono text-gray-300 ml-1 flex items-center gap-1.5">
-                                <Terminal size={13} className="text-emerald-400" /> generate_excel.py
+                            <span className="font-mono text-gray-200 font-bold ml-1 flex items-center gap-1.5 text-xs">
+                                <Terminal size={14} className="text-emerald-400" /> generate_excel.py
+                            </span>
+                            <span className="text-[10px] text-gray-400 font-mono px-2 py-0.5 rounded bg-white/5 border border-white/5">
+                                {code.split('\n').length} lignes
                             </span>
                         </div>
 
+                        {/* Outils d'accessibilité & ergonomie (Zoom, Wrap, Thème) */}
                         <div className="flex items-center gap-1.5">
+                            {/* Contrôle de Zoom de la police */}
+                            <div className="flex items-center bg-black/40 rounded-lg border border-white/10 p-0.5" title="Ajuster la taille de la police pour une lisibilité parfaite">
+                                <button
+                                    onClick={handleZoomOut}
+                                    title="Réduire la taille de police (A-)"
+                                    className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <ZoomOut size={13} />
+                                </button>
+                                <span className="text-[11px] font-mono px-1 text-emerald-300 font-bold min-w-[28px] text-center">
+                                    {editorFontSize}px
+                                </span>
+                                <button
+                                    onClick={handleZoomIn}
+                                    title="Agrandir la taille de police (A+)"
+                                    className="p-1 hover:bg-white/10 rounded text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <ZoomIn size={13} />
+                                </button>
+                            </div>
+
+                            {/* Retour à la ligne (Word Wrap) */}
+                            <button
+                                onClick={handleToggleWrap}
+                                className={`px-2 py-1 rounded text-[11px] font-mono font-semibold border transition-all flex items-center gap-1 ${
+                                    editorWordWrap === 'on'
+                                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
+                                        : 'bg-white/5 text-gray-400 border-white/5 hover:text-white'
+                                }`}
+                                title="Activer / Désactiver le retour automatique à la ligne"
+                            >
+                                <AlignLeft size={12} />
+                                <span>{editorWordWrap === 'on' ? 'Wrap: On' : 'Wrap: Off'}</span>
+                            </button>
+
+                            {/* Sélecteur de Thème */}
+                            <button
+                                onClick={handleCycleTheme}
+                                className="px-2 py-1 rounded text-[11px] font-mono bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white border border-white/10 transition-colors"
+                                title="Changer de thème (VS Dark / Contraste Élevé / Clair)"
+                            >
+                                {editorTheme === 'vs-dark' ? '🌙 Dark+' : editorTheme === 'hc-black' ? '⚡ Contraste' : '☀️ Clair'}
+                            </button>
+
+                            {/* Copier & Reset */}
                             <button
                                 onClick={handleCopyCode}
                                 className="text-xs text-gray-400 hover:text-white flex items-center gap-1 px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-colors"
-                                title="Copier le code"
+                                title="Copier tout le code"
                             >
-                                {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
-                                {copied ? 'Copié !' : 'Copier'}
+                                {copied ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
                             </button>
                             <button
                                 onClick={() => handleSelectTemplate(selectedTemplateKey)}
                                 className="text-xs text-gray-400 hover:text-white flex items-center gap-1 px-2 py-1 rounded bg-white/5 hover:bg-white/10 transition-colors"
-                                title="Réinitialiser au code de base"
+                                title="Réinitialiser au code initial"
                             >
-                                <RotateCcw size={12} /> Reset
+                                <RotateCcw size={13} />
                             </button>
                         </div>
                     </div>
 
-                    {/* Zone de code */}
-                    <div className={`flex-1 relative ${isFullscreen ? 'min-h-0 overflow-hidden' : 'min-h-[380px]'}`}>
-                        <textarea
+                    {/* Palette de Snippets Rapides */}
+                    <div className="px-3.5 py-1.5 bg-[#0a0f1c] border-b border-white/5 flex items-center gap-2 overflow-x-auto scrollbar-none text-[11px]">
+                        <span className="text-gray-400 font-bold uppercase text-[10px] tracking-wider shrink-0 flex items-center gap-1">
+                            <PlusCircle size={12} className="text-emerald-400" /> Snippets :
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                            {OPENPYXL_SNIPPETS.map((snip, idx) => (
+                                <button
+                                    key={idx}
+                                    onClick={() => insertSnippet(snip.code)}
+                                    title={snip.title}
+                                    className="px-2 py-0.5 rounded-md bg-white/5 hover:bg-emerald-500/20 text-gray-300 hover:text-emerald-300 border border-white/5 hover:border-emerald-500/30 whitespace-nowrap transition-all font-mono text-[10px] font-semibold"
+                                >
+                                    {snip.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Zone de code Monaco Editor */}
+                    <div className={`flex-1 relative ${isFullscreen ? 'min-h-0 overflow-hidden' : 'min-h-[420px]'}`}>
+                        <Editor
+                            height="100%"
+                            defaultLanguage="python"
+                            language="python"
+                            theme={editorTheme}
                             value={code}
-                            onChange={(e) => setCode(e.target.value)}
-                            spellCheck={false}
-                            className={`w-full bg-[#090d16] text-[#e2e8f0] font-mono text-xs leading-relaxed p-4 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 ${
-                                isFullscreen ? 'absolute inset-0 resize-none h-full' : 'min-h-[380px] resize-y h-full'
-                            }`}
-                            style={{ tabSize: 4 }}
+                            onChange={(val) => setCode(val || '')}
+                            onMount={handleEditorDidMount}
+                            options={{
+                                fontSize: editorFontSize,
+                                lineNumbers: 'on',
+                                minimap: { enabled: editorMinimap },
+                                scrollBeyondLastLine: false,
+                                automaticLayout: true,
+                                wordWrap: editorWordWrap,
+                                tabSize: 4,
+                                insertSpaces: true,
+                                fontFamily: "'Fira Code', 'Cascadia Code', 'JetBrains Mono', 'Consolas', monospace",
+                                fontLigatures: true,
+                                renderLineHighlight: 'all',
+                                bracketPairColorization: { enabled: true },
+                                cursorBlinking: 'smooth',
+                                smoothScrolling: true,
+                                padding: { top: 12, bottom: 12 },
+                                suggestOnTriggerCharacters: true,
+                                lineHeight: 1.6,
+                                contextmenu: true
+                            }}
                         />
+                    </div>
+
+                    {/* Barre d'état inférieure de l'éditeur */}
+                    <div className="px-3.5 py-1.5 bg-[#0a0f1a] border-t border-white/10 flex items-center justify-between text-[11px] text-gray-400 font-mono">
+                        <div className="flex items-center gap-3">
+                            <span className="text-emerald-400 font-bold">
+                                Ln {cursorPos.line}, Col {cursorPos.col}
+                            </span>
+                            <span className="text-gray-600">|</span>
+                            <span>Python 3.11</span>
+                            <span className="text-gray-600">|</span>
+                            <span>4 espaces</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 text-gray-400">
+                            <Keyboard size={12} className="text-blue-400" />
+                            <span>Raccourci : <strong>Ctrl + Entrée</strong></span>
+                        </div>
                     </div>
 
                     {/* Barre d'action d'exécution */}
@@ -1362,7 +1572,7 @@ export default function PythonExcelGenerator({ config }) {
                             ) : (
                                 <>
                                     <Play size={16} className="fill-white" />
-                                    <span>Exécuter & Générer l'Excel</span>
+                                    <span>Exécuter & Générer l'Excel <span className="text-xs text-emerald-200 font-mono font-normal ml-1">(Ctrl+Entrée)</span></span>
                                 </>
                             )}
                         </button>
