@@ -1137,11 +1137,15 @@ export default function PythonExcelGenerator({ config }) {
         const template = EXCEL_TEMPLATES[templateKey];
         if (template) {
             setCode(template.code);
+            if (editorRef.current) {
+                editorRef.current.setValue(template.code);
+            }
             setOutput('');
             setError(null);
             setDownloadUrl(null);
             setParsedWorkbook(null);
             setGridData([]);
+            setSelectedCellInfo(null);
         }
     };
 
@@ -1209,41 +1213,83 @@ export default function PythonExcelGenerator({ config }) {
         setSelectedCellInfo(null);
 
         const pyodide = pyodideRef.current;
+        // Toujours récupérer le code en direct depuis l'éditeur Monaco s'il est actif
+        const codeToRun = editorRef.current ? editorRef.current.getValue() : code;
 
         try {
             pyodide.setStdout({ batched: (s) => setOutput(prev => prev + s + '\n') });
             pyodide.setStderr({ batched: (s) => setOutput(prev => prev + '⚠️ ' + s + '\n') });
 
-            await pyodide.runPythonAsync(code);
-
-            let foundFile = null;
+            // 1. NETTOYAGE PRÉALABLE : Supprimer les anciens fichiers .xlsx de la session précédente
+            // afin d'être certain de ne charger QUE le fichier généré par cette exécution
             const searchDirs = ['.', '/home/pyodide', '/tmp', '/'];
-
             for (const dir of searchDirs) {
-                if (foundFile) break;
                 try {
                     const entries = pyodide.FS.readdir(dir);
                     for (const name of entries) {
                         if (name.endsWith('.xlsx')) {
-                            const path = dir === '/' ? `/${name}` : `${dir}/${name}`;
-                            const bytes = pyodide.FS.readFile(path);
-                            if (bytes && bytes.length > 0) {
-                                foundFile = { name, bytes };
-                                break;
-                            }
+                            try {
+                                const fullPath = dir === '/' ? `/${name}` : `${dir}/${name}`;
+                                pyodide.FS.unlink(fullPath);
+                            } catch (_) {}
                         }
                     }
                 } catch (_) {}
             }
 
+            // 2. EXÉCUTION DU CODE PYTHON ACTUELLEMENT DANS L'ÉDITEUR
+            await pyodide.runPythonAsync(codeToRun);
+
+            // 3. DÉTECTION DU NOM DE FICHIER ATTENDU DANS LE CODE
+            const saveMatch = codeToRun.match(/(?:\.save|\.to_excel)\s*\(\s*['"]([^'"]+\.xlsx)['"]/i);
+            const expectedFileName = saveMatch ? saveMatch[1].replace(/^[./\\]+/, '') : null;
+
+            // 4. RÉCUPÉRER LE NOUVEAU FICHIER .XLSX RÉELLEMENT CRÉÉ
+            let foundFile = null;
+            let candidateFiles = [];
+
+            for (const dir of searchDirs) {
+                try {
+                    const entries = pyodide.FS.readdir(dir);
+                    for (const name of entries) {
+                        if (name.endsWith('.xlsx')) {
+                            const path = dir === '/' ? `/${name}` : `${dir}/${name}`;
+                            try {
+                                const stat = pyodide.FS.stat(path);
+                                const bytes = pyodide.FS.readFile(path);
+                                if (bytes && bytes.length > 0) {
+                                    candidateFiles.push({
+                                        name,
+                                        path,
+                                        bytes,
+                                        mtime: stat?.mtime ? new Date(stat.mtime).getTime() : Date.now()
+                                    });
+                                }
+                            } catch (_) {}
+                        }
+                    }
+                } catch (_) {}
+            }
+
+            // A. Priorité 1 : Fichier dont le nom correspond exactement au save du code
+            if (expectedFileName) {
+                foundFile = candidateFiles.find(f => f.name === expectedFileName || f.name.endsWith(expectedFileName));
+            }
+
+            // B. Priorité 2 : Le fichier le plus récent
+            if (!foundFile && candidateFiles.length > 0) {
+                candidateFiles.sort((a, b) => b.mtime - a.mtime);
+                foundFile = candidateFiles[0];
+            }
+
             if (foundFile) {
                 const blob = new Blob([foundFile.bytes], {
-                    type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                   type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
                 });
                 const url = URL.createObjectURL(blob);
                 const sizeKb = (foundFile.bytes.length / 1024).toFixed(1);
                 setDownloadUrl({ url, name: foundFile.name, size: sizeKb });
-                setOutput(prev => prev + `\n✨ Succès ! Fichier "${foundFile.name}" créé (${sizeKb} KB) et chargé dans le tableur interactif.`);
+                setOutput(prev => prev + `\n✨ Succès ! Nouveau classeur "${foundFile.name}" créé (${sizeKb} KB) et chargé dans le tableur.`);
                 
                 // Parser et afficher le fichier dans le tableau interactif
                 parseExcelBuffer(foundFile.bytes, foundFile.name);
