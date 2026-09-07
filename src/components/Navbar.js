@@ -135,6 +135,16 @@ export default function Navbar() {
             )}
           </div>
 
+          <Link
+            href="/cv"
+            className="flex items-center gap-1.5 text-gray-300 hover:text-[#a78bfa] transition-colors group"
+          >
+            <span className="font-medium">Créateur CV</span>
+            <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm">
+              Nouveau
+            </span>
+          </Link>
+
           <LanguageSwitcher />
 
           <div className="flex items-center gap-4 ml-4">
@@ -221,6 +231,10 @@ export default function Navbar() {
           <div className="flex flex-col p-6 gap-4">
             <Link href="/" onClick={() => setIsOpen(false)} className="text-gray-300">{t('nav.home')}</Link>
             <Link href="/courses" onClick={() => setIsOpen(false)} className="text-gray-300">{t('nav.courses')}</Link>
+            <Link href="/cv" onClick={() => setIsOpen(false)} className="text-purple-300 font-semibold flex items-center justify-between">
+              <span>📄 Créateur de CV Pro</span>
+              <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-violet-600 text-white">Nouveau</span>
+            </Link>
 
             {/* Mobile Formations */}
             <div className="border-t border-gray-700 pt-2">

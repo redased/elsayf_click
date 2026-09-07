@@ -2,7 +2,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { ArrowRight, CheckCircle, Terminal, Video, Cpu, Zap, Crown, Globe } from 'lucide-react';
+import { ArrowRight, CheckCircle, Terminal, Video, Cpu, Zap, Crown, Globe, FileText, Sparkles } from 'lucide-react';
 import CodeEditor from '../components/CodeEditor';
 import AdSenseAd from '../components/AdSenseAd';
 import { useLanguage } from '@/context/LanguageContext';
@@ -317,6 +317,100 @@ export default function Home() {
                     <div className="h-8 bg-gray-900 rounded border border-gray-800"></div>
                     <div className="h-8 bg-gray-900 rounded border border-gray-800"></div>
                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Section Studio CV Pro ── */}
+      <section className="container mx-auto px-4 py-8">
+        <div className="relative rounded-3xl p-8 md:p-12 overflow-hidden border border-violet-500/30 bg-gradient-to-br from-violet-950/40 via-[#0a0f1d] to-indigo-950/40 backdrop-blur-xl shadow-2xl">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#a78bfa] rounded-full blur-[160px] opacity-15 pointer-events-none"></div>
+
+          <div className="grid lg:grid-cols-12 gap-8 items-center relative z-10">
+            <div className="lg:col-span-7 space-y-6 text-left">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#a78bfa]/15 border border-[#a78bfa]/30 text-[#a78bfa] text-xs font-bold uppercase tracking-wider">
+                <Sparkles size={14} /> NOUVEAUTÉ • STUDIO CV PRO
+              </div>
+              <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
+                Créez un CV d'élite <br />
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#a78bfa] via-purple-300 to-indigo-300">
+                  Adapté à votre Spécialité
+                </span>
+              </h2>
+              <p className="text-gray-300 text-sm md:text-base leading-relaxed">
+                Que vous soyez <strong className="text-white">Développeur</strong>, <strong className="text-white">Responsable RH</strong>, <strong className="text-white">Designer UI/UX</strong> ou <strong className="text-white">Data Analyst</strong>, générez un CV moderne, dynamique et calibré A4 prêt à imprimer et exporter en PDF haute fidélité.
+              </p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                  <div className="text-lg font-bold text-[#a78bfa]">6+</div>
+                  <div className="text-[11px] text-gray-400">Templates A4</div>
+                </div>
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                  <div className="text-lg font-bold text-emerald-400">1 Clic</div>
+                  <div className="text-[11px] text-gray-400">Profils Types</div>
+                </div>
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                  <div className="text-lg font-bold text-cyan-400">100%</div>
+                  <div className="text-[11px] text-gray-400">ATS Friendly</div>
+                </div>
+                <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
+                  <div className="text-lg font-bold text-purple-400">Gratuit</div>
+                  <div className="text-[11px] text-gray-400">Export PDF</div>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 pt-4">
+                <Link
+                  href="/cv"
+                  className="btn btn-primary text-base px-8 py-3.5 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-purple-500/20"
+                >
+                  <FileText size={18} />
+                  <span>Créer mon CV Pro</span>
+                  <ArrowRight size={18} />
+                </Link>
+                <Link
+                  href="/cv"
+                  className="px-6 py-3.5 rounded-xl border border-white/20 text-gray-300 hover:text-white hover:border-[#a78bfa] transition-all text-sm font-semibold"
+                >
+                  Tester les modèles en direct
+                </Link>
+              </div>
+            </div>
+
+            {/* Visual Preview Card */}
+            <div className="lg:col-span-5 relative">
+              <div className="relative rounded-2xl overflow-hidden border border-white/20 shadow-2xl bg-white text-gray-900 p-5 transform lg:rotate-1 hover:rotate-0 transition-transform duration-300">
+                <div className="flex items-center justify-between pb-3 border-b border-gray-200 mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-full bg-violet-600 text-white font-bold flex items-center justify-center text-xs">
+                      SM
+                    </div>
+                    <div>
+                      <div className="text-xs font-bold">Sofiane Mansouri</div>
+                      <div className="text-[10px] text-gray-500">Dev Full-Stack & IA</div>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700">
+                    Template Tech
+                  </span>
+                </div>
+                <div className="space-y-2 text-[11px]">
+                  <div className="h-1.5 bg-gray-200 rounded w-full"></div>
+                  <div className="h-1.5 bg-gray-200 rounded w-4/5"></div>
+                  <div className="pt-2 flex flex-wrap gap-1">
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">Python</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">Next.js</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">IA & Gemini</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">Docker</span>
+                  </div>
+                </div>
+                <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center text-[10px] text-gray-400">
+                  <span>Prêt pour recruteurs & ATS</span>
+                  <span className="text-violet-600 font-bold">A4 Vectoriel</span>
                 </div>
               </div>
             </div>

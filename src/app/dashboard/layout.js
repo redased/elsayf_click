@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Code, Award, Settings, LogOut, Video, BarChart3, MessagesSquare, Trophy, Shield, User, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Code, Award, Settings, LogOut, Video, BarChart3, MessagesSquare, Trophy, Shield, User, Menu, X, FileText } from 'lucide-react';
 import { signOut, useSession } from "next-auth/react"
 import { useLanguage } from '@/context/LanguageContext';
 
@@ -28,6 +28,7 @@ export default function DashboardLayout({ children }) {
         { name: t('dashboard.leaderboard'), href: '/dashboard/leaderboard', icon: Trophy },
         { name: t('dashboard.live'), href: '/dashboard/live', icon: Video },
         { name: t('dashboard.certificates'), href: '/dashboard/certificates', icon: Award },
+        { name: 'Générateur de CV', href: '/cv', icon: FileText },
         { name: 'Profil', href: '/dashboard/profile', icon: User },
         { name: t('dashboard.settings'), href: '/dashboard/settings', icon: Settings },
     ];
