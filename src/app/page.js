@@ -79,6 +79,21 @@ export default function Home() {
             <Link href="/register" className="btn btn-primary text-lg px-8 py-3 rounded-xl flex items-center gap-2">
               {t('hero.start_free')} <ArrowRight size={20} />
             </Link>
+            <Link
+              href="/cv"
+              className="group relative px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white font-bold hover:shadow-[0_0_35px_rgba(167,139,250,0.6)] hover:scale-105 transition-all flex items-center gap-2.5 overflow-hidden border border-violet-400/50"
+            >
+              <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500"></span>
+              </span>
+              <FileText size={18} className="relative z-10 text-yellow-300" />
+              <span className="relative z-10">Créer mon CV Pro</span>
+              <span className="relative z-10 px-2 py-0.5 text-[10px] font-black rounded-full bg-yellow-300 text-black uppercase tracking-wider">
+                Nouveau
+              </span>
+            </Link>
             <Link href="/formation-ia" className="group relative px-8 py-3 rounded-xl bg-gray-900 border border-violet-500/50 text-white font-semibold hover:border-violet-500 hover:shadow-[0_0_20px_rgba(167,139,250,0.3)] transition-all flex items-center gap-2 overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <span className="relative flex h-2 w-2">

@@ -8,7 +8,7 @@ export default function MinimalistTemplate({ data, color = '#18181b', font = 'sa
 
   return (
     <div
-      className={`w-full bg-white text-black ${fontClass} text-[13px] leading-relaxed p-9 min-h-[1120px] flex flex-col justify-between`}
+      className={`w-full bg-white text-black ${fontClass} text-[13px] leading-relaxed p-9 min-h-[297mm] h-full flex flex-col justify-between`}
       style={{ '--accent': color }}
     >
       <div>

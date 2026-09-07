@@ -91,6 +91,16 @@ export default function CVPreview({ data, config, onPrint }) {
         </div>
       </div>
 
+      {/* Astuce d'impression A4 Pleine Page */}
+      <div className="px-4 py-2 bg-gradient-to-r from-violet-950/70 via-purple-950/50 to-indigo-950/70 border-b border-violet-500/20 flex items-center justify-between gap-2 text-xs text-purple-200 shrink-0">
+        <div className="flex items-center gap-2">
+          <span className="text-yellow-300 font-bold shrink-0">💡 Astuce A4 :</span>
+          <span className="leading-snug">
+            Dans la fenêtre d'impression, réglez les <strong>Marges sur « Aucune »</strong> et cochez <strong>« Graphiques d'arrière-plan »</strong> pour un rendu 100% bord-à-bord parfait.
+          </span>
+        </div>
+      </div>
+
       {/* A4 Sheet Container */}
       <div className="flex-1 overflow-auto p-4 md:p-8 flex justify-center items-start bg-[#080d19]/90 relative cv-preview-scroll">
         <div
@@ -104,7 +114,7 @@ export default function CVPreview({ data, config, onPrint }) {
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.7)',
             transition: 'transform 0.15s ease-out',
           }}
-          className="bg-white text-black shrink-0 relative transition-all rounded-sm overflow-hidden"
+          className="bg-white text-black shrink-0 relative transition-all rounded-sm overflow-hidden print:!transform-none print:!m-0 print:!p-0 print:!w-[210mm] print:!h-[297mm] print:!min-h-[297mm] print:!shadow-none print:!rounded-none"
         >
           {renderTemplate()}
         </div>

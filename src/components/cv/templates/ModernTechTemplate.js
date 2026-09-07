@@ -9,12 +9,12 @@ export default function ModernTechTemplate({ data, color = '#7c3aed', font = 'sa
 
   return (
     <div
-      className={`w-full bg-white text-gray-800 ${fontClass} text-[13px] leading-relaxed select-text print:shadow-none min-h-[1120px]`}
+      className={`w-full bg-white text-gray-800 ${fontClass} text-[13px] leading-relaxed select-text print:shadow-none min-h-[297mm] h-full`}
       style={{ '--accent': color }}
     >
-      <div className="grid grid-cols-12 min-h-[1120px]">
+      <div className="grid grid-cols-12 min-h-[297mm] h-full">
         {/* Left Column / Sidebar (4 cols) */}
-        <div className="col-span-4 bg-slate-900 text-slate-100 p-6 flex flex-col justify-between border-r border-slate-800">
+        <div className="col-span-4 bg-slate-900 text-slate-100 p-6 flex flex-col justify-between border-r border-slate-800 min-h-[297mm] h-full">
           <div className="space-y-6">
             {/* Photo / Avatar */}
             {personal.avatar ? (
@@ -191,7 +191,7 @@ export default function ModernTechTemplate({ data, color = '#7c3aed', font = 'sa
         </div>
 
         {/* Right Column / Main Body (8 cols) */}
-        <div className="col-span-8 p-7 bg-white text-gray-800 flex flex-col justify-between">
+        <div className="col-span-8 p-7 bg-white text-gray-800 flex flex-col justify-between min-h-[297mm] h-full">
           <div className={spacingClass}>
             {/* Header / Name & Title */}
             <div className="border-b-2 pb-4" style={{ borderColor: color }}>

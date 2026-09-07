@@ -9,7 +9,7 @@ export default function ExecutiveRHTemplate({ data, color = '#1e40af', font = 's
 
   return (
     <div
-      className={`w-full bg-white text-gray-900 ${fontClass} text-[13px] leading-relaxed p-8 min-h-[1120px] flex flex-col justify-between`}
+      className={`w-full bg-white text-gray-900 ${fontClass} text-[13px] leading-relaxed p-8 min-h-[297mm] h-full flex flex-col justify-between`}
       style={{ '--accent': color }}
     >
       <div>

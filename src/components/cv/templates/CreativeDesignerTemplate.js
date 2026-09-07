@@ -9,7 +9,7 @@ export default function CreativeDesignerTemplate({ data, color = '#e11d48', font
 
   return (
     <div
-      className={`w-full bg-[#fafafa] text-zinc-800 ${fontClass} text-[13px] leading-relaxed p-7 min-h-[1120px] flex flex-col justify-between`}
+      className={`w-full bg-[#fafafa] text-zinc-800 ${fontClass} text-[13px] leading-relaxed p-7 min-h-[297mm] h-full flex flex-col justify-between`}
       style={{ '--accent': color }}
     >
       <div>

@@ -9,7 +9,7 @@ export default function DualColumnTemplate({ data, color = '#059669', font = 'sa
 
   return (
     <div
-      className={`w-full bg-white text-gray-800 ${fontClass} text-[13px] leading-relaxed p-6 min-h-[1120px] flex flex-col justify-between`}
+      className={`w-full bg-white text-gray-800 ${fontClass} text-[13px] leading-relaxed p-6 min-h-[297mm] h-full flex flex-col justify-between`}
       style={{ '--accent': color }}
     >
       <div>

@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, BookOpen, LogOut, User, ChevronDown, Monitor, BarChart2, Video, Search } from 'lucide-react';
+import { Menu, X, BookOpen, LogOut, User, ChevronDown, Monitor, BarChart2, Video, Search, FileText } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import StreamNotifications from './StreamNotifications';
@@ -137,11 +137,12 @@ export default function Navbar() {
 
           <Link
             href="/cv"
-            className="flex items-center gap-1.5 text-gray-300 hover:text-[#a78bfa] transition-colors group"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600/30 via-purple-600/30 to-indigo-600/30 hover:from-violet-600/50 hover:to-indigo-600/50 text-white border border-violet-400/40 transition-all hover:scale-105 shadow-[0_0_15px_rgba(167,139,250,0.25)] group"
           >
-            <span className="font-medium">Créateur CV</span>
-            <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-sm">
-              Nouveau
+            <FileText size={15} className="text-[#a78bfa]" />
+            <span className="font-bold text-xs tracking-wide">Créer mon CV</span>
+            <span className="px-1.5 py-0.2 text-[9px] font-black rounded-full bg-[#a78bfa] text-black">
+              PRO
             </span>
           </Link>
 
@@ -231,9 +232,12 @@ export default function Navbar() {
           <div className="flex flex-col p-6 gap-4">
             <Link href="/" onClick={() => setIsOpen(false)} className="text-gray-300">{t('nav.home')}</Link>
             <Link href="/courses" onClick={() => setIsOpen(false)} className="text-gray-300">{t('nav.courses')}</Link>
-            <Link href="/cv" onClick={() => setIsOpen(false)} className="text-purple-300 font-semibold flex items-center justify-between">
-              <span>📄 Créateur de CV Pro</span>
-              <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-violet-600 text-white">Nouveau</span>
+            <Link href="/cv" onClick={() => setIsOpen(false)} className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600/40 to-indigo-600/40 border border-violet-400/40 text-white font-bold flex items-center justify-between shadow-lg shadow-purple-900/20">
+              <span className="flex items-center gap-2">
+                <FileText size={16} className="text-[#a78bfa]" />
+                <span>Créer mon CV Pro</span>
+              </span>
+              <span className="px-2 py-0.5 text-[10px] font-black rounded-full bg-[#a78bfa] text-black">NOUVEAU</span>
             </Link>
 
             {/* Mobile Formations */}
