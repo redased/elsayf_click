@@ -1,9 +1,10 @@
-import html2canvas from 'html2canvas';
+import { toPng } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
 /**
- * Télécharge un PDF vectoriel/haute résolution A4 direct sans passer par les boîtes d'impression
+ * Télécharge un PDF haute résolution A4 direct sans passer par les boîtes d'impression
  * Calibré exactement à 210mm x 297mm (Norme internationale ISO 216 A4)
+ * Utilise le moteur de rendu SVG natif du navigateur (supporte 100% du CSS moderne : lab, oklch, grid, flex)
  */
 export async function downloadDirectPDF(elementId, fileName = 'CV_Elsayf.pdf') {
   const element = document.getElementById(elementId);
@@ -12,30 +13,23 @@ export async function downloadDirectPDF(elementId, fileName = 'CV_Elsayf.pdf') {
     return false;
   }
 
-  // Sauvegarder le transform original pour ne pas le déformer pendant la capture
+  // Sauvegarder les styles de prévisualisation (zoom, ombres)
   const originalTransform = element.style.transform;
   const originalTransition = element.style.transition;
   const originalBoxShadow = element.style.boxShadow;
-  
+
   element.style.transform = 'none';
   element.style.transition = 'none';
   element.style.boxShadow = 'none';
 
   try {
-    // Rendu haute fidélité avec scale 2 pour une netteté cristalline
-    const canvas = await html2canvas(element, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
+    // Rendu haute fidélité x2 (environ 1588x2246 px pour A4 à 2x)
+    const dataUrl = await toPng(element, {
+      quality: 0.98,
+      pixelRatio: 2,
+      cacheBust: true,
       backgroundColor: '#ffffff',
-      logging: false,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: 794, // 210mm à 96 DPI
-      windowHeight: 1123, // 297mm à 96 DPI
     });
-
-    const imgData = canvas.toDataURL('image/png');
 
     // Créer le document PDF aux dimensions A4 exactes
     const pdf = new jsPDF({
@@ -45,13 +39,13 @@ export async function downloadDirectPDF(elementId, fileName = 'CV_Elsayf.pdf') {
       compress: true,
     });
 
-    // 210mm de large, 297mm de haut, démarre à x=0, y=0 (couvre 100% de la feuille sans marge)
-    pdf.addImage(imgData, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
+    // 210mm de large, 297mm de haut, démarre à (0, 0)
+    pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297, undefined, 'FAST');
     pdf.save(fileName);
     return true;
   } catch (err) {
-    console.error('Erreur génération PDF:', err);
-    alert("Erreur lors de la création du PDF direct. L'impression du navigateur va s'ouvrir comme alternative.");
+    console.error('Erreur génération PDF direct:', err);
+    // En cas d'erreur de rendu direct, basculer sur l'impression isolée
     printViaIsolatedIframe(elementId, fileName.replace(/\.pdf$/, ''));
     return false;
   } finally {
@@ -77,12 +71,16 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
 
   const iframe = document.createElement('iframe');
   iframe.id = 'cv-isolated-print-frame';
+  // IMPORTANT : L'iframe DOIT avoir des dimensions physiques réelles (210mm x 297mm)
+  // sinon Chromium la considère comme vide et imprime une page blanche !
   iframe.style.position = 'fixed';
   iframe.style.right = '0';
   iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
-  iframe.style.border = '0';
+  iframe.style.width = '210mm';
+  iframe.style.height = '297mm';
+  iframe.style.border = 'none';
+  iframe.style.opacity = '0.01';
+  iframe.style.pointerEvents = 'none';
   iframe.style.zIndex = '-9999';
   document.body.appendChild(iframe);
 
@@ -158,8 +156,14 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
   `);
   doc.close();
 
+  // Attendre 500ms que le DOM et les polices de l'iframe soient évalués
   setTimeout(() => {
-    iframe.contentWindow?.focus();
-    iframe.contentWindow?.print();
-  }, 450);
+    try {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+    } catch (e) {
+      console.warn('Erreur print iframe:', e);
+      window.print();
+    }
+  }, 500);
 }

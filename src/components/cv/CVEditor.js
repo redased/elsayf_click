@@ -456,7 +456,7 @@ export default function CVEditor({
                   type="tel"
                   value={data.personal?.phone || ''}
                   onChange={(e) => updatePersonal('phone', e.target.value)}
-                  placeholder="+213 550 ..."
+                  placeholder="+213 550 00 00 00"
                   className="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#a78bfa]"
                 />
               </div>
