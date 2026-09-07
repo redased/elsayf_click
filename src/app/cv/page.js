@@ -1,10 +1,11 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { Sparkles, Printer, FileText, Download, Upload, Eye, Edit3, CheckCircle2, ArrowRight, Lock, UserCheck } from 'lucide-react';
+import { Sparkles, Printer, FileText, Download, Upload, Eye, Edit3, CheckCircle2, ArrowRight, Lock, UserCheck, Loader2 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import CVEditor from '@/components/cv/CVEditor';
 import CVPreview from '@/components/cv/CVPreview';
 import { PRESET_PROFILES } from '@/components/cv/defaultPresets';
+import { downloadDirectPDF, printViaIsolatedIframe } from '@/components/cv/exportPDF';
 import Link from 'next/link';
 
 const STORAGE_KEY_DATA = 'elsayf_cv_builder_data_v1';
@@ -124,8 +125,25 @@ export default function CVBuilderPage() {
     e.target.value = '';
   };
 
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+
+  const getCvTitle = () => {
+    const fName = data.personal?.firstName || 'Candidat';
+    const lName = data.personal?.lastName || 'Elsayf';
+    return `CV_${fName}_${lName}`;
+  };
+
   const handlePrint = () => {
-    window.print();
+    printViaIsolatedIframe('cv-printable-area', getCvTitle());
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      await downloadDirectPDF('cv-printable-area', `${getCvTitle()}.pdf`);
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   // Écran de chargement NextAuth
@@ -224,6 +242,25 @@ export default function CVBuilderPage() {
             overflow: hidden !important;
             background: white !important;
           }
+          /* Neutraliser absolument tous les conteneurs parents (main pt-20, py-6, etc.) */
+          main,
+          main > div,
+          #__next,
+          div[class*="min-h-screen"],
+          div[class*="py-"],
+          div[class*="pt-"],
+          div[class*="p-"] {
+            padding: 0 !important;
+            margin: 0 !important;
+            min-height: 0 !important;
+            max-height: 297mm !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: white !important;
+            transform: none !important;
+            filter: none !important;
+            backdrop-filter: none !important;
+          }
           header, nav, footer, .print\\:hidden {
             display: none !important;
           }
@@ -235,14 +272,14 @@ export default function CVBuilderPage() {
           }
           #cv-printable-area {
             position: fixed !important;
-            left: 0 !important;
-            top: 0 !important;
+            left: 0mm !important;
+            top: 0mm !important;
+            margin: 0mm !important;
+            padding: 0mm !important;
             width: 210mm !important;
             min-height: 297mm !important;
             height: 297mm !important;
             max-height: 297mm !important;
-            margin: 0 !important;
-            padding: 0 !important;
             transform: none !important;
             box-shadow: none !important;
             border: none !important;
@@ -270,13 +307,26 @@ export default function CVBuilderPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3 relative z-10">
+          <div className="flex flex-wrap items-center gap-3 relative z-10">
+            {/* Bouton Téléchargement Direct PDF A4 (100% calibré, zéro marge fantôme) */}
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isGeneratingPdf}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-900/40 cursor-pointer disabled:opacity-50"
+              title="Télécharger le fichier PDF directement sur votre appareil"
+            >
+              {isGeneratingPdf ? <Loader2 size={17} className="animate-spin" /> : <Download size={17} />}
+              <span>{isGeneratingPdf ? 'Génération...' : 'Télécharger PDF (A4)'}</span>
+            </button>
+
+            {/* Bouton Impression Isolée */}
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-[#a78bfa] to-[#8b5cf6] text-black hover:scale-105 active:scale-95 transition-all shadow-lg shadow-purple-500/20 cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white hover:scale-105 active:scale-95 transition-all shadow-lg shadow-purple-900/30 cursor-pointer"
+              title="Ouvrir la boîte de dialogue d'impression"
             >
               <Printer size={17} />
-              <span>Exporter PDF / Imprimer</span>
+              <span>Imprimer</span>
             </button>
           </div>
         </div>

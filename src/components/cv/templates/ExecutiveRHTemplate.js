@@ -5,25 +5,25 @@ export default function ExecutiveRHTemplate({ data, color = '#1e40af', font = 's
   const { personal = {}, skills = [], softSkills = [], tools = [], languages = [], experiences = [], education = [], projects = [], certifications = [], interests = [] } = data || {};
 
   const fontClass = font === 'sans' ? 'font-sans' : font === 'mono' ? 'font-mono' : 'font-serif';
-  const spacingClass = spacing === 'compact' ? 'space-y-3' : spacing === 'relaxed' ? 'space-y-6' : 'space-y-4';
+  const spacingClass = spacing === 'compact' ? 'space-y-2.5' : spacing === 'relaxed' ? 'space-y-5' : 'space-y-3.5';
 
   return (
     <div
-      className={`w-full bg-white text-gray-900 ${fontClass} text-[13px] leading-relaxed p-8 min-h-[297mm] h-full flex flex-col justify-between`}
+      className={`w-full bg-white text-gray-900 ${fontClass} text-[12px] leading-relaxed p-6 min-h-[297mm] h-full flex flex-col justify-between`}
       style={{ '--accent': color }}
     >
       <div>
         {/* En-tête Executive Chic */}
-        <header className="border-b-2 pb-6 flex items-center justify-between gap-6" style={{ borderColor: color }}>
-          <div className="flex-1 space-y-2">
-            <h1 className="text-3xl font-bold tracking-tight text-gray-950 uppercase">
+        <header className="border-b-2 pb-4 flex items-center justify-between gap-5" style={{ borderColor: color }}>
+          <div className="flex-1 space-y-1.5">
+            <h1 className="text-2xl font-bold tracking-tight text-gray-950 uppercase">
               {personal.firstName} <span style={{ color }}>{personal.lastName}</span>
             </h1>
-            <p className="text-base font-medium tracking-wide uppercase text-gray-600">
+            <p className="text-sm font-medium tracking-wide uppercase text-gray-600">
               {personal.title}
             </p>
             {personal.summary && (
-              <p className="text-xs text-gray-700 leading-relaxed max-w-2xl font-sans pt-1">
+              <p className="text-xs text-gray-700 leading-relaxed max-w-2xl font-sans pt-0.5">
                 {personal.summary}
               </p>
             )}
@@ -35,12 +35,12 @@ export default function ExecutiveRHTemplate({ data, color = '#1e40af', font = 's
               <img
                 src={personal.avatar}
                 alt={personal.firstName}
-                className="w-24 h-24 rounded-full object-cover border-4 shadow-sm"
+                className="w-20 h-20 rounded-full object-cover border-4 shadow-sm"
                 style={{ borderColor: color }}
               />
             ) : (
               <div
-                className="w-20 h-20 rounded-full border-2 flex items-center justify-center text-xl font-bold uppercase shadow-sm"
+                className="w-16 h-16 rounded-full border-2 flex items-center justify-center text-lg font-bold uppercase shadow-sm"
                 style={{ borderColor: color, color: color, backgroundColor: '#f8fafc' }}
               >
                 {personal.firstName?.[0]}{personal.lastName?.[0]}
@@ -50,7 +50,7 @@ export default function ExecutiveRHTemplate({ data, color = '#1e40af', font = 's
         </header>
 
         {/* Barre de Coordonnées Horizontale */}
-        <div className="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-gray-200 text-xs font-sans text-gray-600 bg-slate-50 px-3 mt-1 rounded-sm">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 py-2 border-b border-gray-200 text-xs font-sans text-gray-600 bg-slate-50 px-3 mt-1 rounded-sm">
           {personal.email && (
             <div className="flex items-center gap-1.5">
               <Mail size={13} style={{ color }} />
@@ -84,7 +84,7 @@ export default function ExecutiveRHTemplate({ data, color = '#1e40af', font = 's
         </div>
 
         {/* Corps du CV en 2 colonnes */}
-        <div className="grid grid-cols-12 gap-8 mt-5">
+        <div className="grid grid-cols-12 gap-6 mt-4">
           {/* Colonne Principale : Expériences & Projets (8 cols) */}
           <div className={`col-span-8 ${spacingClass}`}>
             {/* Expériences */}
