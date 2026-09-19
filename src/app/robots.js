@@ -4,6 +4,10 @@ export default function robots() {
   return {
     rules: [
       {
+        userAgent: 'Mediapartners-Google',
+        allow: '/',
+      },
+      {
         userAgent: '*',
         allow: [
           '/',
@@ -11,8 +15,14 @@ export default function robots() {
           '/courses/',
           '/pricing',
           '/formation-ia',
+          '/cv',
+          '/privacy',
+          '/terms',
+          '/about',
+          '/contact',
           '/register',
           '/login',
+          '/ads.txt',
         ],
         disallow: [
           '/dashboard/',
