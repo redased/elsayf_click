@@ -6,15 +6,22 @@ import {
   Sparkles, Download, FileText, Zap, Shield, Star, ArrowRight,
   CheckCircle, ChevronRight, Play, Award, Users, Clock,
   Palette, Layout, Code2, Briefcase, GraduationCap, Brush,
-  Globe, Monitor, Smartphone, Check, ChevronDown, X, LogIn, User
+  Globe, Monitor, Smartphone, Check, ChevronDown, X, LogIn, User,
+  Printer, Bot, CheckCircle2, Sliders, ArrowUpRight, HelpCircle,
+  ExternalLink, BarChart3, RefreshCw, Layers
 } from 'lucide-react';
+import AdSenseAd from '@/components/AdSenseAd';
+import { PRESET_PROFILES } from '@/components/cv/defaultPresets';
 
-// ─── Données des templates ──────────────────────────────────────────────────
+const STORAGE_KEY_DATA = 'elsayf_cv_builder_data_v1';
+const STORAGE_KEY_CONFIG = 'elsayf_cv_builder_config_v1';
+
+// ─── Données des 6 Templates ────────────────────────────────────────────────
 const TEMPLATES = [
   {
     id: 'modern-tech',
     name: 'Modern Tech',
-    tagline: 'Pour les développeurs & ingénieurs',
+    tagline: 'Pour les développeurs & profils techniques',
     category: 'Tech & Code',
     categoryColor: '#8b5cf6',
     accent: '#7c3aed',
@@ -35,7 +42,7 @@ const TEMPLATES = [
   {
     id: 'executive-rh',
     name: 'Executive RH',
-    tagline: 'Pour les cadres & dirigeants',
+    tagline: 'Pour les cadres, managers & ressources humaines',
     category: 'Management',
     categoryColor: '#3b82f6',
     accent: '#1e40af',
@@ -56,7 +63,7 @@ const TEMPLATES = [
   {
     id: 'creative-designer',
     name: 'Creative Designer',
-    tagline: 'Pour les créatifs & designers',
+    tagline: 'Pour les créatifs, graphistes & UI/UX designers',
     category: 'Design & Art',
     categoryColor: '#ec4899',
     accent: '#db2777',
@@ -77,7 +84,7 @@ const TEMPLATES = [
   {
     id: 'minimalist',
     name: 'Minimalist ATS',
-    tagline: 'Maximal ATS - International',
+    tagline: 'Score ATS maximal pour cabinets internationaux',
     category: 'Épuré & Pro',
     categoryColor: '#6b7280',
     accent: '#374151',
@@ -98,28 +105,28 @@ const TEMPLATES = [
   {
     id: 'dual-column',
     name: 'Dual Column',
-    tagline: 'Deux colonnes élégantes',
-    category: 'Polyvalent',
-    categoryColor: '#14b8a6',
-    accent: '#0d9488',
-    gradient: 'from-teal-600 via-cyan-500 to-teal-600',
-    gradientBg: 'from-teal-950/80 via-cyan-950/50 to-teal-950/80',
-    border: 'border-teal-500/40',
-    badge: 'bg-teal-500/20 text-teal-300 border-teal-400/30',
+    tagline: 'Deux colonnes pour structurer une carrière riche',
+    category: 'Classique',
+    categoryColor: '#0ea5e9',
+    accent: '#0284c7',
+    gradient: 'from-sky-600 via-cyan-600 to-blue-600',
+    gradientBg: 'from-sky-950/80 via-cyan-950/50 to-blue-950/80',
+    border: 'border-sky-500/40',
+    badge: 'bg-sky-500/20 text-sky-300 border-sky-400/30',
     icon: Layout,
     popular: false,
-    features: ['Double colonne compacte', 'Densité optimisée', 'Tous secteurs'],
+    features: ['Équilibre visuel parfait', 'Densité d\'information', 'Hiérarchie claire'],
     preview: {
-      header: { bg: 'bg-teal-700', text: 'text-white' },
-      sidebar: { bg: 'bg-teal-50', text: 'text-teal-900' },
+      header: { bg: 'bg-slate-800', text: 'text-white' },
+      sidebar: { bg: 'bg-slate-100', text: 'text-slate-800' },
       body: { bg: 'bg-white', text: 'text-gray-800' },
-      accent: '#0d9488',
+      accent: '#0284c7',
     }
   },
   {
     id: 'emerald',
     name: 'Emerald Pro',
-    tagline: 'Naturel, frais & professionnel',
+    tagline: 'Idéal santé, conseil, enseignement & sciences',
     category: 'Élégant',
     categoryColor: '#10b981',
     accent: '#059669',
@@ -139,7 +146,108 @@ const TEMPLATES = [
   },
 ];
 
-// ─── Mini-aperçu visuel d'un CV ─────────────────────────────────────────────
+// ─── Profils rapides de démarrage ───────────────────────────────────────────
+const QUICK_PROFILES = [
+  { id: 'developer', label: '💻 Tech / Développeur', template: 'modern-tech' },
+  { id: 'rh', label: '👔 RH / Management', template: 'executive-rh' },
+  { id: 'business_finance', label: '📈 Finance / Gestion', template: 'dual-column' },
+  { id: 'designer', label: '🎨 Design / Créatif', template: 'creative-designer' },
+  { id: 'data_analyst', label: '📊 Data / Analyste', template: 'minimalist' },
+];
+
+// ─── Outils MyCV (Style iLovePDF) ───────────────────────────────────────────
+const ILOVEPDF_TOOLS = [
+  {
+    id: 'studio',
+    title: 'Studio CV Complet',
+    badge: 'PRINCIPAL',
+    badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+    icon: Layout,
+    iconBg: 'bg-violet-500/10 text-violet-400 border-violet-500/20',
+    desc: 'Éditeur modulaire complet avec gestion illimitée des expériences, formations, projets et certifications.',
+    href: '/cv/builder',
+    cta: 'Ouvrir l\'éditeur',
+  },
+  {
+    id: 'ia',
+    title: 'Assistant IA Gemini',
+    badge: 'INTELLIGENT',
+    badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+    icon: Bot,
+    iconBg: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    desc: 'Génération automatique du résumé professionnel et reformulation percutante de vos réalisations en 1 clic.',
+    href: '/cv/builder?tab=ai',
+    cta: 'Tester l\'IA',
+  },
+  {
+    id: 'ats',
+    title: 'Audit & Score ATS',
+    badge: 'SUR 100 PTS',
+    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    icon: BarChart3,
+    iconBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    desc: 'Analyse automatique de conformité aux robots de recrutement : densité de mots-clés et hiérarchie.',
+    href: '/cv/builder?tab=ats',
+    cta: 'Vérifier mon score',
+  },
+  {
+    id: 'templates',
+    title: '6 Modèles Certifiés',
+    badge: 'DESIGN',
+    badgeColor: 'bg-pink-500/20 text-pink-300 border-pink-500/30',
+    icon: Palette,
+    iconBg: 'bg-pink-500/10 text-pink-400 border-pink-500/20',
+    desc: 'Changez de modèle et de palette de couleurs à tout moment sans jamais perdre vos informations saisies.',
+    href: '#designs',
+    cta: 'Voir les modèles',
+  },
+  {
+    id: 'pdf',
+    title: 'Export PDF A4 Haute Définition',
+    badge: 'VECTORIEL',
+    badgeColor: 'bg-blue-500/20 text-blue-300 border-blue-500/30',
+    icon: Download,
+    iconBg: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+    desc: 'Génération instantanée en format A4 strict (210 x 297 mm) avec texte sélectionnable et netteté maximale.',
+    href: '/cv/builder',
+    cta: 'Télécharger en PDF',
+  },
+  {
+    id: 'cloud',
+    title: 'Sauvegarde Cloud & Locale',
+    badge: 'SÉCURISÉ',
+    badgeColor: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30',
+    icon: Shield,
+    iconBg: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+    desc: 'Sauvegarde automatique dans votre navigateur et synchronisation cloud sécurisée si vous êtes connecté.',
+    href: '/login?callbackUrl=/cv/builder',
+    cta: 'Synchroniser',
+  },
+  {
+    id: 'i18n',
+    title: 'Multi-langues (FR, EN, AR)',
+    badge: 'INTERNATIONAL',
+    badgeColor: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    icon: Globe,
+    iconBg: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20',
+    desc: 'Adaptez votre CV pour postuler auprès d\'entreprises multinationales ou locales avec des intitulés bilingues.',
+    href: '/cv/builder',
+    cta: 'Créer en anglais',
+  },
+  {
+    id: 'free',
+    title: '100% Gratuit & Zéro Filigrane',
+    badge: 'GARANTIE',
+    badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+    icon: CheckCircle2,
+    iconBg: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+    desc: 'Aucun frais caché, aucun abonnement surprise, aucun filigrane publicitaire imposé sur votre document.',
+    href: '/cv/builder',
+    cta: 'Commencer gratuitement',
+  }
+];
+
+// ─── Mini-aperçu vectoriel CV ───────────────────────────────────────────────
 function CVMiniPreview({ template, isActive }) {
   const p = template.preview;
   return (
@@ -149,7 +257,6 @@ function CVMiniPreview({ template, isActive }) {
       }`}
       style={{ borderColor: isActive ? template.accent : undefined }}
     >
-      {/* Header du CV */}
       <div className={`${p.header.bg} px-2 py-1.5 flex items-center gap-1.5`}>
         <div className="w-4 h-4 rounded-full bg-white/30 shrink-0" />
         <div className="flex-1 space-y-0.5">
@@ -157,10 +264,7 @@ function CVMiniPreview({ template, isActive }) {
           <div className="h-1 bg-white/40 rounded w-10" />
         </div>
       </div>
-
-      {/* Corps */}
       <div className="flex h-[calc(100%-36px)]">
-        {/* Sidebar si présente */}
         {p.sidebar && (
           <div className={`${p.sidebar.bg} w-2/5 px-1 py-1.5 space-y-1.5`}>
             <div className="space-y-0.5">
@@ -172,146 +276,28 @@ function CVMiniPreview({ template, isActive }) {
               <div className="h-1 rounded w-full opacity-60" style={{ background: template.accent }} />
               <div className="h-1.5 rounded w-full bg-current opacity-20" />
               <div className="h-1.5 rounded w-4/5 bg-current opacity-15" />
-              <div className="h-1.5 rounded w-full bg-current opacity-20" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="h-1 rounded opacity-60 w-full" style={{ background: template.accent }} />
-              <div className="flex gap-0.5 flex-wrap">
-                {[3, 4, 3, 5, 2].map((w, i) => (
-                  <div key={i} className="h-1 rounded bg-current opacity-25" style={{ width: `${w * 4}px` }} />
-                ))}
-              </div>
             </div>
           </div>
         )}
-
-        {/* Corps principal */}
-        <div className={`${p.body.bg} flex-1 px-1.5 py-1.5 space-y-1.5`}>
-          {/* Section expérience */}
+        <div className={`${p.body.bg} flex-1 px-2 py-1.5 space-y-2`}>
           <div>
             <div className="h-0.5 rounded mb-1 opacity-70" style={{ background: template.accent }} />
             <div className="h-1 bg-gray-700 rounded w-2/3 opacity-40 mb-0.5" />
             <div className="h-0.5 bg-gray-400 rounded w-1/2 opacity-30 mb-0.5" />
             <div className="h-0.5 bg-gray-300 rounded w-full opacity-25" />
-            <div className="h-0.5 bg-gray-300 rounded w-4/5 opacity-25" />
           </div>
           <div>
             <div className="h-0.5 rounded mb-1 opacity-70" style={{ background: template.accent }} />
             <div className="h-1 bg-gray-700 rounded w-3/5 opacity-40 mb-0.5" />
-            <div className="h-0.5 bg-gray-400 rounded w-2/5 opacity-30 mb-0.5" />
             <div className="h-0.5 bg-gray-300 rounded w-full opacity-25" />
           </div>
-          {!p.sidebar && (
-            <div>
-              <div className="h-0.5 rounded mb-1 opacity-70" style={{ background: template.accent }} />
-              <div className="flex gap-0.5 flex-wrap">
-                {[4, 3, 5, 3, 4, 2].map((w, i) => (
-                  <div key={i} className="h-1.5 rounded bg-gray-200" style={{ width: `${w * 5}px` }} />
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
   );
 }
 
-// ─── Card Template Galerie ──────────────────────────────────────────────────
-function TemplateCard({ template, delay = 0 }) {
-  const [hovered, setHovered] = useState(false);
-  const Icon = template.icon;
-
-  return (
-    <div
-      className="group relative flex flex-col rounded-3xl overflow-hidden border border-white/10 bg-[#0d1117]/90 backdrop-blur hover:border-white/25 transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl cursor-pointer"
-      style={{
-        animationDelay: `${delay}ms`,
-        boxShadow: hovered ? `0 25px 60px -10px ${template.accent}40` : undefined,
-      }}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {/* Badge Populaire */}
-      {template.popular && (
-        <div className="absolute top-3 right-3 z-10 flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] font-black shadow-lg">
-          <Star size={9} fill="white" /> POPULAIRE
-        </div>
-      )}
-
-      {/* Aperçu visuel du CV */}
-      <div className={`relative p-4 pb-2 bg-gradient-to-b ${template.gradientBg}`}>
-        <div className="max-w-[160px] mx-auto">
-          <CVMiniPreview template={template} isActive={hovered} />
-        </div>
-        {/* Overlay gradient */}
-        <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#0d1117] to-transparent" />
-      </div>
-
-      {/* Infos */}
-      <div className="p-5 pt-3 flex-1 flex flex-col">
-        {/* Catégorie */}
-        <span
-          className={`self-start text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${template.badge} mb-2`}
-        >
-          {template.category}
-        </span>
-
-        {/* Titre & sous-titre */}
-        <div className="flex items-start justify-between gap-2 mb-1">
-          <h3 className="text-base font-black text-white leading-tight">{template.name}</h3>
-          <div
-            className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-transform group-hover:scale-110 duration-300"
-            style={{ background: `${template.accent}25` }}
-          >
-            <Icon size={16} style={{ color: template.accent }} />
-          </div>
-        </div>
-        <p className="text-xs text-gray-400 mb-3 leading-relaxed">{template.tagline}</p>
-
-        {/* Features */}
-        <ul className="space-y-1 mb-4 flex-1">
-          {template.features.map((f, i) => (
-            <li key={i} className="flex items-center gap-1.5 text-[11px] text-gray-300">
-              <Check size={11} style={{ color: template.accent }} className="shrink-0" />
-              {f}
-            </li>
-          ))}
-        </ul>
-
-        {/* CTA */}
-        <Link
-          href={`/cv/builder?template=${template.id}`}
-          className="flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black text-white transition-all duration-300 hover:gap-3 hover:scale-[1.02] active:scale-95"
-          style={{
-            background: `linear-gradient(135deg, ${template.accent}, ${template.accent}cc)`,
-            boxShadow: `0 4px 15px ${template.accent}40`,
-          }}
-        >
-          <span>Utiliser ce design</span>
-          <ArrowRight size={13} />
-        </Link>
-      </div>
-    </div>
-  );
-}
-
-// ─── Stat Counter animé ─────────────────────────────────────────────────────
-function StatBadge({ value, label, icon: Icon, color }) {
-  return (
-    <div className="flex items-center gap-3 px-5 py-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur">
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: `${color}20` }}>
-        <Icon size={18} style={{ color }} />
-      </div>
-      <div>
-        <div className="text-lg font-black text-white leading-none">{value}</div>
-        <div className="text-[11px] text-gray-400 font-medium">{label}</div>
-      </div>
-    </div>
-  );
-}
-
-// ─── FAQ Item ───────────────────────────────────────────────────────────────
+// ─── FAQ Accordion ──────────────────────────────────────────────────────────
 function FaqItem({ q, a, isOpen, onToggle }) {
   return (
     <div className="border border-white/10 rounded-2xl overflow-hidden bg-white/5 transition-all duration-300 hover:border-white/20">
@@ -326,7 +312,7 @@ function FaqItem({ q, a, isOpen, onToggle }) {
         />
       </button>
       <div
-        className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-40 opacity-100' : 'max-h-0 opacity-0'}`}
+        className={`overflow-hidden transition-all duration-300 ${isOpen ? 'max-h-56 opacity-100' : 'max-h-0 opacity-0'}`}
       >
         <div className="px-5 pb-4 pt-1 text-sm text-gray-400 leading-relaxed border-t border-white/10">
           {a}
@@ -336,90 +322,214 @@ function FaqItem({ q, a, isOpen, onToggle }) {
   );
 }
 
-// ─── Page principale ─────────────────────────────────────────────────────────
+// ─── Page Principale MyCV.click (Inspirée iLovePDF) ───────────────────────────
 export default function MyCVHomePage() {
   const { data: session } = useSession();
   const [openFaq, setOpenFaq] = useState(null);
-  const [activeTemplate, setActiveTemplate] = useState(TEMPLATES[0].id);
-  const [isMyCvDomain, setIsMyCvDomain] = useState(false);
-  const heroRef = useRef(null);
 
+  // État du créateur rapide direct sur la page d'accueil
+  const [selectedTemplate, setSelectedTemplate] = useState('modern-tech');
+  const [selectedPresetId, setSelectedPresetId] = useState('developer');
+  const [quickData, setQuickData] = useState({
+    firstName: 'Sofiane',
+    lastName: 'Mansouri',
+    title: 'Développeur Full-Stack & Ingénieur IA',
+    email: 'sofiane.mansouri@dev-mail.com',
+    phone: '+213 550 00 00 00',
+    summary: 'Ingénieur passionné avec 4+ ans d\'expérience dans la conception d\'applications web scalables avec Next.js et Python. Spécialisé dans l\'intégration de modèles IA.',
+    skills: 'Python, Next.js, Django, PostgreSQL, Docker, Tailwind CSS, API Gemini'
+  });
+
+  const [activeTab, setActiveTab] = useState('preset'); // 'preset' | 'form' | 'templates'
+  const [isCopied, setIsCopied] = useState(false);
+
+  // Charger depuis le localStorage si l'utilisateur a déjà des données
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const isMyCv = window.location.hostname.toLowerCase().includes('mycv.click') ||
-                     window.location.hostname === 'localhost';
-      setIsMyCvDomain(isMyCv);
-      document.title = 'MyCV.click — Créateur de CV Gratuit & Professionnel | 6 Designs Premium';
+      try {
+        const savedData = localStorage.getItem(STORAGE_KEY_DATA);
+        const savedConfig = localStorage.getItem(STORAGE_KEY_CONFIG);
+        if (savedData) {
+          const parsed = JSON.parse(savedData);
+          if (parsed.personal) {
+            setQuickData({
+              firstName: parsed.personal.firstName || '',
+              lastName: parsed.personal.lastName || '',
+              title: parsed.personal.title || '',
+              email: parsed.personal.email || '',
+              phone: parsed.personal.phone || '',
+              summary: parsed.personal.summary || '',
+              skills: (parsed.skills || []).map(s => s.name || s).join(', ')
+            });
+          }
+        }
+        if (savedConfig) {
+          const cfg = JSON.parse(savedConfig);
+          if (cfg.template) setSelectedTemplate(cfg.template);
+        }
+      } catch (e) {
+        console.warn('Erreur lecture localStorage:', e);
+      }
     }
   }, []);
 
+  // Changer de preset rapide
+  const handleSelectPreset = (presetId) => {
+    setSelectedPresetId(presetId);
+    const preset = PRESET_PROFILES[presetId] || PRESET_PROFILES.developer;
+    if (preset?.data?.personal) {
+      setQuickData({
+        firstName: preset.data.personal.firstName,
+        lastName: preset.data.personal.lastName,
+        title: preset.data.personal.title,
+        email: preset.data.personal.email,
+        phone: preset.data.personal.phone,
+        summary: preset.data.personal.summary,
+        skills: (preset.data.skills || []).map(s => s.name).join(', ')
+      });
+      if (preset.template) {
+        setSelectedTemplate(preset.template);
+      }
+      // Sauvegarder dans le localStorage
+      syncToLocalStorage(preset.data, preset.template);
+    }
+  };
+
+  // Synchroniser dans le localStorage pour le builder
+  const syncToLocalStorage = (dataObj, tmpl) => {
+    if (typeof window === 'undefined') return;
+    try {
+      localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(dataObj));
+      localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify({
+        template: tmpl || selectedTemplate,
+        color: '#7c3aed',
+        font: 'sans',
+        spacing: 'normal'
+      }));
+    } catch (e) {
+      console.warn('Erreur sync localStorage:', e);
+    }
+  };
+
+  // Mise à jour formulaire
+  const handleInputChange = (field, val) => {
+    const updated = { ...quickData, [field]: val };
+    setQuickData(updated);
+
+    // Mettre à jour l'objet complet pour le builder
+    const fullData = PRESET_PROFILES[selectedPresetId]?.data || PRESET_PROFILES.developer.data;
+    const cloned = JSON.parse(JSON.stringify(fullData));
+    cloned.personal.firstName = updated.firstName;
+    cloned.personal.lastName = updated.lastName;
+    cloned.personal.title = updated.title;
+    cloned.personal.email = updated.email;
+    cloned.personal.phone = updated.phone;
+    cloned.personal.summary = updated.summary;
+    if (updated.skills) {
+      cloned.skills = updated.skills.split(',').map(s => ({ name: s.trim(), level: 85, category: 'hard' })).filter(s => s.name);
+    }
+    syncToLocalStorage(cloned, selectedTemplate);
+  };
+
+  const currentTmplObj = TEMPLATES.find(t => t.id === selectedTemplate) || TEMPLATES[0];
+
   const faq = [
     {
-      q: "Est-ce vraiment gratuit et sans inscription ?",
-      a: "Oui, entièrement gratuit. Choisissez un design, remplissez vos informations, et téléchargez votre CV en PDF A4 haute définition — aucun compte requis, aucun filigrane."
+      q: "Est-ce que MyCV.click est réellement 100% gratuit et sans abonnement caché ?",
+      a: "Oui, MyCV.click est entièrement gratuit. Vous pouvez concevoir votre CV de A à Z, modifier la mise en page, utiliser nos 6 designs professionnels et télécharger votre document en PDF A4 haute définition sans débourser le moindre centime et sans aucun filigrane."
     },
     {
-      q: "Mes données sont-elles protégées ?",
-      a: "Vos données restent dans votre navigateur (localStorage). Rien n'est envoyé sur nos serveurs sans votre accord. En créant un compte, vous profitez d'une sauvegarde cloud sécurisée."
+      q: "Mes informations personnelles et professionnelles sont-elles protégées ?",
+      a: "Absolument. Vos informations sont stockées localement dans votre navigateur (localStorage). Aucune donnée n'est revendue à des tiers. Si vous choisissez de vous connecter avec votre compte Google, la sauvegarde cloud est chiffrée et privée."
     },
     {
-      q: "Les CV sont-ils compatibles avec les systèmes ATS ?",
-      a: "Absolument. Nos 6 modèles sont optimisés pour les ATS (Applicant Tracking Systems) : hiérarchie HTML propre, texte sélectionnable, sections standardisées, PDF vectoriel."
+      q: "Qu'est-ce qu'un CV compatible ATS et pourquoi est-ce crucial en 2026 ?",
+      a: "Un ATS (Applicant Tracking System) est un logiciel utilisé par plus de 80% des grandes entreprises et cabinets de recrutement pour filtrer automatiquement les candidatures avant l'œil humain. Nos 6 modèles respectent les standards ATS : structure HTML sémantique, polices vectorielles standardisées, sections délimitées et texte sélectionnable."
     },
     {
-      q: "Puis-je changer de design après avoir rempli mes infos ?",
-      a: "Oui, vos données sont sauvegardées automatiquement. Changez de template en un clic dans le builder sans perdre aucune information."
+      q: "Puis-je changer de modèle ou de couleur sans perdre mes textes ?",
+      a: "Oui ! Vos données sont totalement séparées de la couche graphique. Vous pouvez basculer d'un modèle 'Modern Tech' vers 'Executive RH' ou 'Minimalist ATS' en un clic, tout votre contenu reste intact."
     },
     {
-      q: "Comment fonctionne l'assistant IA ?",
-      a: "Notre IA (Gemini) analyse votre profil ou l'offre d'emploi et rempli automatiquement tous les champs de votre CV avec un contenu professionnel adapté à votre secteur."
+      q: "Comment fonctionne l'Assistant IA Gemini pour la rédaction du CV ?",
+      a: "L'assistant IA analyse votre profil ou votre poste et rédige instantanément une accroche professionnelle percutante, tout en suggérant des verbes d'action et des réalisations chiffrées adaptés à votre secteur."
+    },
+    {
+      q: "Comment télécharger mon CV au format PDF prêt pour l'impression ?",
+      a: "Cliquez simplement sur 'Continuer dans le Studio Complet' ou 'Télécharger PDF'. Le moteur de rendu génère un document vectoriel A4 calibré à 210 x 297 mm, parfait pour être envoyé par email ou imprimé."
     }
   ];
 
   return (
-    <div className="min-h-screen bg-[#030712] text-slate-100 overflow-x-hidden">
+    <div className="min-h-screen bg-[#030712] text-slate-100 overflow-x-hidden font-sans">
 
-      {/* ─── SEO Schema.org ──────────────────────────────────────────────────── */}
+      {/* ─── SEO Schema.org WebApplication & FAQPage ─────────────────────────── */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             "@context": "https://schema.org",
-            "@type": "WebApplication",
-            "name": "MyCV.click",
-            "applicationCategory": "BusinessApplication",
-            "operatingSystem": "All",
-            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
-            "description": "Créateur de CV professionnel gratuit avec 6 designs premium, assistant IA, export PDF A4 et compatibilité ATS."
+            "@graph": [
+              {
+                "@type": "WebApplication",
+                "name": "MyCV.click",
+                "applicationCategory": "BusinessApplication",
+                "operatingSystem": "All",
+                "offers": { "@type": "Offer", "price": "0", "priceCurrency": "EUR" },
+                "description": "Créateur de CV en ligne gratuit et rapide inspiré par iLovePDF : créez votre CV directement sur la page d'accueil, exportez en PDF A4 et optimisez votre score ATS."
+              },
+              {
+                "@type": "FAQPage",
+                "mainEntity": faq.map(f => ({
+                  "@type": "Question",
+                  "name": f.q,
+                  "acceptedAnswer": {
+                    "@type": "Answer",
+                    "text": f.a
+                  }
+                }))
+              }
+            ]
           })
         }}
       />
 
       {/* ─── NAVBAR ───────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-40 border-b border-white/10 bg-[#030712]/90 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-pink-500 flex items-center justify-center text-white font-black text-sm shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3.5 flex items-center justify-between gap-4">
+          <Link href="/" className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-violet-600 via-indigo-600 to-pink-500 flex items-center justify-center text-white font-black text-sm shadow-lg shadow-violet-900/30">
               CV
             </div>
             <div>
-              <span className="font-black tracking-tight text-white">MyCV.click</span>
-              <span className="ml-2 text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                GRATUIT
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="font-black text-lg tracking-tight text-white">MyCV.click</span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                  100% GRATUIT
+                </span>
+              </div>
+              <div className="text-[11px] text-gray-400 font-medium hidden sm:block">
+                Le studio CV instantané façon iLovePDF
+              </div>
             </div>
-          </div>
+          </Link>
 
-          <nav className="hidden md:flex items-center gap-6 text-sm text-gray-400">
-            <a href="#designs" className="hover:text-white transition-colors font-medium">Designs</a>
-            <a href="#fonctionnalites" className="hover:text-white transition-colors font-medium">Fonctionnalités</a>
+          <nav className="hidden md:flex items-center gap-6 text-sm text-gray-300">
+            <a href="#creation-rapide" className="hover:text-white transition-colors font-medium flex items-center gap-1.5">
+              <Sparkles size={14} className="text-violet-400" /> Créer mon CV
+            </a>
+            <a href="#outils" className="hover:text-white transition-colors font-medium flex items-center gap-1.5">
+              <Layers size={14} className="text-blue-400" /> Outils
+            </a>
+            <a href="#designs" className="hover:text-white transition-colors font-medium">Modèles</a>
+            <a href="#guide-ats" className="hover:text-white transition-colors font-medium">Guide ATS 2026</a>
             <a href="#faq" className="hover:text-white transition-colors font-medium">FAQ</a>
           </nav>
 
           <div className="flex items-center gap-3">
             {session?.user ? (
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-full bg-violet-600/30 border border-violet-500/40 flex items-center justify-center text-[11px] font-bold text-violet-300">
+                <div className="w-8 h-8 rounded-full bg-violet-600/30 border border-violet-500/40 flex items-center justify-center text-xs font-bold text-violet-300">
                   {(session.user.name?.[0] || session.user.email?.[0] || 'U').toUpperCase()}
                 </div>
                 <span className="text-xs text-gray-300 font-medium hidden sm:inline max-w-[120px] truncate">
@@ -444,195 +554,485 @@ export default function MyCVHomePage() {
 
             <Link
               href="/cv/builder"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 transition-all hover:scale-105 shadow-lg shadow-violet-900/30"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 text-white hover:from-violet-500 hover:to-purple-500 transition-all hover:scale-105 shadow-lg shadow-violet-900/30"
             >
-              <Sparkles size={14} />
-              Créer mon CV
+              <Layout size={14} />
+              Studio Complet
             </Link>
           </div>
         </div>
       </header>
 
-      {/* ─── HERO SECTION ─────────────────────────────────────────────────────── */}
-      <section className="relative pt-20 pb-16 px-4 sm:px-6 overflow-hidden" ref={heroRef}>
-        {/* Background blobs animés */}
+      {/* ─── HERO & CRÉATEUR DIRECT SUR LA PAGE D'ACCUEIL ─────────────────────── */}
+      <section id="creation-rapide" className="relative pt-12 pb-16 px-4 sm:px-6 overflow-hidden">
+        {/* Background glow ambient */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          <div className="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-violet-700/20 blur-[120px] animate-pulse" />
-          <div className="absolute top-20 right-0 w-80 h-80 rounded-full bg-indigo-700/15 blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
-          <div className="absolute bottom-0 left-1/3 w-72 h-72 rounded-full bg-pink-700/10 blur-[90px] animate-pulse" style={{ animationDelay: '2s' }} />
-          {/* Grid dots */}
+          <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-violet-700/20 blur-[140px]" />
+          <div className="absolute top-20 right-0 w-96 h-96 rounded-full bg-indigo-700/15 blur-[120px]" />
+          <div className="absolute bottom-10 left-1/3 w-80 h-80 rounded-full bg-pink-700/10 blur-[100px]" />
           <div
-            className="absolute inset-0 opacity-[0.04]"
+            className="absolute inset-0 opacity-[0.03]"
             style={{
               backgroundImage: 'radial-gradient(circle, #ffffff 1px, transparent 1px)',
-              backgroundSize: '32px 32px',
+              backgroundSize: '28px 28px',
             }}
           />
         </div>
 
-        <div className="relative max-w-5xl mx-auto text-center space-y-6">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs font-bold mb-2">
-            <Sparkles size={12} className="text-yellow-400" />
-            Créateur de CV Gratuit — Aucune inscription requise
-          </div>
-
-          {/* Titre hero */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black leading-[1.08] tracking-tight">
-            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
-              Créez votre CV
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-violet-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-              professionnel
-            </span>
-            <br />
-            <span className="bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
-              en quelques minutes
-            </span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-gray-400 max-w-2xl mx-auto leading-relaxed">
-            Choisissez parmi <strong className="text-white">6 designs professionnels</strong>, remplissez vos informations,
-            laissez l'<strong className="text-violet-300">IA vous assister</strong> et exportez votre CV en{' '}
-            <strong className="text-emerald-300">PDF A4 parfait</strong> — gratuitement.
-          </p>
-
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-            <Link
-              href="/cv/builder"
-              className="group flex items-center gap-2.5 px-7 py-3.5 rounded-2xl text-base font-black bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-2xl shadow-violet-900/50 hover:shadow-violet-700/50 transition-all duration-300 hover:scale-105 hover:gap-3.5"
-            >
-              <Play size={16} fill="white" />
-              Commencer gratuitement
-              <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
-            </Link>
-            <a
-              href="#designs"
-              className="flex items-center gap-2 px-6 py-3.5 rounded-2xl text-sm font-bold text-gray-300 hover:text-white border border-white/15 hover:border-white/30 bg-white/5 hover:bg-white/10 transition-all duration-300"
-            >
-              <Layout size={15} />
-              Voir les designs
-            </a>
-          </div>
-
-          {/* Stats */}
-          <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
-            <StatBadge value="6" label="Designs Premium" icon={Palette} color="#8b5cf6" />
-            <StatBadge value="100%" label="Gratuit & Sans pub" icon={Shield} color="#10b981" />
-            <StatBadge value="IA" label="Assistant intégré" icon={Sparkles} color="#f59e0b" />
-            <StatBadge value="PDF A4" label="Export instantané" icon={Download} color="#3b82f6" />
-          </div>
-        </div>
-      </section>
-
-      {/* ─── GALERIE DES DESIGNS ──────────────────────────────────────────────── */}
-      <section id="designs" className="py-20 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          {/* En-tête section */}
-          <div className="text-center mb-12 space-y-3">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-violet-400 px-3 py-1 rounded-full border border-violet-500/30 bg-violet-500/10">
-              <Palette size={12} />
-              Choisissez votre style
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              6 Designs pour chaque{' '}
-              <span className="bg-gradient-to-r from-violet-400 to-pink-400 bg-clip-text text-transparent">
-                profil & secteur
+        <div className="relative max-w-6xl mx-auto space-y-8">
+          {/* Titre d'accroche */}
+          <div className="text-center space-y-4 max-w-3xl mx-auto">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-violet-500/30 bg-violet-500/10 text-violet-300 text-xs font-bold">
+              <Sparkles size={13} className="text-amber-400" />
+              Inspiré par la simplicité d'iLovePDF • 100% Gratuit
+            </div>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight text-white leading-[1.15]">
+              Créez votre CV professionnel <br className="hidden sm:inline" />
+              <span className="bg-gradient-to-r from-violet-400 via-purple-300 to-pink-400 bg-clip-text text-transparent">
+                directement ici en 1 minute
               </span>
-            </h2>
-            <p className="text-gray-400 max-w-xl mx-auto text-sm leading-relaxed">
-              Chaque template est optimisé pour un secteur précis et compatible avec les filtres ATS.
-              Cliquez sur un design pour démarrer immédiatement.
+            </h1>
+            <p className="text-sm sm:text-base text-gray-400 leading-relaxed max-w-2xl mx-auto">
+              Choisissez votre métier, ajustez vos informations et téléchargez votre CV prêt pour les recruteurs.
+              Aucune carte bancaire, aucun filigrane.
             </p>
           </div>
 
-          {/* Grille de templates */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {TEMPLATES.map((tmpl, i) => (
-              <TemplateCard key={tmpl.id} template={tmpl} delay={i * 80} />
-            ))}
-          </div>
+          {/* ─── LE WIDGET CRÉATEUR DIRECT (Le cœur de la page) ────────────────── */}
+          <div className="bg-[#0b0f19]/95 border border-white/15 rounded-3xl p-5 sm:p-7 shadow-2xl backdrop-blur-2xl">
+            {/* Header du widget avec onglets */}
+            <div className="flex flex-wrap items-center justify-between gap-3 pb-5 border-b border-white/10">
+              <div className="flex items-center gap-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+                <span className="text-xs font-bold text-gray-300 uppercase tracking-wider">
+                  Création Rapide & Intuitive
+                </span>
+              </div>
+              <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+                <button
+                  onClick={() => setActiveTab('preset')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'preset' ? 'bg-violet-600 text-white shadow' : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  ⚡ Profils Métiers
+                </button>
+                <button
+                  onClick={() => setActiveTab('form')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'form' ? 'bg-violet-600 text-white shadow' : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  ✍️ Vos Informations
+                </button>
+                <button
+                  onClick={() => setActiveTab('templates')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                    activeTab === 'templates' ? 'bg-violet-600 text-white shadow' : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  🎨 6 Designs ({selectedTemplate})
+                </button>
+              </div>
+            </div>
 
-          {/* CTA final */}
-          <div className="text-center mt-12">
-            <Link
-              href="/cv/builder"
-              className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl text-base font-black bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 text-white shadow-2xl shadow-emerald-900/40 hover:shadow-emerald-700/50 transition-all duration-300 hover:scale-105"
-            >
-              <Sparkles size={17} />
-              Créer mon CV avec l'IA
-              <ArrowRight size={17} />
-            </Link>
-            <p className="mt-3 text-xs text-gray-500">Aucune inscription • PDF gratuit • Données privées</p>
+            {/* Corps du widget en 2 colonnes (Édition + Live Preview) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-6">
+              {/* Colonne gauche : Contrôles (7/12) */}
+              <div className="lg:col-span-7 space-y-5">
+                {/* Contenu de l'onglet : Profils rapides */}
+                {activeTab === 'preset' && (
+                  <div className="space-y-4">
+                    <label className="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-2">
+                      <Zap size={14} className="text-yellow-400" />
+                      1. Choisissez un secteur pour pré-remplir instantanément :
+                    </label>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                      {QUICK_PROFILES.map((qp) => {
+                        const isSelected = selectedPresetId === qp.id;
+                        return (
+                          <button
+                            key={qp.id}
+                            onClick={() => handleSelectPreset(qp.id)}
+                            className={`p-3 rounded-2xl text-left border text-xs font-bold transition-all cursor-pointer flex flex-col justify-between gap-1.5 ${
+                              isSelected
+                                ? 'bg-violet-600/20 border-violet-500 text-white shadow-lg shadow-violet-900/30'
+                                : 'bg-white/5 border-white/10 text-gray-300 hover:border-white/20 hover:bg-white/10'
+                            }`}
+                          >
+                            <span>{qp.label}</span>
+                            <span className="text-[10px] text-gray-400 font-normal">
+                              Modèle : {qp.template}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Contenu de l'onglet : Formulaire express */}
+                {(activeTab === 'form' || activeTab === 'preset') && (
+                  <div className="space-y-3.5 bg-white/[0.02] p-4 rounded-2xl border border-white/5">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-gray-300 uppercase tracking-wider">
+                        Vos Coordonnées Clés
+                      </label>
+                      <span className="text-[11px] text-emerald-400 font-medium">
+                        ✓ Sauvegardé automatiquement
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-[11px] text-gray-400 mb-1 block">Prénom</span>
+                        <input
+                          type="text"
+                          value={quickData.firstName}
+                          onChange={(e) => handleInputChange('firstName', e.target.value)}
+                          placeholder="Prénom"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[11px] text-gray-400 mb-1 block">Nom</span>
+                        <input
+                          type="text"
+                          value={quickData.lastName}
+                          onChange={(e) => handleInputChange('lastName', e.target.value)}
+                          placeholder="Nom de famille"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] text-gray-400 mb-1 block">Titre de poste recherché</span>
+                      <input
+                        type="text"
+                        value={quickData.title}
+                        onChange={(e) => handleInputChange('title', e.target.value)}
+                        placeholder="ex: Chef de Projet Digital / Développeur Python"
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <span className="text-[11px] text-gray-400 mb-1 block">Email</span>
+                        <input
+                          type="email"
+                          value={quickData.email}
+                          onChange={(e) => handleInputChange('email', e.target.value)}
+                          placeholder="votre.email@exemple.com"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
+                        />
+                      </div>
+                      <div>
+                        <span className="text-[11px] text-gray-400 mb-1 block">Téléphone</span>
+                        <input
+                          type="text"
+                          value={quickData.phone}
+                          onChange={(e) => handleInputChange('phone', e.target.value)}
+                          placeholder="+33 6 00 00 00 00"
+                          className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] text-gray-400 mb-1 block">Résumé professionnel / Accroche</span>
+                      <textarea
+                        rows={2}
+                        value={quickData.summary}
+                        onChange={(e) => handleInputChange('summary', e.target.value)}
+                        placeholder="2 à 3 lignes décrivant vos points forts et votre valeur ajoutée..."
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition resize-none"
+                      />
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] text-gray-400 mb-1 block">Compétences clés (séparées par virgules)</span>
+                      <input
+                        type="text"
+                        value={quickData.skills}
+                        onChange={(e) => handleInputChange('skills', e.target.value)}
+                        placeholder="ex: Python, React, Gestion de projet, Anglais C1..."
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3.5 py-2 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 transition"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* Sélecteur de Modèle en pastilles rapides */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-gray-300">
+                    <span className="uppercase tracking-wider">Modèle actif :</span>
+                    <span className="text-violet-400">{currentTmplObj.name} ({currentTmplObj.category})</span>
+                  </div>
+                  <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                    {TEMPLATES.map((tmpl) => {
+                      const isAct = selectedTemplate === tmpl.id;
+                      return (
+                        <button
+                          key={tmpl.id}
+                          onClick={() => {
+                            setSelectedTemplate(tmpl.id);
+                            syncToLocalStorage(PRESET_PROFILES[selectedPresetId]?.data || PRESET_PROFILES.developer.data, tmpl.id);
+                          }}
+                          className={`p-2 rounded-xl border text-center transition-all cursor-pointer ${
+                            isAct
+                              ? 'bg-violet-600/30 border-violet-400 text-white ring-2 ring-violet-500/50'
+                              : 'bg-white/5 border-white/10 text-gray-400 hover:text-white hover:bg-white/10'
+                          }`}
+                        >
+                          <div className="w-3.5 h-3.5 rounded-full mx-auto mb-1" style={{ background: tmpl.accent }} />
+                          <div className="text-[10px] font-bold truncate">{tmpl.name}</div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Boutons d'action géants du créateur */}
+                <div className="pt-2 flex flex-col sm:flex-row gap-3">
+                  <Link
+                    href={`/cv/builder?template=${selectedTemplate}`}
+                    className="flex-1 flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl text-sm font-black bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 text-white shadow-xl shadow-violet-900/40 hover:from-violet-500 hover:to-purple-500 transition-all hover:scale-[1.02] cursor-pointer"
+                  >
+                    <Sparkles size={16} />
+                    Ouvrir le Studio Complet (Gratuit)
+                    <ArrowRight size={16} />
+                  </Link>
+
+                  <Link
+                    href={`/cv/builder?template=${selectedTemplate}&action=print`}
+                    className="flex items-center justify-center gap-2 px-5 py-3.5 rounded-2xl text-sm font-bold bg-white/10 hover:bg-white/15 border border-white/15 text-white transition-all hover:scale-[1.02] cursor-pointer"
+                  >
+                    <Download size={16} className="text-emerald-400" />
+                    Télécharger PDF A4
+                  </Link>
+                </div>
+              </div>
+
+              {/* Colonne droite : Live Preview visuelle (5/12) */}
+              <div className="lg:col-span-5 flex flex-col items-center justify-center">
+                <div className="w-full max-w-[310px] bg-slate-900/90 p-3.5 rounded-2xl border border-white/15 shadow-2xl space-y-3">
+                  <div className="flex items-center justify-between text-xs text-gray-400 px-1">
+                    <span className="font-semibold flex items-center gap-1.5 text-white">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400" /> Aperçu A4 Direct
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-gray-300">
+                      Format ISO 216
+                    </span>
+                  </div>
+
+                  {/* Carte visuelle du CV en direct */}
+                  <div className="relative w-full aspect-[210/297] rounded-xl overflow-hidden shadow-2xl border border-white/15 bg-white text-gray-900 text-left p-3.5 flex flex-col justify-between">
+                    {/* Header dynamique */}
+                    <div className="border-b pb-2" style={{ borderColor: `${currentTmplObj.accent}40` }}>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="text-xs font-black text-gray-900 leading-tight">
+                            {quickData.firstName || 'Votre'} {quickData.lastName || 'Nom'}
+                          </div>
+                          <div className="text-[10px] font-bold" style={{ color: currentTmplObj.accent }}>
+                            {quickData.title || 'Titre du poste'}
+                          </div>
+                        </div>
+                        <div
+                          className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-[10px] font-black"
+                          style={{ background: currentTmplObj.accent }}
+                        >
+                          {(quickData.firstName?.[0] || 'C')}{(quickData.lastName?.[0] || 'V')}
+                        </div>
+                      </div>
+
+                      <div className="text-[8px] text-gray-500 mt-1 flex flex-wrap gap-2">
+                        <span>{quickData.email || 'email@exemple.com'}</span>
+                        <span>{quickData.phone || '+213 550 00 00'}</span>
+                      </div>
+                    </div>
+
+                    {/* Résumé */}
+                    <div className="py-1">
+                      <div className="text-[8px] font-bold uppercase tracking-wider mb-0.5" style={{ color: currentTmplObj.accent }}>
+                        Profil Professionnel
+                      </div>
+                      <p className="text-[7.5px] text-gray-600 leading-tight line-clamp-3">
+                        {quickData.summary || 'Votre accroche professionnelle s\'affichera ici.'}
+                      </p>
+                    </div>
+
+                    {/* Expérience simulée */}
+                    <div className="border-t border-gray-100 pt-1">
+                      <div className="text-[8px] font-bold uppercase tracking-wider mb-1" style={{ color: currentTmplObj.accent }}>
+                        Dernière Expérience
+                      </div>
+                      <div className="text-[8px] font-bold text-gray-800">
+                        {quickData.title || 'Poste occupé'} • Entreprise Référence
+                      </div>
+                      <div className="text-[7px] text-gray-500">2023 - Présent • Alger / Paris</div>
+                      <div className="text-[7px] text-gray-600 leading-tight mt-0.5">
+                        • Pilotage de projets stratégiques avec augmentation de +30% de la performance.
+                      </div>
+                    </div>
+
+                    {/* Compétences tags */}
+                    <div className="border-t border-gray-100 pt-1">
+                      <div className="text-[8px] font-bold uppercase tracking-wider mb-1" style={{ color: currentTmplObj.accent }}>
+                        Compétences Clés
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {(quickData.skills || 'Compétence 1, Compétence 2, Compétence 3')
+                          .split(',')
+                          .slice(0, 4)
+                          .map((sk, idx) => (
+                            <span
+                              key={idx}
+                              className="text-[7px] px-1.5 py-0.5 rounded font-medium bg-gray-100 text-gray-700"
+                            >
+                              {sk.trim()}
+                            </span>
+                          ))}
+                      </div>
+                    </div>
+
+                    {/* Footer mini-CV */}
+                    <div className="text-[7px] text-gray-400 text-center border-t border-gray-100 pt-1 font-mono">
+                      Page 1/1 • Modèle {currentTmplObj.name} • Certifié ATS
+                    </div>
+                  </div>
+
+                  <div className="text-center">
+                    <Link
+                      href={`/cv/builder?template=${selectedTemplate}`}
+                      className="text-xs text-violet-400 hover:text-violet-300 font-bold flex items-center justify-center gap-1 transition"
+                    >
+                      Personnaliser toutes les sections dans le studio <ChevronRight size={13} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ─── FONCTIONNALITÉS ──────────────────────────────────────────────────── */}
-      <section id="fonctionnalites" className="py-20 px-4 sm:px-6 bg-gradient-to-b from-transparent via-white/[0.02] to-transparent">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12 space-y-3">
-            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/30 bg-emerald-500/10">
-              <Zap size={12} />
-              Puissant & Simple
+      {/* ─── LA BOÎTE À OUTILS MYCV (GRILLE DE TUILES STYLE ILOVEPDF) ─────────── */}
+      <section id="outils" className="py-16 px-4 sm:px-6 bg-[#060a14] border-y border-white/10">
+        <div className="max-w-6xl mx-auto space-y-10">
+          <div className="text-center space-y-3 max-w-3xl mx-auto">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-violet-400 px-3 py-1 rounded-full border border-violet-500/20 bg-violet-500/10">
+              <Layers size={13} /> Boîte à Outils Complète
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white">
-              Tout ce qu'il faut pour un{' '}
-              <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                CV parfait
-              </span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">
+              Tous les outils nécessaires pour réussir votre candidature
             </h2>
+            <p className="text-sm text-gray-400">
+              À l'instar des célèbres outils PDF en ligne, MyCV.click réunit chaque fonction indispensable pour concevoir un dossier de recrutement parfait.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {[
-              {
-                icon: Sparkles, color: '#f59e0b',
-                title: 'Assistant IA Gemini',
-                desc: 'Remplissage automatique de votre CV par intelligence artificielle. Décrivez votre profil en quelques mots, l\'IA fait le reste.',
-              },
-              {
-                icon: Shield, color: '#10b981',
-                title: 'Score ATS en temps réel',
-                desc: 'Analyseur ATS intégré qui vérifie votre CV en direct et vous donne des recommandations pour maximiser votre score.',
-              },
-              {
-                icon: Download, color: '#3b82f6',
-                title: 'PDF A4 Vectoriel',
-                desc: 'Export PDF haute définition au format 210×297mm exact. Texte sélectionnable, parfait à l\'impression et pour les ATS.',
-              },
-              {
-                icon: Monitor, color: '#8b5cf6',
-                title: 'Aperçu A4 en direct',
-                desc: 'Voyez votre CV au format réel pendant que vous le créez. Zoom, plein écran, et mode tablette inclus.',
-              },
-              {
-                icon: Clock, color: '#ec4899',
-                title: 'Sauvegarde automatique',
-                desc: 'Vos données sont sauvegardées en temps réel dans votre navigateur. Reprenez là où vous avez arrêté.',
-              },
-              {
-                icon: Globe, color: '#06b6d4',
-                title: 'Multilingue & Mobilité',
-                desc: 'Langues multiples, niveaux personnalisés, champs mobilité géographique. Adapté aux candidatures internationales.',
-              },
-            ].map((feat, i) => {
-              const Icon = feat.icon;
+          {/* Grille des 8 outils façon iLovePDF */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {ILOVEPDF_TOOLS.map((tool) => {
+              const Icon = tool.icon;
+              return (
+                <Link
+                  key={tool.id}
+                  href={tool.href}
+                  className="group relative flex flex-col justify-between p-5 rounded-3xl bg-[#0c1222]/90 border border-white/10 hover:border-violet-500/40 transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl hover:shadow-violet-950/40 backdrop-blur"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className={`w-11 h-11 rounded-2xl border flex items-center justify-center ${tool.iconBg}`}>
+                        <Icon size={22} />
+                      </div>
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border ${tool.badgeColor}`}>
+                        {tool.badge}
+                      </span>
+                    </div>
+                    <h3 className="text-base font-black text-white group-hover:text-violet-300 transition-colors">
+                      {tool.title}
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed">
+                      {tool.desc}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 mt-3 border-t border-white/5 flex items-center justify-between text-xs font-bold text-violet-400 group-hover:text-violet-300">
+                    <span>{tool.cta}</span>
+                    <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── SHOWCASE DES 6 MODÈLES DE CV ─────────────────────────────────────── */}
+      <section id="designs" className="py-20 px-4 sm:px-6 bg-[#030712]">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center space-y-3 max-w-3xl mx-auto">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-pink-400 px-3 py-1 rounded-full border border-pink-500/20 bg-pink-500/10">
+              <Palette size={13} /> Galerie de Modèles
+            </span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">
+              6 Designs modernes, ergonomiques et conformes ATS
+            </h2>
+            <p className="text-sm text-gray-400">
+              Chaque modèle est conçu en collaboration avec des professionnels du recrutement pour valoriser votre parcours avec élégance.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {TEMPLATES.map((tmpl) => {
+              const Icon = tmpl.icon;
               return (
                 <div
-                  key={i}
-                  className="group p-6 rounded-3xl border border-white/8 bg-white/[0.03] hover:bg-white/[0.06] hover:border-white/15 transition-all duration-300 hover:-translate-y-1"
+                  key={tmpl.id}
+                  className="rounded-3xl border border-white/10 bg-[#0c1222]/80 overflow-hidden hover:border-white/25 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl flex flex-col justify-between"
                 >
-                  <div
-                    className="w-11 h-11 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 duration-300"
-                    style={{ background: `${feat.color}18` }}
-                  >
-                    <Icon size={20} style={{ color: feat.color }} />
+                  <div className="p-5 pb-2">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold border ${tmpl.badge}`}>
+                        {tmpl.category}
+                      </span>
+                      {tmpl.popular && (
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30 flex items-center gap-1">
+                          <Star size={10} fill="currentColor" /> POPULAIRE
+                        </span>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-black text-white mb-1">{tmpl.name}</h3>
+                    <p className="text-xs text-gray-400 mb-4">{tmpl.tagline}</p>
+
+                    {/* Mini preview */}
+                    <div className="max-w-[170px] mx-auto py-2">
+                      <CVMiniPreview template={tmpl} isActive={selectedTemplate === tmpl.id} />
+                    </div>
                   </div>
-                  <h3 className="font-black text-white mb-2">{feat.title}</h3>
-                  <p className="text-sm text-gray-400 leading-relaxed">{feat.desc}</p>
+
+                  <div className="p-5 pt-3 border-t border-white/5 space-y-3">
+                    <ul className="space-y-1 text-[11px] text-gray-400">
+                      {tmpl.features.map((f, i) => (
+                        <li key={i} className="flex items-center gap-1.5">
+                          <Check size={12} className="text-emerald-400 shrink-0" />
+                          <span>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+
+                    <Link
+                      href={`/cv/builder?template=${tmpl.id}`}
+                      className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black bg-white/10 hover:bg-violet-600 text-white transition-all"
+                    >
+                      <Sparkles size={13} />
+                      Choisir ce design
+                    </Link>
+                  </div>
                 </div>
               );
             })}
@@ -640,52 +1040,99 @@ export default function MyCVHomePage() {
         </div>
       </section>
 
-      {/* ─── BANNIÈRE CTA CENTRALE ────────────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          <div className="relative rounded-3xl overflow-hidden p-10 sm:p-14 text-center border border-violet-500/20 bg-gradient-to-br from-violet-950/60 via-[#0d0f24] to-indigo-950/60">
-            {/* Blobs */}
-            <div className="absolute -top-20 -right-20 w-60 h-60 rounded-full bg-violet-700/20 blur-[80px]" />
-            <div className="absolute -bottom-20 -left-20 w-60 h-60 rounded-full bg-indigo-700/20 blur-[80px]" />
+      {/* ─── EMPLACEMENT PUBLICITAIRE ADSENSE (CONFORME & NON-INTRUSIF) ────────── */}
+      <section className="py-6 px-4 bg-[#030712]">
+        <AdSenseAd slot="cv-home-middle" />
+      </section>
 
-            <div className="relative space-y-6">
-              <div className="flex items-center justify-center gap-2 mb-3">
-                <Award size={22} className="text-yellow-400" />
-                <span className="text-yellow-400 font-bold text-sm">100% Gratuit • Aucun filigrane</span>
-              </div>
-              <h2 className="text-3xl sm:text-4xl font-black text-white">
-                Votre prochain emploi commence ici
-              </h2>
-              <p className="text-gray-400 max-w-xl mx-auto text-base leading-relaxed">
-                Rejoignez des milliers de candidats qui ont créé leur CV professionnel avec MyCV.click.
-                Aucune carte bancaire, aucune inscription requise.
+      {/* ─── GUIDE ÉDITORIAL COMPLET ADSENSE (ANTI-THIN-CONTENT) ───────────────── */}
+      <section id="guide-ats" className="py-20 px-4 sm:px-6 bg-[#070c18] border-y border-white/10">
+        <div className="max-w-4xl mx-auto space-y-12">
+          <div className="text-center space-y-3 max-w-2xl mx-auto">
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-emerald-400 px-3 py-1 rounded-full border border-emerald-500/20 bg-emerald-500/10">
+              <Award size={13} /> Guide Expert Recrutement 2026
+            </span>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">
+              Comment réussir son CV et franchir les filtres ATS
+            </h2>
+            <p className="text-sm text-gray-400">
+              Découvrez les règles d'or, les structures recommandées et les stratégies éprouvées pour maximiser vos chances d'obtenir des entretiens d'embauche.
+            </p>
+          </div>
+
+          <div className="space-y-8 text-sm text-gray-300 leading-relaxed">
+            {/* Article Part 1 */}
+            <div className="bg-white/5 border border-white/10 p-6 sm:p-8 rounded-3xl space-y-4">
+              <h3 className="text-lg font-black text-white flex items-center gap-2">
+                <span className="w-7 h-7 rounded-xl bg-violet-600/30 text-violet-300 border border-violet-500/30 flex items-center justify-center text-xs">1</span>
+                Qu'est-ce qu'un ATS et comment fonctionne le filtrage automatique ?
+              </h3>
+              <p>
+                Un <strong>Applicant Tracking System (ATS)</strong> est une suite logicielle utilisée par les départements RH et cabinets de recrutement pour trier, analyser et classer les candidatures. Lorsqu'un recruteur reçoit 300 candidatures pour un seul poste, l'ATS extrait les données textuelles du fichier PDF ou Word et calcule un score de pertinence en fonction des mots-clés de l'offre d'emploi.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/cv/builder"
-                  className="group flex items-center gap-2.5 px-8 py-4 rounded-2xl text-base font-black bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-2xl shadow-violet-900/50 hover:shadow-violet-700/60 transition-all duration-300 hover:scale-105"
-                >
-                  <Sparkles size={17} />
-                  Créer mon CV maintenant
-                  <ArrowRight size={17} className="transition-transform group-hover:translate-x-1" />
-                </Link>
-              </div>
-              {/* Trust badges */}
-              <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+              <p>
+                Si votre CV contient des tableaux complexes imbriqués, des colonnes flottantes non indexables ou des images de texte, le robot ne parviendra pas à lire votre profil. C'est pourquoi **MyCV.click applique une hiérarchie stricte** reconnue par tous les moteurs de parsing internationaux (Workday, Taleo, Greenhouse, Lever).
+              </p>
+            </div>
+
+            {/* Article Part 2 */}
+            <div className="bg-white/5 border border-white/10 p-6 sm:p-8 rounded-3xl space-y-4">
+              <h3 className="text-lg font-black text-white flex items-center gap-2">
+                <span className="w-7 h-7 rounded-xl bg-blue-600/30 text-blue-300 border border-blue-500/30 flex items-center justify-center text-xs">2</span>
+                Les 5 sections indispensables pour un CV d'impact en 2026
+              </h3>
+              <ul className="space-y-3 pl-2">
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-white">L'en-tête clair et professionnel :</strong> Nom complet, titre de poste ciblé (identique à l'offre visée), coordonnées joignables (email sérieux, numéro, ville) et lien vers votre profil LinkedIn ou portfolio.
+                  </div>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-white">L'accroche / Résumé de carrière :</strong> 3 à 4 lignes percutantes résumant vos années d'expérience, vos spécialisations majeures et la valeur directe que vous apportez à l'entreprise.
+                  </div>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-white">Les expériences avec réalisations chiffrées :</strong> Utilisez la méthode STAR (Situation, Tâche, Action, Résultat). Remplacez "Responsable des ventes" par "Pilotage d'un portefeuille de 45 clients avec une croissance du CA de +22% en 12 mois".
+                  </div>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-white">Les compétences techniques & outils (Hard Skills) :</strong> Listez précisément les logiciels, langages ou méthodes maîtrisés pour faire correspondre votre CV aux filtres de recherche des recruteurs.
+                  </div>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <CheckCircle2 size={18} className="text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-white">Formations, Diplômes & Langues :</strong> Mentionnez le diplôme le plus élevé, l'établissement et votre niveau de maîtrise linguistique selon le cadre européen (C1, C2, Bilingue).
+                  </div>
+                </li>
+              </ul>
+            </div>
+
+            {/* Article Part 3 */}
+            <div className="bg-white/5 border border-white/10 p-6 sm:p-8 rounded-3xl space-y-4">
+              <h3 className="text-lg font-black text-white flex items-center gap-2">
+                <span className="w-7 h-7 rounded-xl bg-pink-600/30 text-pink-300 border border-pink-500/30 flex items-center justify-center text-xs">3</span>
+                Les 5 erreurs éliminatoires à bannir absolument
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {[
-                  { icon: Check, text: 'Sans inscription' },
-                  { icon: Check, text: 'PDF gratuit' },
-                  { icon: Check, text: 'Données privées' },
-                  { icon: Check, text: 'Sans filigrane' },
-                ].map((b, i) => {
-                  const Icon = b.icon;
-                  return (
-                    <div key={i} className="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
-                      <Icon size={12} className="text-emerald-400" />
-                      {b.text}
-                    </div>
-                  );
-                })}
+                  { title: "Fautes d'orthographe", desc: "Une seule faute de grammaire divise par deux les chances d'être contacté." },
+                  { title: "CV générique non ciblé", desc: "Adapter le titre et les 3 compétences clés à chaque annonce postulée." },
+                  { title: "Absence de métriques", desc: "Un recruteur cherche des preuves d'impact concrètes, pas des listes de devoirs." },
+                  { title: "Format A4 non respecté", desc: "Un document mal calibré sera coupé lors de l'impression physique chez le recruteur." },
+                ].map((err, i) => (
+                  <div key={i} className="p-3.5 rounded-2xl bg-red-500/10 border border-red-500/20">
+                    <div className="text-xs font-bold text-red-300 mb-1">❌ {err.title}</div>
+                    <div className="text-[11px] text-gray-400">{err.desc}</div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -693,13 +1140,14 @@ export default function MyCVHomePage() {
       </section>
 
       {/* ─── FAQ ──────────────────────────────────────────────────────────────── */}
-      <section id="faq" className="py-20 px-4 sm:px-6 pb-28">
-        <div className="max-w-3xl mx-auto">
-          <div className="text-center mb-10 space-y-3">
+      <section id="faq" className="py-20 px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto space-y-8">
+          <div className="text-center space-y-3">
             <span className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-widest text-gray-400 px-3 py-1 rounded-full border border-white/10 bg-white/5">
-              Questions Fréquentes
+              <HelpCircle size={13} /> Réponses Claires
             </span>
-            <h2 className="text-3xl font-black text-white">Tout ce que vous devez savoir</h2>
+            <h2 className="text-2xl sm:text-3xl font-black text-white">Questions Fréquentes</h2>
+            <p className="text-xs text-gray-400">Tout ce que vous devez savoir pour concevoir votre CV en toute sérénité.</p>
           </div>
           <div className="space-y-3">
             {faq.map((item, idx) => (
@@ -715,22 +1163,80 @@ export default function MyCVHomePage() {
         </div>
       </section>
 
-      {/* ─── FOOTER ───────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/10 py-10 px-4 sm:px-6 bg-[#030712]">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-violet-600 to-pink-500 flex items-center justify-center text-white font-black text-xs">
-              CV
+      {/* ─── CTA FINAL ────────────────────────────────────────────────────────── */}
+      <section className="py-16 px-4 sm:px-6 bg-gradient-to-b from-transparent via-violet-950/20 to-transparent">
+        <div className="max-w-4xl mx-auto text-center space-y-6 bg-gradient-to-r from-violet-950/40 via-purple-950/50 to-indigo-950/40 p-8 sm:p-12 rounded-3xl border border-violet-500/30 shadow-2xl">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
+            <Check size={13} /> Aucun compte requis • Téléchargement immédiat
+          </div>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white">
+            Prêt à propulser votre carrière ?
+          </h2>
+          <p className="text-sm text-gray-400 max-w-xl mx-auto">
+            Rejoignez des milliers de candidats qui ont obtenu des entretiens grâce aux modèles optimisés de MyCV.click.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+            <Link
+              href="/cv/builder"
+              className="flex items-center gap-2 px-8 py-4 rounded-2xl text-base font-black bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white shadow-xl shadow-violet-900/40 hover:scale-105 transition-all"
+            >
+              <Sparkles size={18} />
+              Lancer le Studio CV Complet
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FOOTER COMPLET & CONFORME GOOGLE ─────────────────────────────────── */}
+      <footer className="border-t border-white/10 py-12 px-4 sm:px-6 bg-[#030712] text-xs text-gray-500">
+        <div className="max-w-6xl mx-auto space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <div className="space-y-3 md:col-span-2">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-violet-600 to-pink-500 flex items-center justify-center text-white font-black text-xs">
+                  CV
+                </div>
+                <span className="font-black text-white text-base">MyCV.click</span>
+              </div>
+              <p className="text-gray-400 text-xs max-w-sm leading-relaxed">
+                Le créateur de CV en ligne gratuit et sans filigrane inspiré par la simplicité d'iLovePDF. Conçu pour aider chaque candidat à décrocher des opportunités professionnelles grâce à des formats conformes aux normes ATS.
+              </p>
+              <div className="text-[11px] text-gray-600">
+                Hébergé en Europe • 100% conforme RGPD • Données traitées localement
+              </div>
             </div>
-            <span className="font-black text-white">MyCV.click</span>
-            <span className="text-gray-600 text-sm">— Créateur de CV gratuit</span>
+
+            <div className="space-y-2">
+              <div className="font-bold text-white uppercase tracking-wider text-[11px]">Outils CV</div>
+              <ul className="space-y-1.5">
+                <li><Link href="/cv/builder" className="hover:text-white transition-colors">Studio CV Complet</Link></li>
+                <li><a href="#designs" className="hover:text-white transition-colors">6 Modèles Professionnels</a></li>
+                <li><Link href="/cv/builder?tab=ai" className="hover:text-white transition-colors">Assistant IA Gemini</Link></li>
+                <li><Link href="/cv/builder?tab=ats" className="hover:text-white transition-colors">Calculateur Score ATS</Link></li>
+              </ul>
+            </div>
+
+            <div className="space-y-2">
+              <div className="font-bold text-white uppercase tracking-wider text-[11px]">Informations Légales</div>
+              <ul className="space-y-1.5">
+                <li><Link href="/privacy" className="hover:text-white transition-colors">Politique de Confidentialité</Link></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Conditions Générales d'Utilisation</Link></li>
+                <li><Link href="/contact" className="hover:text-white transition-colors">Contact & Support</Link></li>
+                <li><a href="https://elsayf.click" className="hover:text-white transition-colors">Plateforme Elsayf</a></li>
+              </ul>
+            </div>
           </div>
-          <div className="flex items-center gap-5 text-sm text-gray-500">
-            <Link href="/cv/builder" className="hover:text-white transition-colors">Builder CV</Link>
-            <Link href="/privacy" className="hover:text-white transition-colors">Confidentialité</Link>
-            <a href="https://elsayf.click" className="hover:text-white transition-colors">Elsayf E-learning</a>
+
+          <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-gray-600">
+            <div>© 2026 MyCV.click — Tous droits réservés. Propulsé par Elsayf.</div>
+            <div className="flex items-center gap-4">
+              <Link href="/privacy" className="hover:text-gray-400">Confidentialité</Link>
+              <span>•</span>
+              <Link href="/terms" className="hover:text-gray-400">Mentions Légales</Link>
+              <span>•</span>
+              <Link href="/contact" className="hover:text-gray-400">Contact</Link>
+            </div>
           </div>
-          <p className="text-xs text-gray-600">© 2026 MyCV.click — Propulsé par Elsayf</p>
         </div>
       </footer>
     </div>
