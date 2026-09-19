@@ -220,13 +220,19 @@ export default function CVEditor({
   };
 
   const tabs = [
-    { id: 'personal', label: 'Profil & Infos', icon: User },
-    { id: 'skills', label: 'Compétences', icon: Wrench },
-    { id: 'experience', label: 'Expériences', icon: Briefcase },
-    { id: 'education', label: 'Formation', icon: GraduationCap },
-    { id: 'projects', label: 'Projets', icon: Layers },
-    { id: 'extra', label: 'Certifs & Loisirs', icon: Award },
-    { id: 'design', label: 'Design & Templates', icon: Palette },
+    { id: 'personal', label: 'Profil & Infos', icon: User, count: data.personal?.firstName ? '✓' : null },
+    { id: 'skills', label: 'Compétences', icon: Wrench, count: (data.skills?.length || 0) + (data.tools?.length || 0) },
+    { id: 'experience', label: 'Expériences', icon: Briefcase, count: data.experiences?.length || 0 },
+    { id: 'education', label: 'Formation', icon: GraduationCap, count: data.education?.length || 0 },
+    { id: 'projects', label: 'Projets', icon: Layers, count: data.projects?.length || 0 },
+    { id: 'extra', label: 'Langues & Certifs', icon: Award, count: (data.languages?.length || 0) + (data.certifications?.length || 0) },
+    { id: 'design', label: 'Modèles & Style', icon: Palette },
+  ];
+
+  const SUGGESTED_SKILLS = [
+    'Python', 'JavaScript', 'React / Next.js', 'SQL / PostgreSQL', 'Docker',
+    'Gestion de projet', 'Leadership & RH', 'Méthodes Agiles', 'Communication',
+    'Excel Avancé', 'Figma / UI Design', 'Analyse de données', 'Git & GitHub', 'Négociation B2B'
   ];
 
   const colorOptions = [
@@ -337,14 +343,21 @@ export default function CVEditor({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center gap-2 px-4 py-3 text-xs font-semibold whitespace-nowrap transition-all border-b-2 cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3.5 py-3 text-xs font-semibold whitespace-nowrap transition-all border-b-2 cursor-pointer ${
                 isActive
-                  ? 'border-[#a78bfa] text-[#a78bfa] bg-[#a78bfa]/10'
+                  ? 'border-[#a78bfa] text-[#a78bfa] bg-[#a78bfa]/10 font-bold'
                   : 'border-transparent text-gray-400 hover:text-gray-200 hover:bg-white/5'
               }`}
             >
-              <Icon size={15} />
+              <Icon size={14} />
               <span>{tab.label}</span>
+              {tab.count !== null && tab.count !== undefined && (
+                <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono font-bold ${
+                  isActive ? 'bg-[#a78bfa] text-black' : 'bg-white/10 text-gray-300'
+                }`}>
+                  {tab.count}
+                </span>
+              )}
             </button>
           );
         })}
@@ -548,6 +561,33 @@ export default function CVEditor({
                 >
                   <Plus size={14} /> Ajouter une compétence
                 </button>
+              </div>
+
+              {/* Suggestions rapides en 1 clic */}
+              <div className="p-3 rounded-xl bg-purple-950/20 border border-purple-500/20 space-y-1.5">
+                <div className="text-[11px] font-bold text-purple-300 flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-amber-400" />
+                  <span>Suggestions rapides (cliquez pour ajouter en 1 seconde) :</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {SUGGESTED_SKILLS.filter(
+                    (s) => !(data.skills || []).some((k) => (k.name || '').toLowerCase() === s.toLowerCase())
+                  ).slice(0, 9).map((sugg) => (
+                    <button
+                      key={sugg}
+                      type="button"
+                      onClick={() => {
+                        onChange({
+                          ...data,
+                          skills: [...(data.skills || []), { name: sugg, level: 85, category: 'hard' }]
+                        });
+                      }}
+                      className="px-2.5 py-1 rounded-lg text-[11px] font-medium bg-white/5 hover:bg-[#a78bfa]/25 text-gray-200 hover:text-white border border-white/10 hover:border-[#a78bfa]/40 transition-all cursor-pointer active:scale-95"
+                    >
+                      + {sugg}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="space-y-2.5">

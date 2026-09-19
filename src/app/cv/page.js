@@ -1,9 +1,10 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   Sparkles, Printer, FileText, Download, Upload, Eye, Edit3, 
   CheckCircle2, ArrowRight, Lock, UserCheck, Loader2, ShieldCheck, 
-  HelpCircle, ChevronDown, Award, Briefcase, Zap, Star, Save
+  HelpCircle, ChevronDown, Award, Briefcase, Zap, Star, Save,
+  BarChart2, X, RefreshCw, Smartphone, Monitor, ChevronRight
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import CVEditor from '@/components/cv/CVEditor';
@@ -15,6 +16,46 @@ import Link from 'next/link';
 
 const STORAGE_KEY_DATA = 'elsayf_cv_builder_data_v1';
 const STORAGE_KEY_CONFIG = 'elsayf_cv_builder_config_v1';
+
+// Algorithme de calcul du Score ATS en temps réel
+function computeAtsScore(data) {
+  let score = 0;
+  const items = [];
+
+  const hasName = Boolean((data.personal?.firstName || '').trim() && (data.personal?.lastName || '').trim());
+  const hasTitle = Boolean((data.personal?.title || '').trim().length >= 4);
+  const hasContact = Boolean((data.personal?.email || '').trim() && (data.personal?.phone || '').trim());
+  const hasSummary = Boolean((data.personal?.summary || '').trim().length >= 40);
+  const expCount = data.experiences?.length || 0;
+  const skillCount = (data.skills?.length || 0) + (data.tools?.length || 0);
+  const eduCount = data.education?.length || 0;
+  const langCount = data.languages?.length || 0;
+
+  if (hasName) { score += 15; items.push({ title: 'Nom et Prénom', pts: 15, done: true }); }
+  else items.push({ title: 'Nom et Prénom complets', pts: 15, done: false, tip: 'Indiquez votre nom et prénom en haut du CV.' });
+
+  if (hasTitle) { score += 15; items.push({ title: 'Titre professionnel ciblé', pts: 15, done: true }); }
+  else items.push({ title: 'Titre de poste', pts: 15, done: false, tip: 'Précisez l\'intitulé exact de l\'offre visée.' });
+
+  if (hasContact) { score += 15; items.push({ title: 'Email et Téléphone', pts: 15, done: true }); }
+  else items.push({ title: 'Coordonnées de contact', pts: 15, done: false, tip: 'Ajoutez votre adresse email et un numéro de téléphone joignable.' });
+
+  if (hasSummary) { score += 15; items.push({ title: 'Accroche / Résumé pro (> 40 car.)', pts: 15, done: true }); }
+  else items.push({ title: 'Résumé professionnel percutant', pts: 15, done: false, tip: 'Rédigez 2-3 lignes synthétisant votre valeur ajoutée.' });
+
+  if (expCount >= 2) { score += 20; items.push({ title: `${expCount} expériences détaillées`, pts: 20, done: true }); }
+  else if (expCount === 1) { score += 12; items.push({ title: '1 expérience enregistrée', pts: 12, done: true, tip: 'Ajoutez une 2ème expérience pour obtenir +8 pts ATS.' }); }
+  else items.push({ title: 'Expériences professionnelles', pts: 20, done: false, tip: 'Ajoutez au moins une expérience avec des réalisations chiffrées.' });
+
+  if (skillCount >= 5) { score += 10; items.push({ title: `${skillCount} compétences & outils techniques`, pts: 10, done: true }); }
+  else if (skillCount >= 2) { score += 5; items.push({ title: 'Compétences clés', pts: 5, done: true, tip: 'Listez 5 compétences ou outils pour valider +5 pts.' }); }
+  else items.push({ title: 'Compétences & Outils', pts: 10, done: false, tip: 'Ajoutez des mots-clés techniques recherchés par les recruteurs.' });
+
+  if (eduCount >= 1) { score += 10; items.push({ title: 'Formation ou diplôme', pts: 10, done: true }); }
+  else items.push({ title: 'Formation & Diplôme', pts: 10, done: false, tip: 'Indiquez votre diplôme ou certification la plus pertinente.' });
+
+  return { score: Math.min(100, score), items };
+}
 
 export default function CVBuilderPage() {
   const { data: session, status } = useSession();
@@ -30,7 +71,12 @@ export default function CVBuilderPage() {
   const [openFaq, setOpenFaq] = useState(null);
   const [isCloudSaving, setIsCloudSaving] = useState(false);
   const [cloudSaveSuccess, setCloudSaveSuccess] = useState(false);
+  const [showAtsAudit, setShowAtsAudit] = useState(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const hasTrackedCreation = useRef(false);
+
+  // Score ATS calculé en temps réel
+  const atsResult = useMemo(() => computeAtsScore(data), [data]);
 
   // Réglages dynamiques administrables depuis /admin/cv
   const [siteSettings, setSiteSettings] = useState({
@@ -43,47 +89,62 @@ export default function CVBuilderPage() {
     showAds: true,
   });
 
-  // Styles visuels associés aux thèmes dynamiques
+  // Styles visuels riches associés aux thèmes dynamiques
   const themeStyles = {
     'dark-cyber': {
-      container: 'bg-[#050a14] text-white',
-      heroCard: 'bg-gradient-to-r from-violet-950/40 via-purple-900/20 to-indigo-950/40 border-violet-500/20 text-white',
-      sectionCard: 'bg-[#0b1022] border-gray-800/80 text-white',
-      cardSub: 'text-gray-400',
+      container: 'bg-[#050814] text-slate-100',
+      headerBar: 'bg-[#0a0f24]/90 border-violet-500/20 text-white backdrop-blur-xl',
+      heroCard: 'bg-gradient-to-r from-violet-950/40 via-[#0a1128] to-indigo-950/40 border-violet-500/20 text-white shadow-2xl',
+      sectionCard: 'bg-[#090e21] border-gray-800/80 text-white',
+      cardSub: 'text-slate-400',
       badge: 'bg-[#a78bfa]/15 border-[#a78bfa]/30 text-[#a78bfa]',
       gradientText: 'from-white via-purple-100 to-[#a78bfa]',
+      dockBar: 'bg-slate-900/95 border-white/20',
+      accentColor: '#a78bfa'
     },
     'minimal-light': {
       container: 'bg-[#f8fafc] text-slate-900',
+      headerBar: 'bg-white/95 border-slate-200 text-slate-900 backdrop-blur-xl shadow-sm',
       heroCard: 'bg-white border-slate-200 shadow-xl text-slate-900',
       sectionCard: 'bg-white border-slate-200 shadow-lg text-slate-900',
       cardSub: 'text-slate-600',
       badge: 'bg-indigo-50 border-indigo-200 text-indigo-700',
       gradientText: 'from-slate-950 via-slate-800 to-indigo-600',
+      dockBar: 'bg-white/95 border-slate-300 text-slate-900',
+      accentColor: '#4f46e5'
     },
     'executive-navy': {
-      container: 'bg-[#0a1128] text-slate-100',
-      heroCard: 'bg-gradient-to-r from-[#0d1b3e] via-[#102454] to-[#0d1b3e] border-blue-500/30 text-white',
-      sectionCard: 'bg-[#0e1c40] border-blue-900/60 text-slate-100',
+      container: 'bg-[#060f26] text-slate-100',
+      headerBar: 'bg-[#09173d]/90 border-blue-500/25 text-white backdrop-blur-xl',
+      heroCard: 'bg-gradient-to-r from-[#0d1f4d] via-[#102a6b] to-[#0d1f4d] border-blue-500/30 text-white shadow-2xl',
+      sectionCard: 'bg-[#0a1b42] border-blue-900/60 text-slate-100',
       cardSub: 'text-slate-400',
       badge: 'bg-blue-500/15 border-blue-400/30 text-blue-300',
       gradientText: 'from-white via-sky-100 to-sky-400',
+      dockBar: 'bg-[#09173d]/95 border-blue-400/30',
+      accentColor: '#38bdf8'
     },
     'emerald-modern': {
-      container: 'bg-[#051b14] text-slate-100',
-      heroCard: 'bg-gradient-to-r from-[#08291e] via-[#0b3829] to-[#08291e] border-emerald-500/30 text-white',
+      container: 'bg-[#041510] text-slate-100',
+      headerBar: 'bg-[#07241b]/90 border-emerald-500/25 text-white backdrop-blur-xl',
+      heroCard: 'bg-gradient-to-r from-[#08291e] via-[#0b3829] to-[#08291e] border-emerald-500/30 text-white shadow-2xl',
       sectionCard: 'bg-[#07241b] border-emerald-900/60 text-slate-100',
       cardSub: 'text-slate-400',
       badge: 'bg-emerald-500/15 border-emerald-400/30 text-emerald-300',
       gradientText: 'from-white via-emerald-100 to-emerald-400',
+      dockBar: 'bg-[#07241b]/95 border-emerald-400/30',
+      accentColor: '#34d399'
     },
     'sunset-gradient': {
-      container: 'bg-[#180d2b] text-slate-100',
-      heroCard: 'bg-gradient-to-r from-[#261245] via-[#3b1554] to-[#261245] border-rose-500/30 text-white',
+      container: 'bg-[#12071f] text-slate-100',
+      headerBar: 'bg-[#1f0b36]/90 border-rose-500/25 text-white backdrop-blur-xl',
+      heroCard: 'bg-gradient-to-r from-[#261245] via-[#3b1554] to-[#261245] border-rose-500/30 text-white shadow-2xl',
       sectionCard: 'bg-[#220f3d] border-rose-900/60 text-slate-100',
       cardSub: 'text-slate-400',
       badge: 'bg-rose-500/15 border-rose-400/30 text-rose-300',
       gradientText: 'from-white via-rose-100 to-rose-400',
+      dockBar: 'bg-[#1f0b36]/95 border-rose-400/30',
+      accentColor: '#fb7185'
     }
   };
 
@@ -102,11 +163,13 @@ export default function CVBuilderPage() {
   }, []);
 
   // Titre dynamique selon le domaine
+  const [isMyCvDomain, setIsMyCvDomain] = useState(false);
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const isMyCv = window.location.hostname.toLowerCase().includes('mycv.click');
+      setIsMyCvDomain(isMyCv);
       document.title = isMyCv
-        ? 'MyCV.click • Créateur de CV en Ligne Gratuit & Professionnel (Format A4 & ATS)'
+        ? 'MyCV.click • Studio CV Professionnel Gratuit (Format A4 & Normes ATS)'
         : 'Studio CV Pro • Créateur de CV en Ligne | Elsayf';
     }
   }, []);
@@ -169,7 +232,6 @@ export default function CVBuilderPage() {
       localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(data));
       localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
       
-      // Tracer l'édition initiale une seule fois par session
       if (!hasTrackedCreation.current && (data.personal?.firstName || data.personal?.title)) {
         hasTrackedCreation.current = true;
         trackCvAction('CREATE');
@@ -194,6 +256,7 @@ export default function CVBuilderPage() {
   };
 
   const handleReset = () => {
+    if (!confirm('Êtes-vous sûr de vouloir réinitialiser entièrement votre CV ?')) return;
     const emptyData = {
       personal: { firstName: '', lastName: '', title: '', email: '', phone: '', city: '', mobility: '', website: '', linkedin: '', github: '', avatar: '', summary: '' },
       skills: [],
@@ -253,8 +316,6 @@ export default function CVBuilderPage() {
     }
   };
 
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
   const getCvTitle = () => {
     const fName = data.personal?.firstName || 'Candidat';
     const lName = data.personal?.lastName || 'Professionnel';
@@ -286,25 +347,25 @@ export default function CVBuilderPage() {
       a: "Nos 6 modèles sont conçus selon les critères stricts des systèmes de suivi des candidatures (ATS - Applicant Tracking Systems). La hiérarchie HTML est propre, les titres de sections sont standardisés (Expérience, Formation, Compétences), et l'export PDF génère un texte sélectionnable et vectoriel sans éléments graphiques perturbateurs."
     },
     {
-      q: "L'outil et le téléchargement PDF A4 sont-ils 100% gratuits ?",
-      a: "Oui, l'accès au Studio CV, la personnalisation des modèles, la prévisualisation en temps réel et l'exportation au format PDF A4 haute définition sont entièrement gratuits et sans filigrane."
+      q: "L'outil et le téléchargement PDF A4 sont-ils 100% gratuits et sans inscription ?",
+      a: "Oui, vous pouvez créer, éditer, tester tous les modèles et télécharger votre CV au format PDF A4 haute définition directement, sans aucune obligation d'inscription ni filigrane."
     },
     {
-      q: "Mes données personnelles sont-elles conservées en sécurité ?",
-      a: "Absolument. Vos données sont enregistrées localement dans votre propre navigateur via le localStorage. Aucune information privée n'est revendue à des tiers. Si vous êtes connecté avec votre compte, vous bénéficiez également d'une sauvegarde cloud sécurisée."
+      q: "Mes données personnelles sont-elles sécurisées ?",
+      a: "Absolument. Vos données sont enregistrées localement dans votre propre navigateur via le localStorage. Aucune information privée n'est revendue. Si vous créez un compte, vous profitez également d'une sauvegarde cloud chiffrée."
     },
     {
       q: "Faut-il mettre une photo sur son curriculum vitae ?",
-      a: "En France et dans plusieurs pays francophones, la photo reste courante mais facultative. Dans les pays anglo-saxons (USA, UK, Canada), elle est généralement déconseillée pour éviter les biais de sélection. Vous pouvez afficher ou masquer votre photo en un clic selon vos besoins."
+      a: "En France et dans plusieurs pays francophones, la photo reste courante mais facultative. Dans les pays anglo-saxons (USA, UK, Canada), elle est généralement déconseillée. Vous pouvez ajouter ou retirer votre photo en 1 clic selon votre cible."
     },
     {
       q: "Combien de pages doit faire un bon CV ?",
-      a: "Pour les profils juniors et intermédiaires (moins de 7 ans d'expérience), le format 1 page A4 est le standard d'or recommandé par 95% des recruteurs. Nos modèles sont précisément calibrés sur le format 210 x 297 mm pour maximiser la densité sans surcharger la lecture."
+      a: "Pour les profils juniors et intermédiaires (moins de 7 ans d'expérience), le format 1 page A4 est le standard recommandé par 95% des recruteurs. Nos modèles sont précisément calibrés sur le format 210 x 297 mm pour maximiser la densité sans surcharger."
     }
   ];
 
   return (
-    <div className={`min-h-screen py-6 px-3 sm:px-6 lg:px-8 transition-colors duration-300 ${currentTheme.container}`}>
+    <div className={`min-h-screen transition-colors duration-300 ${currentTheme.container}`}>
       {/* Schema.org pour Google et AdSense */}
       <script
         type="application/ld+json"
@@ -312,7 +373,7 @@ export default function CVBuilderPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "WebApplication",
-            "name": "MyCV - Studio CV Pro",
+            "name": isMyCvDomain ? "MyCV.click - Studio CV Pro" : "Studio CV Pro Elsayf",
             "applicationCategory": "BusinessApplication",
             "operatingSystem": "All",
             "offers": {
@@ -395,348 +456,427 @@ export default function CVBuilderPage() {
         }
       `}</style>
 
-      {/* Header Section */}
-      <div id="studio" className="max-w-7xl mx-auto mb-6 print:hidden">
-        {/* Bandeau d'état (Connecté vs Visiteur invité) */}
-        <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-950/40 via-slate-900/60 to-indigo-950/40 border border-purple-500/20 text-xs mb-4">
-          <div className="flex items-center gap-2 text-gray-300">
-            {session ? (
-              <>
-                <UserCheck size={16} className="text-emerald-400" />
-                <span>
-                  Connecté en tant que <strong className="text-white">{session.user?.name || session.user?.email}</strong> (Sauvegarde Cloud active)
-                </span>
-              </>
-            ) : (
-              <>
-                <Zap size={16} className="text-amber-400" />
-                <span>
-                  <strong className="text-white">Accès Libre & Gratuit :</strong> Vos modifications sont sauvegardées dans votre navigateur.
-                </span>
-              </>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            {!session ? (
-              <>
-                <Link
-                  href="/login?callbackUrl=/cv"
-                  className="px-3 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-gray-200 hover:text-white transition-all text-[11px] font-semibold"
-                >
-                  Se connecter
-                </Link>
-                <Link
-                  href="/register?callbackUrl=/cv"
-                  className="px-3 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition-all text-[11px] font-bold"
-                >
-                  Créer un compte
-                </Link>
-              </>
-            ) : (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleCloudSave}
-                  disabled={isCloudSaving}
-                  className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all shadow cursor-pointer disabled:opacity-50"
-                  title="Sauvegarder immédiatement dans mon compte"
-                >
-                  {isCloudSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
-                  <span>{cloudSaveSuccess ? 'Sauvegardé !' : 'Sauvegarder dans le Cloud'}</span>
-                </button>
+      {/* ========================================================================= */}
+      {/* 1. TOP STUDIO BAR (Compacité & Ergonomie Canva / Figma / Linear)          */}
+      {/* ========================================================================= */}
+      <header className={`sticky top-0 z-30 border-b shadow-md transition-colors print:hidden ${currentTheme.headerBar}`}>
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 flex items-center justify-between gap-3">
+          
+          {/* Logo & Jauge Score ATS */}
+          <div className="flex items-center gap-2.5 sm:gap-4">
+            <Link href="/cv" className="flex items-center gap-2 group">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-purple-600 via-indigo-600 to-pink-500 flex items-center justify-center text-white font-black text-sm shadow-md group-hover:scale-105 transition-transform">
+                CV
               </div>
+              <div className="hidden sm:block">
+                <span className="font-black tracking-tight text-sm text-white">
+                  {isMyCvDomain ? 'MyCV.click' : 'Studio CV'}
+                </span>
+                <span className="ml-1.5 text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+                  PRO A4
+                </span>
+              </div>
+            </Link>
+
+            {/* Bouton Score ATS interactif */}
+            <button
+              onClick={() => setShowAtsAudit(!showAtsAudit)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 transition-all text-xs font-semibold cursor-pointer active:scale-95"
+              title="Cliquer pour voir l'audit ATS de votre CV"
+            >
+              <Zap size={13} className={atsResult.score >= 80 ? 'text-emerald-400' : 'text-amber-400'} />
+              <span className="hidden xs:inline text-gray-300">Score ATS :</span>
+              <span className={`font-mono font-bold ${
+                atsResult.score >= 80 ? 'text-emerald-400' : atsResult.score >= 50 ? 'text-amber-400' : 'text-rose-400'
+              }`}>
+                {atsResult.score}%
+              </span>
+              <div className="w-10 h-1.5 bg-black/40 rounded-full overflow-hidden hidden md:block">
+                <div 
+                  className={`h-full transition-all duration-300 ${
+                    atsResult.score >= 80 ? 'bg-emerald-400' : atsResult.score >= 50 ? 'bg-amber-400' : 'bg-rose-400'
+                  }`}
+                  style={{ width: `${atsResult.score}%` }}
+                />
+              </div>
+            </button>
+          </div>
+
+          {/* Sélecteur de Profils Rapides (Visible sur Desktop) */}
+          <div className="hidden lg:flex items-center gap-1 bg-black/30 p-1 rounded-xl border border-white/10 text-xs">
+            <span className="px-2 text-[11px] text-gray-400 font-semibold flex items-center gap-1">
+              <Sparkles size={12} className="text-purple-400" /> Exemples :
+            </span>
+            {Object.entries(PRESET_PROFILES).slice(0, 4).map(([key, p]) => (
+              <button
+                key={key}
+                onClick={() => handleLoadPreset(key)}
+                className="px-2.5 py-1 rounded-lg hover:bg-white/10 text-gray-300 hover:text-white transition-all text-[11px] font-medium cursor-pointer"
+                title={`Charger le modèle type ${p.name}`}
+              >
+                {p.badge}
+              </button>
+            ))}
+          </div>
+
+          {/* Actions Droite: Cloud Save & PDF Direct */}
+          <div className="flex items-center gap-2">
+            {/* Statut Membre / Invité */}
+            {session ? (
+              <button
+                onClick={handleCloudSave}
+                disabled={isCloudSaving}
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 text-xs font-bold transition-all cursor-pointer disabled:opacity-50"
+                title="Sauvegarder immédiatement dans votre compte"
+              >
+                {isCloudSaving ? <Loader2 size={13} className="animate-spin" /> : <Save size={13} />}
+                <span>{cloudSaveSuccess ? 'Sauvegardé !' : 'Cloud Sync'}</span>
+              </button>
+            ) : (
+              <span className="hidden sm:inline-flex items-center gap-1 text-[11px] text-gray-400 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10">
+                <ShieldCheck size={12} className="text-emerald-400" /> Auto-Save Local
+              </span>
             )}
-          </div>
-        </div>
 
-        {/* Hero Card configurable via Admin */}
-        <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl border shadow-2xl relative overflow-hidden backdrop-blur-xl transition-all ${currentTheme.heroCard}`}>
-          <div className="space-y-1 relative z-10">
-            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-1 ${currentTheme.badge}`}>
-              <Sparkles size={13} /> Studio CV Pro • 6 Templates A4 & Normes ATS
-            </div>
-            <h1 className={`text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r ${currentTheme.gradientText}`}>
-              {siteSettings.heroTitle || 'Générateur de CV Professionnel & Dynamique'}
-            </h1>
-            <p className={`text-xs md:text-sm max-w-2xl leading-relaxed ${currentTheme.cardSub}`}>
-              {siteSettings.heroSubtitle || 'Créez un CV élégant, structuré et conforme aux attentes des recruteurs. Choisissez un modèle, pré-remplissez votre profil en 1 clic et exportez votre PDF instantanément.'}
-            </p>
-          </div>
+            {/* Bouton Imprimer */}
+            <button
+              onClick={handlePrint}
+              className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 hover:text-white text-xs font-bold transition-all cursor-pointer"
+              title="Imprimer directement le CV"
+            >
+              <Printer size={14} />
+              <span>Imprimer</span>
+            </button>
 
-          <div className="flex flex-wrap items-center gap-3 relative z-10">
-            {/* Bouton Téléchargement Direct PDF A4 */}
+            {/* Bouton Primaire Télécharger PDF A4 */}
             <button
               onClick={handleDownloadPDF}
               disabled={isGeneratingPdf}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white hover:scale-105 active:scale-95 transition-all shadow-lg shadow-emerald-900/40 cursor-pointer disabled:opacity-50"
-              title="Télécharger le fichier PDF directement sur votre appareil"
+              className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-xl text-xs sm:text-sm font-black bg-gradient-to-r from-emerald-500 via-teal-500 to-emerald-600 hover:from-emerald-400 hover:to-teal-400 text-white shadow-lg shadow-emerald-900/30 transition-all hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-50"
+              title="Télécharger le fichier PDF au format A4 vectoriel"
             >
-              {isGeneratingPdf ? <Loader2 size={17} className="animate-spin" /> : <Download size={17} />}
-              <span>{isGeneratingPdf ? 'Génération...' : 'Télécharger PDF (A4)'}</span>
-            </button>
-
-            {/* Bouton Impression Isolée */}
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white hover:scale-105 active:scale-95 transition-all shadow-lg shadow-purple-900/30 cursor-pointer"
-              title="Ouvrir la boîte de dialogue d'impression"
-            >
-              <Printer size={17} />
-              <span>Imprimer</span>
+              {isGeneratingPdf ? <Loader2 size={15} className="animate-spin" /> : <Download size={15} />}
+              <span>{isGeneratingPdf ? 'Génération...' : 'Télécharger PDF'}</span>
             </button>
           </div>
         </div>
 
-        {/* Mobile View Toggle (Visible on screens < lg) */}
-        <div className="flex lg:hidden mt-4 p-1 rounded-xl bg-slate-900 border border-white/10">
+        {/* Modal / Tiroir d'Audit ATS */}
+        {showAtsAudit && (
+          <div className="p-4 bg-[#0a0e1c] border-b border-white/15 text-xs animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="max-w-4xl mx-auto space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap size={16} className="text-amber-400" />
+                  <strong className="text-white text-sm">Diagnostic de Conformité ATS : {atsResult.score}/100</strong>
+                </div>
+                <button
+                  onClick={() => setShowAtsAudit(false)}
+                  className="p-1 rounded-lg hover:bg-white/10 text-gray-400 hover:text-white"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+              <p className="text-gray-400 text-[11px]">
+                Les robots recruteurs (ATS) scannent votre curriculum vitae selon ces critères essentiels. Complétez les étapes ci-dessous pour maximiser votre visibilité :
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 pt-1">
+                {atsResult.items.map((item, i) => (
+                  <div 
+                    key={i} 
+                    className={`p-2 rounded-xl border flex items-start gap-2 ${
+                      item.done 
+                        ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-200' 
+                        : 'bg-white/5 border-white/10 text-gray-300'
+                    }`}
+                  >
+                    <div className="mt-0.5 shrink-0">
+                      {item.done ? <CheckCircle2 size={14} className="text-emerald-400" /> : <div className="w-3.5 h-3.5 rounded-full border border-gray-500" />}
+                    </div>
+                    <div className="space-y-0.5">
+                      <div className="font-semibold">{item.title} (+{item.pts} pts)</div>
+                      {!item.done && item.tip && (
+                        <div className="text-[10px] text-amber-300/90 leading-tight">{item.tip}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </header>
+
+      {/* ========================================================================= */}
+      {/* 2. CONTENU PRINCIPAL & STUDIO WORKSPACE                                   */}
+      {/* ========================================================================= */}
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-4 md:py-6 space-y-6">
+        
+        {/* Toggle Mobile / Tablette (< lg) */}
+        <div className="flex lg:hidden p-1 rounded-2xl bg-black/50 border border-white/10 print:hidden">
           <button
             onClick={() => setActiveMobileView('editor')}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               activeMobileView === 'editor'
-                ? 'bg-[#a78bfa] text-black shadow'
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
             <Edit3 size={15} />
-            <span>Formulaire & Réglages</span>
+            <span>1. Édition & Données</span>
           </button>
           <button
             onClick={() => setActiveMobileView('preview')}
-            className={`flex-1 py-2 rounded-lg text-xs font-bold flex items-center justify-center gap-2 transition-all ${
+            className={`flex-1 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
               activeMobileView === 'preview'
-                ? 'bg-[#a78bfa] text-black shadow'
+                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg'
                 : 'text-gray-400 hover:text-white'
             }`}
           >
             <Eye size={15} />
-            <span>Aperçu CV & PDF</span>
+            <span>2. Aperçu Direct A4</span>
           </button>
         </div>
-      </div>
 
-      {/* Main Studio Grid (Editor on left, Preview on right) */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-14rem)] min-h-[750px] print:m-0 print:p-0 print:h-auto">
-        {/* Editor Column (5 cols on lg) */}
-        <div
-          className={`lg:col-span-5 h-full ${
-            activeMobileView === 'editor' ? 'block' : 'hidden lg:block'
-          } print:hidden`}
-        >
-          <CVEditor
-            data={data}
-            onChange={setData}
-            config={config}
-            onConfigChange={setConfig}
-            onLoadPreset={handleLoadPreset}
-            onReset={handleReset}
-            onExportJson={handleExportJson}
-            onImportJson={handleImportJson}
-          />
-        </div>
-
-        {/* Preview Column (7 cols on lg) */}
-        <div
-          className={`lg:col-span-7 h-full ${
-            activeMobileView === 'preview' ? 'block' : 'hidden lg:block'
-          } print:block print:w-full print:col-span-12`}
-        >
-          <CVPreview data={data} config={config} onPrint={handlePrint} />
-        </div>
-      </div>
-
-      {/* ========================================================================= */}
-      {/* SECTION EDITORIALE, MODULES ATS, FAQ ET PUBLICITÉS                       */}
-      {/* ========================================================================= */}
-      <div className="max-w-7xl mx-auto mt-16 print:hidden space-y-16">
-        
-        {/* Emplacement Publicitaire 1 (Si activé par l'admin) */}
-        {siteSettings.showAds !== false && (
-          <AdSenseAd slot="cv-top-leaderboard" format="auto" className="my-6" />
-        )}
-
-        {/* Guide d'optimisation ATS (Si activé par l'admin) */}
-        {siteSettings.showAtsGuide !== false && (
-          <section id="guide-ats" className={`p-8 md:p-10 rounded-3xl shadow-2xl relative overflow-hidden scroll-mt-24 ${currentTheme.sectionCard}`}>
-            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-            
-            <div className="max-w-3xl mb-8">
-              <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${currentTheme.badge}`}>
-                Guide Recrutement 2026
-              </span>
-              <h2 className="text-2xl md:text-3xl font-black mt-3">
-                Comment réussir son CV et franchir les filtres ATS ?
-              </h2>
-              <p className={`text-sm mt-2 leading-relaxed ${currentTheme.cardSub}`}>
-                Plus de 80% des grandes entreprises et cabinets de recrutement utilisent des logiciels ATS (Applicant Tracking Systems) pour filtrer automatiquement les candidatures avant l'examen humain. Voici les critères clés intégrés dans nos templates :
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold">
-                  1
-                </div>
-                <h3 className="font-bold text-base">Structure Standardisée</h3>
-                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
-                  Des sections reconnues (Expériences, Formations, Compétences) organisées par ordre antichronologique pour une indexation sans erreur.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">
-                  2
-                </div>
-                <h3 className="font-bold text-base">Mots-Clés Ciblés</h3>
-                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
-                  Valorisez les compétences techniques (outils, logiciels, langages) et les compétences comportementales en lien avec l'offre visée.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
-                  3
-                </div>
-                <h3 className="font-bold text-base">Format PDF Calibré</h3>
-                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
-                  Exportation aux dimensions A4 exactes (210 x 297 mm) avec une typographie lisible et un texte net, sans marges blanches accidentelles.
-                </p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-                <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
-                  4
-                </div>
-                <h3 className="font-bold text-base">Résultats Chiffrés</h3>
-                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
-                  Apportez de la crédibilité en quantifiant vos succès : pourcentages de progression, budgets gérés, délais réduits ou volumes traités.
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Panorama des 6 modèles professionnels (Si activé par l'admin) */}
-        {siteSettings.showTemplates !== false && (
-          <section id="modeles" className="space-y-6 scroll-mt-24">
-            <div className="text-center max-w-2xl mx-auto space-y-2">
-              <span className={`text-xs font-bold uppercase tracking-wider ${currentTheme.badge}`}>
-                Designs & Typographies
-              </span>
-              <h2 className="text-2xl md:text-3xl font-black">
-                6 Modèles Pensés pour Chaque Secteur d'Activité
-              </h2>
-              <p className={`text-xs sm:text-sm ${currentTheme.cardSub}`}>
-                Adaptez le style visuel de votre candidature aux codes de votre métier en un clic.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className={`p-6 rounded-2xl border space-y-3 ${currentTheme.sectionCard}`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-purple-400 uppercase tracking-wide">Tech & Ingénierie</span>
-                  <span className="px-2 py-0.5 text-[10px] rounded bg-purple-500/20 text-purple-300 font-semibold">Modèle ModernTech</span>
-                </div>
-                <h3 className="text-lg font-bold">Profil Développeur & Data</h3>
-                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
-                  Mise en valeur directe de la stack technologique, des projets GitHub, des certifications Cloud et des architectures logicielles.
-                </p>
-              </div>
-
-              <div className={`p-6 rounded-2xl border space-y-3 ${currentTheme.sectionCard}`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-blue-400 uppercase tracking-wide">Management & RH</span>
-                  <span className="px-2 py-0.5 text-[10px] rounded bg-blue-500/20 text-blue-300 font-semibold">Modèle ExecutiveRH</span>
-                </div>
-                <h3 className="text-lg font-bold">Cadres & Dirigeants</h3>
-                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
-                  Clarté sobre et élégance corporate pour mettre en lumière le leadership, la gestion d'équipes et les accomplissements stratégiques.
-                </p>
-              </div>
-
-              <div className={`p-6 rounded-2xl border space-y-3 ${currentTheme.sectionCard}`}>
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">Polyvalent & Dense</span>
-                  <span className="px-2 py-0.5 text-[10px] rounded bg-emerald-500/20 text-emerald-300 font-semibold">Modèle DualColumn</span>
-                </div>
-                <h3 className="text-lg font-bold">Double Colonne Équilibrée</h3>
-                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
-                  Optimisation maximale de la page A4 permettant de condenser expériences denses et compétences sans sensation d'encombrement.
-                </p>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* Passerelle vers les formations certifiantes Elsayf */}
-        <section className={`p-8 md:p-10 rounded-3xl border flex flex-col md:flex-row items-center justify-between gap-8 ${currentTheme.heroCard}`}>
-          <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
-              <Award size={14} /> Boostez vos qualifications
-            </div>
-            <h2 className="text-2xl md:text-3xl font-black">
-              Enrichissez votre CV avec des compétences en haute demande
-            </h2>
-            <p className={`text-xs md:text-sm leading-relaxed ${currentTheme.cardSub}`}>
-              Les recruteurs recherchent des compétences concrètes en Data, Intelligence Artificielle, Cybersécurité et Automatisation. Suivez nos formations interactives gratuites avec simulateur de code en ligne.
-            </p>
-          </div>
-          <Link
-            href="/courses"
-            className="shrink-0 px-6 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-xl shadow-purple-900/40 hover:scale-105 transition-all flex items-center gap-2"
+        {/* Studio Workspace Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          
+          {/* Colonne Éditeur (5 cols sur Desktop) */}
+          <div
+            className={`lg:col-span-5 h-[calc(100vh-8.5rem)] min-h-[680px] ${
+              activeMobileView === 'editor' ? 'block' : 'hidden lg:block'
+            } print:hidden`}
           >
-            <span>Découvrir les formations</span>
-            <ArrowRight size={17} />
-          </Link>
-        </section>
+            <CVEditor
+              data={data}
+              onChange={setData}
+              config={config}
+              onConfigChange={setConfig}
+              onLoadPreset={handleLoadPreset}
+              onReset={handleReset}
+              onExportJson={handleExportJson}
+              onImportJson={handleImportJson}
+            />
+          </div>
 
-        {/* Emplacement Publicitaire 2 */}
-        {siteSettings.showAds !== false && (
-          <AdSenseAd slot="cv-middle-slot" format="auto" className="my-6" />
-        )}
+          {/* Colonne Aperçu A4 (7 cols sur Desktop) */}
+          <div
+            className={`lg:col-span-7 h-[calc(100vh-8.5rem)] min-h-[680px] ${
+              activeMobileView === 'preview' ? 'block' : 'hidden lg:block'
+            } print:block print:w-full print:col-span-12`}
+          >
+            <CVPreview data={data} config={config} onPrint={handlePrint} />
+          </div>
+        </div>
 
-        {/* FAQ Accordéon Recrutement & CV (Si activé par l'admin) */}
-        {siteSettings.showFaq !== false && (
-          <section id="faq" className={`p-8 md:p-10 rounded-3xl border space-y-6 scroll-mt-24 ${currentTheme.sectionCard}`}>
-            <div className="flex items-center gap-2 text-purple-400 text-xs font-bold uppercase tracking-wider">
-              <HelpCircle size={16} /> Questions Fréquentes
-            </div>
-            <h2 className="text-2xl md:text-3xl font-black">
-              Tout ce que vous devez savoir sur la création de votre CV
-            </h2>
+        {/* ========================================================================= */}
+        {/* 3. SECTIONS EDITORIALES, CONSEILS ATS & FAQ                              */}
+        {/* ========================================================================= */}
+        <div className="space-y-12 pt-8 print:hidden">
+          
+          {/* AdSense Top slot */}
+          {siteSettings.showAds !== false && (
+            <AdSenseAd slot="cv-top-leaderboard" format="auto" className="my-4" />
+          )}
 
-            <div className="space-y-3 pt-2">
-              {faqItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="rounded-xl border border-gray-800 bg-white/5 overflow-hidden transition-all"
-                >
-                  <button
-                    onClick={() => toggleFaq(idx)}
-                    className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-sm hover:text-purple-400 transition-colors cursor-pointer"
-                  >
-                    <span>{item.q}</span>
-                    <ChevronDown
-                      size={18}
-                      className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                        openFaq === idx ? 'rotate-180 text-purple-400' : ''
-                      }`}
-                    />
-                  </button>
-                  {openFaq === idx && (
-                    <div className={`px-6 pb-4 text-xs sm:text-sm leading-relaxed border-t border-white/5 pt-3 ${currentTheme.cardSub}`}>
-                      {item.a}
-                    </div>
-                  )}
+          {/* Guide ATS */}
+          {siteSettings.showAtsGuide !== false && (
+            <section id="guide-ats" className={`p-6 sm:p-8 rounded-3xl border shadow-xl relative overflow-hidden scroll-mt-20 ${currentTheme.sectionCard}`}>
+              <div className="max-w-3xl mb-6">
+                <span className={`text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${currentTheme.badge}`}>
+                  Recommandations Recrutement 2026
+                </span>
+                <h2 className="text-xl sm:text-2xl font-black mt-2 text-white">
+                  Comment maximiser l'impact de votre CV auprès des filtres ATS ?
+                </h2>
+                <p className={`text-xs sm:text-sm mt-1.5 leading-relaxed ${currentTheme.cardSub}`}>
+                  Plus de 80% des grandes entreprises et cabinets RH utilisent des ATS pour trier les candidatures. Nos templates respectent à la lettre ces 4 règles d'or :
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                  <div className="w-8 h-8 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold text-sm">
+                    1
+                  </div>
+                  <h3 className="font-bold text-sm text-white">Sections Claires</h3>
+                  <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                    Titres standardisés (Expérience, Formation, Compétences) organisés par ordre antichronologique.
+                  </p>
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
 
-        {/* Footer AdSense Slot */}
-        {siteSettings.showAds !== false && (
-          <AdSenseAd slot="cv-bottom-leaderboard" format="auto" className="my-6" />
-        )}
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                  <div className="w-8 h-8 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold text-sm">
+                    2
+                  </div>
+                  <h3 className="font-bold text-sm text-white">Mots-Clés Ciblés</h3>
+                  <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                    Intégrez les logiciels, technologies et compétences exactes mentionnées dans l'annonce.
+                  </p>
+                </div>
 
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                  <div className="w-8 h-8 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold text-sm">
+                    3
+                  </div>
+                  <h3 className="font-bold text-sm text-white">PDF 100% Calibré A4</h3>
+                  <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                    Exportation vectorielle aux dimensions exactes 210 x 297 mm avec texte sélectionnable.
+                  </p>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold text-sm">
+                    4
+                  </div>
+                  <h3 className="font-bold text-sm text-white">Résultats Chiffrés</h3>
+                  <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                    Donnez du poids à vos missions avec des métriques réelles (%, volumes, délais, budgets).
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* Panorama des 6 modèles */}
+          {siteSettings.showTemplates !== false && (
+            <section id="modeles" className="space-y-4 scroll-mt-20">
+              <div className="text-center max-w-2xl mx-auto space-y-1">
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${currentTheme.badge}`}>
+                  Design & Typographies
+                </span>
+                <h2 className="text-xl sm:text-2xl font-black text-white">
+                  6 Modèles Pensés pour Chaque Métier
+                </h2>
+                <p className={`text-xs ${currentTheme.cardSub}`}>
+                  Adaptez le style visuel de votre candidature aux codes de votre secteur d'activité.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className={`p-5 rounded-2xl border space-y-2 ${currentTheme.sectionCard}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-purple-400 uppercase">Tech & Code</span>
+                    <span className="px-2 py-0.5 text-[10px] rounded bg-purple-500/20 text-purple-300 font-semibold">Modern Tech</span>
+                  </div>
+                  <h3 className="text-base font-bold text-white">Développeurs & Data Scientists</h3>
+                  <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                    Mise en valeur directe de la stack technique, des dépôts GitHub et des architectures logicielles.
+                  </p>
+                </div>
+
+                <div className={`p-5 rounded-2xl border space-y-2 ${currentTheme.sectionCard}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-blue-400 uppercase">Management & RH</span>
+                    <span className="px-2 py-0.5 text-[10px] rounded bg-blue-500/20 text-blue-300 font-semibold">Executive RH</span>
+                  </div>
+                  <h3 className="text-base font-bold text-white">Cadres & Dirigeants</h3>
+                  <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                    Élégance corporate valorisant le leadership, la gouvernance et le pilotage d'équipes.
+                  </p>
+                </div>
+
+                <div className={`p-5 rounded-2xl border space-y-2 ${currentTheme.sectionCard}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-emerald-400 uppercase">International</span>
+                    <span className="px-2 py-0.5 text-[10px] rounded bg-emerald-500/20 text-emerald-300 font-semibold">Minimaliste ATS</span>
+                  </div>
+                  <h3 className="text-base font-bold text-white">Swiss ATS Standard</h3>
+                  <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                    Structure épurée à haute lisibilité garantissant un score maximal sur tous les filtres automatisés.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* FAQ Accordion */}
+          {siteSettings.showFaq !== false && (
+            <section id="faq" className={`p-6 sm:p-8 rounded-3xl border shadow-xl scroll-mt-20 ${currentTheme.sectionCard}`}>
+              <div className="max-w-2xl mb-6 space-y-1">
+                <span className={`text-[11px] font-bold uppercase tracking-wider ${currentTheme.badge}`}>
+                  Foire Aux Questions
+                </span>
+                <h2 className="text-xl sm:text-2xl font-black text-white">
+                  Questions Fréquemment Posées
+                </h2>
+              </div>
+
+              <div className="space-y-3">
+                {faqItems.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="border border-white/10 rounded-2xl overflow-hidden bg-white/5 transition-colors"
+                  >
+                    <button
+                      onClick={() => toggleFaq(idx)}
+                      className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-4 font-bold text-sm text-white hover:bg-white/5 transition-colors cursor-pointer"
+                    >
+                      <span>{item.q}</span>
+                      <ChevronDown
+                        size={17}
+                        className={`transition-transform duration-200 shrink-0 text-gray-400 ${
+                          openFaq === idx ? 'rotate-180 text-white' : ''
+                        }`}
+                      />
+                    </button>
+                    {openFaq === idx && (
+                      <div className={`px-4 pb-4 pt-1 text-xs leading-relaxed border-t border-white/10 ${currentTheme.cardSub}`}>
+                        {item.a}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* AdSense Bottom slot */}
+          {siteSettings.showAds !== false && (
+            <AdSenseAd slot="cv-bottom-content" format="auto" className="my-6" />
+          )}
+        </div>
+      </main>
+
+      {/* ========================================================================= */}
+      {/* 4. DOCK FLOTTANT MOBILE (Navigation tactile permanente < lg)             */}
+      {/* ========================================================================= */}
+      <div className="lg:hidden fixed bottom-3 inset-x-3 z-40 max-w-sm mx-auto print:hidden">
+        <div className={`p-1.5 rounded-2xl border shadow-2xl backdrop-blur-xl flex items-center justify-between gap-1.5 ${currentTheme.dockBar}`}>
+          <button
+            onClick={() => setActiveMobileView('editor')}
+            className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              activeMobileView === 'editor'
+                ? 'bg-[#a78bfa] text-black shadow font-black'
+                : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            <Edit3 size={14} />
+            <span>Formulaire</span>
+          </button>
+
+          <button
+            onClick={() => setActiveMobileView('preview')}
+            className={`flex-1 py-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+              activeMobileView === 'preview'
+                ? 'bg-[#a78bfa] text-black shadow font-black'
+                : 'text-gray-300 hover:text-white'
+            }`}
+          >
+            <Eye size={14} />
+            <span>Aperçu</span>
+          </button>
+
+          <button
+            onClick={handleDownloadPDF}
+            disabled={isGeneratingPdf}
+            className="px-3.5 py-2 rounded-xl text-xs font-black bg-gradient-to-r from-emerald-500 to-teal-600 text-white shadow transition-all active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-1"
+            title="Télécharger le PDF"
+          >
+            {isGeneratingPdf ? <Loader2 size={13} className="animate-spin" /> : <Download size={13} />}
+            <span>PDF</span>
+          </button>
+        </div>
       </div>
     </div>
   );
