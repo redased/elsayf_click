@@ -496,12 +496,13 @@ export default function CVBuilderPage() {
       <style jsx global>{`
         @page {
           size: A4 portrait;
-          margin: 0;
+          margin: 0mm !important;
         }
         @media print {
           *, *::before, *::after {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            color-adjust: exact !important;
           }
           html, body {
             margin: 0 !important;
@@ -515,22 +516,24 @@ export default function CVBuilderPage() {
           }
           main,
           main > div,
-          div[class*="min-h-screen"] {
+          #__next,
+          div[class*="min-h-screen"],
+          div[class*="py-"],
+          div[class*="pt-"],
+          div[class*="p-"] {
             padding: 0 !important;
             margin: 0 !important;
+            min-height: 0 !important;
+            max-height: 297mm !important;
             border: none !important;
             box-shadow: none !important;
             background: white !important;
             transform: none !important;
+            filter: none !important;
+            backdrop-filter: none !important;
           }
-          /* Masquer la navbar du site mais JAMAIS le header du CV */
-          header.sticky, nav, footer:not(#cv-printable-area *), .print\\:hidden, #guide-ats {
+          header, nav, footer, .print\\:hidden, #guide-ats {
             display: none !important;
-          }
-          #cv-printable-area header, #cv-printable-area footer {
-            display: block !important;
-            visibility: visible !important;
-            opacity: 1 !important;
           }
           #cv-printable-area, #cv-printable-area * {
             visibility: visible !important;

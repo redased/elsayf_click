@@ -91,14 +91,11 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
   }
 
   // Récupérer toutes les feuilles de styles Tailwind et polices
-  // en ignorant les styles parents qui masquent des balises comme header, nav ou body
+  // en filtrant les styles parents qui masquent body * pour éviter de blanchir l'iframe
   let stylesHtml = '';
   document.querySelectorAll('link[rel="stylesheet"], style').forEach((node) => {
-    if (node.tagName === 'STYLE') {
-      const txt = node.textContent || '';
-      if (txt.includes('header') || txt.includes('nav') || txt.includes('visibility: hidden') || txt.includes('body *')) {
-        return;
-      }
+    if (node.tagName === 'STYLE' && (node.textContent.includes('visibility: hidden') || node.textContent.includes('body *'))) {
+      return;
     }
     stylesHtml += node.outerHTML;
   });
@@ -113,10 +110,9 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
       <title>${title}</title>
       ${stylesHtml}
       <style>
-        /* Format strict A4 sans marges parasites */
         @page {
-          size: A4 portrait;
-          margin: 0;
+          size: 210mm 297mm !important;
+          margin: 0mm !important;
         }
         *, *::before, *::after {
           box-sizing: border-box !important;
@@ -128,58 +124,40 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
           margin: 0 !important;
           padding: 0 !important;
           width: 210mm !important;
-          height: 297mm !important;
           min-height: 297mm !important;
           background: #ffffff !important;
           color: #000000 !important;
           visibility: visible !important;
           opacity: 1 !important;
-          overflow: hidden !important;
+          overflow: visible !important;
         }
-        /* Forcer l'affichage de l'en-tête (Nom, Titre, Contact, Avatar) et du pied de page du CV */
-        header, footer, [class*="header"], [class*="banner"] {
-          display: block !important;
-          visibility: visible !important;
-          opacity: 1 !important;
-        }
-        /* Forcer la visibilité intégrale de l'arbre DOM */
+        /* GARANTIE FORMELLE : Visibilité et opacité totales sur l'ensemble de l'arbre DOM */
         body, body *, #cv-printable-area, #cv-printable-area *, #cv-clean-wrapper, #cv-clean-wrapper * {
           visibility: visible !important;
           opacity: 1 !important;
         }
-        /* Conteneur calibré pleine page A4 (210mm x 297mm) */
-        #cv-clean-wrapper, #cv-printable-area {
+        #cv-printable-area, #cv-clean-wrapper {
           width: 210mm !important;
-          height: 297mm !important;
           min-height: 297mm !important;
-          max-height: 297mm !important;
           margin: 0 !important;
           padding: 0 !important;
           transform: none !important;
           border: none !important;
           box-shadow: none !important;
-          background: transparent !important;
-          overflow: hidden !important;
-          position: relative !important;
+          background: #ffffff !important;
+          overflow: visible !important;
+          position: static !important;
         }
-        /* Le template interne prend 100% de la surface A4 */
-        #cv-clean-wrapper > div, #cv-printable-area > div {
-          width: 210mm !important;
-          height: 297mm !important;
-          min-height: 297mm !important;
-          max-height: 297mm !important;
+        #cv-printable-area > div, #cv-clean-wrapper > div {
+          transform: none !important;
           margin: 0 !important;
           box-shadow: none !important;
           border-radius: 0 !important;
-          transform: none !important;
-          display: flex !important;
-          flex-direction: column !important;
-          justify-content: space-between !important;
         }
       </style>
     </head>
     <body>
-      <div id="cv-clean-wrapper" class="cv-printable-area">
+      <div id="cv-printable-area" class="cv-clean-wrapper">
         ${element.innerHTML}
       </div>
     </body>
