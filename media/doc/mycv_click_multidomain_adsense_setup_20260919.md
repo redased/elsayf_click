@@ -71,7 +71,20 @@ certbot --nginx -d mycv.click -d www.mycv.click --non-interactive --agree-tos -m
 
 ---
 
-## 4. Fichiers Modifiés & Sauvegardes
+## 4. Statut du Déploiement & Validation SSL en Production
+
+- **Certificat SSL Let's Encrypt** : Installé avec succès pour `mycv.click` et `www.mycv.click`.
+- **Renouvellement automatique** : Planifié par Certbot (tâche cron système).
+- **URLs de production vérifiées** :
+  - `https://mycv.click` -> HTTP 200 OK (Studio CV direct)
+  - `https://www.mycv.click` -> HTTP 200 OK
+  - `https://mycv.click/ads.txt` -> HTTP 200 OK (`google.com, pub-1168470266191675, DIRECT, f08c47fec0942fa0`)
+  - `https://elsayf.click` -> HTTP 200 OK (Portail de formations)
+  - `https://elsayf.click/cv` -> HTTP 200 OK (Studio CV Elsayf)
+
+---
+
+## 5. Fichiers Modifiés & Sauvegardes
 
 - **Sauvegardes** : `media/bbackup/mycv_click_multidomain_setup_20260919_1200/`
 - **Fichiers créés/modifiés** :
