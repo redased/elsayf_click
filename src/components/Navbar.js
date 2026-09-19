@@ -100,15 +100,18 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-7">
           {isMyCv ? (
             <>
-              <a href="#studio" className="text-white font-bold text-sm hover:text-[#a78bfa] transition-colors flex items-center gap-1.5">
+              <a href="#creer" className="text-white font-bold text-sm hover:text-[#a78bfa] transition-colors flex items-center gap-1.5">
                 <FileText size={15} className="text-[#a78bfa]" />
                 <span>Créer mon CV</span>
               </a>
-              <a href="#guide-ats" className="text-gray-300 hover:text-[#a78bfa] transition-colors text-sm font-medium">
-                Guide ATS
+              <a href="#outils" className="text-gray-300 hover:text-[#a78bfa] transition-colors text-sm font-medium">
+                Boîte à Outils
               </a>
               <a href="#modeles" className="text-gray-300 hover:text-[#a78bfa] transition-colors text-sm font-medium">
                 6 Modèles A4
+              </a>
+              <a href="#guide-ats" className="text-gray-300 hover:text-[#a78bfa] transition-colors text-sm font-medium">
+                Guide ATS
               </a>
               <a href="#faq" className="text-gray-300 hover:text-[#a78bfa] transition-colors text-sm font-medium">
                 FAQ
@@ -179,71 +182,109 @@ export default function Navbar() {
           <LanguageSwitcher />
 
           <div className="flex items-center gap-4 ml-4">
-            {session ? (
-              <>
-                {isSuperAdmin && (
+            {isMyCv ? (
+              session ? (
+                <>
                   <Link
-                    href="/dashboard/code"
-                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                    href="/cv/builder"
+                    className="flex items-center gap-2 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-lg shadow-violet-900/40 transition-all hover:scale-105"
                   >
-                    <Monitor size={16} />
-                    VSCode
+                    <FileText size={14} />
+                    <span>Studio CV</span>
                   </Link>
-                )}
-
-                {hasRStatAccess && (
+                  <Link href={getDashboardLink()} className="flex items-center gap-2 text-white hover:text-[#a78bfa] text-xs font-medium">
+                    <User className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline max-w-[100px] truncate">{session.user?.name || session.user?.email || 'Compte'}</span>
+                  </Link>
+                  <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="flex items-center gap-1.5 text-gray-400 hover:text-white text-xs font-medium transition"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Quitter</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login?callbackUrl=/cv/builder" className="text-white hover:text-[#a78bfa] text-xs font-bold">
+                    Connexion
+                  </Link>
                   <Link
-                    href="/dashboard/rstat"
-                    className="flex items-center gap-2 bg-teal-700 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                    href="/cv/builder"
+                    className="flex items-center gap-1.5 bg-gradient-to-r from-violet-600 via-indigo-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white text-xs font-black px-4 py-2 rounded-xl shadow-lg shadow-violet-900/30 transition-all hover:scale-105"
                   >
-                    <BarChart2 size={16} />
-                    R IDE
+                    <Sparkles size={13} />
+                    <span>Lancer le Studio</span>
                   </Link>
-                )}
-
-                {session && (
-                  <Link
-                    href="/dashboard/live"
-                    className="flex items-center gap-2 bg-violet-700 hover:bg-violet-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-                  >
-                    <Video size={16} />
-                    <span className="hidden lg:inline">Live</span>
-                  </Link>
-                )}
-
-                {session && (
-                  <Link
-                    href="/dashboard/search"
-                    className="flex items-center gap-2 text-gray-400 hover:text-white px-2 py-1.5 rounded-lg transition-colors"
-                    title="Rechercher"
-                  >
-                    <Search size={17} />
-                  </Link>
-                )}
-
-                <StreamNotifications />
-
-                <Link href={getDashboardLink()} className="flex items-center gap-2 text-white hover:text-[#a78bfa] font-medium">
-                  <User className="w-4 h-4" />
-                  <span className="hidden sm:inline">{session.user?.name || 'Dashboard'}</span>
-                </Link>
-                <button
-                  onClick={() => signOut({ callbackUrl: '/' })}
-                  className="flex items-center gap-2 text-gray-300 hover:text-[#a78bfa] font-medium"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Déconnexion</span>
-                </button>
-              </>
+                </>
+              )
             ) : (
-              <>
-                <Link href="/login" className="text-white hover:text-[#a78bfa] font-medium">
-                  {t('nav.login')}
-                </Link>
-                <Link href="/register" className="btn btn-primary text-sm px-5 py-2 rounded-full">
-                  S'inscrire
-                </Link>
-              </>
+              session ? (
+                <>
+                  {isSuperAdmin && (
+                    <Link
+                      href="/dashboard/code"
+                      className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      <Monitor size={16} />
+                      VSCode
+                    </Link>
+                  )}
+
+                  {hasRStatAccess && (
+                    <Link
+                      href="/dashboard/rstat"
+                      className="flex items-center gap-2 bg-teal-700 hover:bg-teal-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      <BarChart2 size={16} />
+                      R IDE
+                    </Link>
+                  )}
+
+                  {session && (
+                    <Link
+                      href="/dashboard/live"
+                      className="flex items-center gap-2 bg-violet-700 hover:bg-violet-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                    >
+                      <Video size={16} />
+                      <span className="hidden lg:inline">Live</span>
+                    </Link>
+                  )}
+
+                  {session && (
+                    <Link
+                      href="/dashboard/search"
+                      className="flex items-center gap-2 text-gray-400 hover:text-white px-2 py-1.5 rounded-lg transition-colors"
+                      title="Rechercher"
+                    >
+                      <Search size={17} />
+                    </Link>
+                  )}
+
+                  <StreamNotifications />
+
+                  <Link href={getDashboardLink()} className="flex items-center gap-2 text-white hover:text-[#a78bfa] font-medium">
+                    <User className="w-4 h-4" />
+                    <span className="hidden sm:inline">{session.user?.name || 'Dashboard'}</span>
+                  </Link>
+                  <button
+                    onClick={() => signOut({ callbackUrl: '/' })}
+                    className="flex items-center gap-2 text-gray-300 hover:text-[#a78bfa] font-medium"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    <span className="hidden sm:inline">Déconnexion</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" className="text-white hover:text-[#a78bfa] font-medium">
+                    {t('nav.login')}
+                  </Link>
+                  <Link href="/register" className="btn btn-primary text-sm px-5 py-2 rounded-full">
+                    S'inscrire
+                  </Link>
+                </>
+              )
             )}
           </div>
         </div>
