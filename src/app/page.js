@@ -22,7 +22,15 @@ import {
   HelpCircle,
   ChevronDown,
   Laptop,
-  Code2
+  Code2,
+  Users,
+  Star,
+  BarChart3,
+  Lock,
+  Briefcase,
+  GraduationCap,
+  Target,
+  Database
 } from 'lucide-react';
 import CodeEditor from '../components/CodeEditor';
 import AdSenseAd from '../components/AdSenseAd';
@@ -230,27 +238,103 @@ const ALL_COURSES = [
 const FAQ_ITEMS = [
   {
     q: 'L\'accès aux 10 formations d\'Elsayf est-il réellement 100% gratuit ?',
-    a: 'Oui, l\'ensemble de nos 10 parcours de formation (Data Science, Power BI, Cybersécurité SOC, Pentest OWASP, Automatisation Excel et IA) est accessible gratuitement sans carte bancaire. La gratuité est rendue possible grâce à des partenariats et des publicités ciblées non intrusives conformes aux règles Google AdSense.'
+    a: 'Oui, l\'ensemble de nos 10 parcours de formation (Data Science, Power BI, Cybersécurité SOC, Pentest OWASP, Automatisation Excel et IA) est accessible gratuitement sans carte bancaire requise. Cette gratuité est rendue possible grâce à un modèle économique transparent combinant des partenariats et des publicités ciblées non intrusives conformes aux règles Google AdSense.'
   },
   {
     q: 'Faut-il installer Python ou des logiciels lourds sur mon ordinateur ?',
-    a: 'Non, aucune installation préalable n\'est nécessaire. La plateforme Elsayf intègre un éditeur de code et un simulateur interactif directement dans le navigateur web. Vous pouvez rédiger, exécuter et tester vos scripts Python ou manipuler vos requêtes instantanément depuis n\'importe quel ordinateur.'
+    a: 'Non, aucune installation préalable n\'est nécessaire. La plateforme Elsayf intègre un éditeur de code et un simulateur interactif directement dans le navigateur web. Vous pouvez rédiger, exécuter et tester vos scripts Python ou manipuler vos requêtes instantanément depuis n\'importe quel ordinateur (Windows, Mac, Linux ou Chromebook).'
   },
   {
     q: 'Quels sont les prérequis pour débuter en Cybersécurité ou en Data Analytics ?',
-    a: 'Nos formations sont calibrées pour accueillir aussi bien les novices complets que les profils en reconversion. Chaque parcours démarre par les fondamentaux conceptuels avant de progresser étape par étape vers des cas pratiques d\'entreprise et des projets concrets.'
+    a: 'Nos formations sont calibrées pour accueillir aussi bien les novices complets que les professionnels en reconversion. Chaque parcours démarre par les fondamentaux conceptuels et mathématiques simples avant de progresser étape par étape vers des cas pratiques d\'entreprise et des projets concrets.'
   },
   {
     q: 'Comment s\'articule la pédagogie par la pratique d\'Elsayf ?',
-    a: 'Nous rejetons l\'apprentissage purement théorique. Chaque chapitre contient des leçons détaillées, des extraits de code interactifs, des exercices d\'application immédiate et un projet de fin de formation réaliste pouvant être intégré à votre portfolio professionnel.'
+    a: 'Nous rejetons l\'apprentissage purement théorique. Chaque chapitre combine une leçon détaillée, des extraits de code interactifs à exécuter, des exercices d\'application immédiate et un projet de fin de formation réaliste pouvant être intégré directement dans votre portfolio professionnel.'
   },
   {
     q: 'Puis-je valoriser ces compétences sur mon CV professionnel ?',
-    a: 'Absolument. En plus des compétences techniques acquises, Elsayf met à votre disposition le Studio CV Pro (accessible gratuitement sur la plateforme) pour générer des CV professionnels au format A4 vectoriel adaptés aux critères des recruteurs et aux logiciels de filtrage ATS.'
+    a: 'Absolument. En plus des compétences techniques acquises, Elsayf met à votre disposition le Studio CV Pro (accessible gratuitement sur mycv.click et elsayf.click) pour générer des CV professionnels au format A4 vectoriel adaptés aux critères stricts des recruteurs et aux logiciels de filtrage ATS.'
+  },
+  {
+    q: 'Délivrez-vous une attestation ou un certificat après avoir complété un cours ?',
+    a: 'Oui. Chaque étudiant qui termine l\'ensemble des leçons, quiz et projets pratiques d\'un cursus reçoit une attestation de compétences nominative avec identifiant unique vérifiable en ligne, valorisable sur LinkedIn et auprès des employeurs.'
+  },
+  {
+    q: 'Comment les données personnelles des étudiants sont-elles protégées ?',
+    a: 'Elsayf respecte scrupuleusement les exigences du RGPD et les standards internationaux de sécurité. Vos données ne sont jamais vendues à des tiers. Notre politique de confidentialité détaille l\'usage éthique des cookies techniques et des services tiers certifiés comme Google AdSense.'
+  },
+  {
+    q: 'Comment fonctionne l\'assistance par Intelligence Artificielle sur la plateforme ?',
+    a: 'Elsayf intègre des assistants IA pédagogiques (Gemini, Claude, Antigravity) configurés spécialement pour la programmation. Si votre script présente une erreur de syntaxe ou un bug logique, l\'assistant vous guide avec bienveillance pour vous aider à comprendre et corriger votre code sans donner la solution toute faite.'
+  },
+  {
+    q: 'La plateforme est-elle compatible sur smartphone et tablette ?',
+    a: 'Oui. Tout le contenu théorique, les guides méthodologiques, les quiz et l\'interface sont entièrement adaptatifs (Responsive Web Design). Pour coder confortablement dans l\'éditeur cloud, nous recommandons néanmoins un ordinateur portable ou de bureau.'
   },
   {
     q: 'Comment contacter l\'équipe pédagogique en cas de question ou de blocage ?',
     a: 'Notre équipe de formateurs et développeurs est joignable 7j/7 via notre formulaire de contact ou directement par e-mail à contact@statlabo.com. Nous nous engageons à répondre à toutes les demandes techniques et pédagogiques sous 24 heures ouvrées.'
+  }
+];
+
+// 4 Parcours Métiers / Roadmaps pour enrichir la valeur éditoriale
+const CAREER_ROADMAPS = [
+  {
+    title: 'Parcours Data Analyst & BI Specialist',
+    icon: BarChart3,
+    color: 'from-amber-500 to-yellow-600',
+    tag: 'Très Forte Demande',
+    desc: 'Transformez des millions de données brutes en indicateurs stratégiques visuels pour aider les dirigeants à prendre des décisions éclairées.',
+    steps: [
+      'Fondamentaux statistiques & nettoyage avec Excel & Python',
+      'Modélisation décisionnelle & ETL avancé sous Power Query',
+      'Mesures DAX complexes & intelligence temporelle',
+      'Conception de Dashboards interactifs pour comités de direction'
+    ],
+    outcomes: 'Postes visés : Data Analyst, Consultant BI, Chargé d\'études statistiques.'
+  },
+  {
+    title: 'Parcours Expert Cybersécurité & SOC',
+    icon: Shield,
+    color: 'from-red-500 to-rose-700',
+    tag: 'Secteur Critique',
+    desc: 'Protégez les serveurs d\'entreprise contre les cyberattaques et apprenez à identifier les failles web avant les pirates malveillants.',
+    steps: [
+      'Hardening système Linux, pare-feu UFW et sécurisation SSH',
+      'Surveillance en temps réel et corrélation SIEM (Wazuh, Suricata)',
+      'Audit de sécurité des applications web (OWASP Top 10)',
+      'Méthodologie de réponse aux incidents et analyse de traces'
+    ],
+    outcomes: 'Postes visés : Analyste SOC Blue Team, Pentester Junior, Administrateur Sécurité.'
+  },
+  {
+    title: 'Parcours Automatisation & Gestion PME',
+    icon: Cpu,
+    color: 'from-emerald-500 to-teal-700',
+    tag: 'Gain de Temps Immédiat',
+    desc: 'Supprimez 90% des tâches répétitives sur Excel et Word en automatisant la comptabilité, les factures et les flux administratifs.',
+    steps: [
+      'Scripts Python avec openpyxl et pandas pour traiter des classeurs volumineux',
+      'Automatisation du Journal comptable, Balance et Rapprochement bancaire',
+      'Génération automatisée de fiches de paie et contrats sous Word',
+      'Mise en place d\'un système ERP léger et sur mesure'
+    ],
+    outcomes: 'Postes visés : Responsable Administratif & Financier, Office Manager Tech, Développeur d\'outils internes.'
+  },
+  {
+    title: 'Parcours Ingénierie du Code & IA Moderne',
+    icon: Sparkles,
+    color: 'from-violet-500 to-indigo-600',
+    tag: 'Compétence Avenir',
+    desc: 'Multipliez votre productivité de développeur par 10 en associant la programmation Python moderne avec les assistants de code autonomes.',
+    steps: [
+      'Prompt engineering appliqué au génie logiciel et refactorisation',
+      'Pilotage de l\'assistant Google Antigravity pour concevoir des architectures web',
+      'Automatisation de macros complexes sans VBA historique',
+      'Déploiement d\'applications robustes avec Docker et CI/CD'
+    ],
+    outcomes: 'Postes visés : Développeur Full-Stack Augmenté, Ingénieur Automatisation IA, Prompt Engineer.'
   }
 ];
 
@@ -299,22 +383,40 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-20 pb-20 overflow-hidden">
 
-      {/* Script JSON-LD FAQPage pour Google AdSense et SEO */}
+      {/* Script JSON-LD Schema.org pour Google AdSense, Search & SEO */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            'mainEntity': FAQ_ITEMS.map(item => ({
-              '@type': 'Question',
-              'name': item.q,
-              'acceptedAnswer': {
-                '@type': 'Answer',
-                'text': item.a
+          __html: JSON.stringify([
+            {
+              '@context': 'https://schema.org',
+              '@type': 'EducationalOrganization',
+              'name': 'Elsayf E-Learning',
+              'url': 'https://elsayf.click',
+              'logo': 'https://elsayf.click/logo.png',
+              'description': 'Plateforme d\'apprentissage en ligne spécialisée en Python, Data Science, Cybersécurité, Business Intelligence et Intelligence Artificielle.',
+              'sameAs': [
+                'https://elsayf.statlabo.com'
+              ],
+              'contactPoint': {
+                '@type': 'ContactPoint',
+                'email': 'contact@statlabo.com',
+                'contactType': 'customer support'
               }
-            }))
-          })
+            },
+            {
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              'mainEntity': FAQ_ITEMS.map(item => ({
+                '@type': 'Question',
+                'name': item.q,
+                'acceptedAnswer': {
+                  '@type': 'Answer',
+                  'text': item.a
+                }
+              }))
+            }
+          ])
         }}
       />
 
@@ -360,6 +462,7 @@ export default function Home() {
             <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-emerald-400" /> 10 Formations Publiées</span>
             <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-purple-400" /> Code Direct dans le Navigateur</span>
             <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-blue-400" /> Sans Carte Bancaire</span>
+            <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-yellow-400" /> Projets Réels & Certificats</span>
           </div>
         </motion.div>
       </section>
@@ -372,7 +475,7 @@ export default function Home() {
           </div>
           <h2 className="text-3xl md:text-4xl font-bold mb-3 text-white">Codez Directement dans Votre Navigateur</h2>
           <p className="text-gray-400 max-w-xl mx-auto text-sm sm:text-base">
-            Aucun logiciel à installer. Exécutez vos scripts Python, testez vos algorithmes et manipulez vos données en toute sécurité.
+            Aucun logiciel lourd à installer. Exécutez vos scripts Python, testez vos algorithmes et manipulez vos données en temps réel en toute sécurité.
           </p>
         </div>
         <motion.div
@@ -498,59 +601,145 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── AdSense Slot 2 (Entre catalogue et Méthodologie) ── */}
+      {/* ── AdSense Slot 2 (Entre catalogue et Parcours Métiers) ── */}
       <AdSenseAd slot="1234567891" format="horizontal" />
 
-      {/* ── 4. SECTION MÉTHODOLOGIE & POURQUOI CHOISIR ELSAYF (Contenu éditorial à forte valeur AdSense) ── */}
-      <section className="container mx-auto px-4 py-12">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">
-              Une pédagogie conçue pour l'action
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white">
-              Pourquoi se former sur Elsayf ?
+      {/* ── 4. SECTION ROADMAPS MÉTIERS & DÉBOUCHÉS (Éléments Clés pour Recruteurs & SEO AdSense) ── */}
+      <section id="roadmap" className="container mx-auto px-4 py-12">
+        <div className="max-w-6xl mx-auto space-y-10">
+          <div className="text-center max-w-3xl mx-auto space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-purple-500/10 text-purple-400 rounded-full text-xs font-semibold uppercase tracking-wider border border-purple-500/20">
+              <CompassIcon size={14} /> Orientation Professionnelle
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              Quel Parcours Choisir Selon Vos Objectifs ?
             </h2>
-            <p className="text-gray-400 text-sm sm:text-base">
-              Nous combinons la puissance des environnements web interactifs avec des projets réels d'entreprise pour vous offrir une formation immédiatement valorisable sur le marché de l'emploi.
+            <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+              Pour vous guider efficacement, notre équipe pédagogique a structuré 4 parcours métiers complets. Choisissez la trajectoire qui correspond à vos ambitions.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="p-8 rounded-3xl bg-gray-900/60 border border-gray-800 hover:border-purple-500/30 transition-all space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
-                <Laptop size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-white">Apprentissage par la Pratique</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Chaque module est accompagné d'exercices concrets et d'ateliers de code. Vous n'écoutez pas passivement : vous construisez vos propres solutions logicielles dès la première minute.
+          <div className="grid md:grid-cols-2 gap-6">
+            {CAREER_ROADMAPS.map((road, idx) => {
+              const IconComp = road.icon;
+              return (
+                <div
+                  key={idx}
+                  className="p-8 rounded-3xl bg-gray-900/60 border border-gray-800 hover:border-purple-500/30 transition-all space-y-5 flex flex-col justify-between"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${road.color} flex items-center justify-center text-white shadow-lg`}>
+                        <IconComp size={24} />
+                      </div>
+                      <span className="text-[10px] font-bold px-3 py-1 rounded-full bg-purple-500/15 text-purple-300 border border-purple-500/30 uppercase tracking-wider">
+                        {road.tag}
+                      </span>
+                    </div>
+
+                    <div>
+                      <h3 className="text-xl font-bold text-white mb-2">{road.title}</h3>
+                      <p className="text-gray-400 text-xs sm:text-sm leading-relaxed">{road.desc}</p>
+                    </div>
+
+                    <div className="space-y-2 pt-2 border-t border-gray-800/80">
+                      <div className="text-[11px] font-bold text-gray-300 uppercase tracking-wider">Étapes d'apprentissage :</div>
+                      {road.steps.map((step, sIdx) => (
+                        <div key={sIdx} className="flex items-start gap-2 text-xs text-gray-300">
+                          <span className="w-4 h-4 rounded-full bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">
+                            {sIdx + 1}
+                          </span>
+                          <span>{step}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-gray-950/80 border border-gray-800 text-xs text-purple-300 font-medium">
+                    🎯 <strong className="text-white">Objectif :</strong> {road.outcomes}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 5. DOSSIER ÉDITORIAL PÉDAGOGIQUE (Contenu Haute Valeur Rédigé pour AdSense) ── */}
+      <section id="guide" className="container mx-auto px-4 py-12">
+        <div className="max-w-5xl mx-auto rounded-3xl p-8 sm:p-12 bg-gray-900/40 border border-gray-800 space-y-10">
+          <div className="text-center space-y-3">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-wider">
+              <GraduationCap size={14} /> Dossier Pédagogique 2026
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white">
+              Pourquoi l'Apprentissage Actif du Code Change Tout
+            </h2>
+            <p className="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+              Comprendre la différence entre visionner des tutoriels vidéo passifs et construire des projets réels assistés par un environnement de développement interactif.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 text-gray-300 text-sm leading-relaxed">
+            <div className="space-y-4 p-6 rounded-2xl bg-gray-950/50 border border-gray-800/60">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Database size={18} className="text-amber-400" />
+                1. La Data et la BI au cœur des décisions
+              </h3>
+              <p>
+                Dans un monde saturé d'informations, savoir extraire, nettoyer et modéliser la donnée brute est devenu la compétence la plus valorisée en entreprise. Grâce à Power BI, Power Query et Python Pandas, les données ne sont plus des chiffres abstraits : elles deviennent des tableaux de bord interactifs permettant d'anticiper la trésorerie, la fidélité client et la performance des ventes.
+              </p>
+              <p className="text-xs text-gray-400">
+                Nos cours vous apprennent à penser comme un analyste : formuler la bonne hypothèse, modéliser les relations et raconter une histoire claire aux décideurs.
               </p>
             </div>
 
-            <div className="p-8 rounded-3xl bg-gray-900/60 border border-gray-800 hover:border-blue-500/30 transition-all space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-                <Shield size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-white">Compétences Métiers Très Demandées</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Nos cursus ciblent les domaines les plus recherchés par les recruteurs : analyse décisionnelle Power BI, cybersécurité défensive SOC, audits web éthiques et automatisation Python.
+            <div className="space-y-4 p-6 rounded-2xl bg-gray-950/50 border border-gray-800/60">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Lock size={18} className="text-red-400" />
+                2. La Cybersécurité : Défense et Éthique
+              </h3>
+              <p>
+                Chaque jour, des milliers d'entreprises et de serveurs web subissent des tentatives d'intrusion automatisées. L'approche d'Elsayf repose sur l'apprentissage par la pratique des deux côtés du miroir : comprendre les failles de l'OWASP Top 10 pour mieux concevoir les défenses, et déployer des outils professionnels comme Wazuh SIEM et Suricata pour bloquer les menaces.
+              </p>
+              <p className="text-xs text-gray-400">
+                Vous apprenez dans un cadre 100% éthique et légal, préparant directement aux exigences des postes de sécurité opérationnelle (SOC Blue Team).
               </p>
             </div>
 
-            <div className="p-8 rounded-3xl bg-gray-900/60 border border-gray-800 hover:border-emerald-500/30 transition-all space-y-4">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                <Cpu size={28} />
-              </div>
-              <h3 className="text-xl font-bold text-white">Accompagnement Assisté par l'IA</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                Découvrez comment démultiplier votre vitesse d'apprentissage grâce aux assistants d'IA générative intégrés (Gemini, Antigravity) pour expliquer les erreurs et refactoriser vos scripts.
+            <div className="space-y-4 p-6 rounded-2xl bg-gray-950/50 border border-gray-800/60">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Zap size={18} className="text-emerald-400" />
+                3. L'Automatisation : Libérer le Potentiel Humain
+              </h3>
+              <p>
+                Passer des heures à copier-coller des lignes de calculs sur des classeurs Excel ou à rédiger manuellement 50 contrats est une perte de temps immense. Avec quelques dizaines de lignes de code Python (openpyxl, docx), ces corvées sont exécutées en quelques secondes sans risque d'erreur humaine de frappe.
+              </p>
+              <p className="text-xs text-gray-400">
+                Cette compétence fait de vous un collaborateur indispensable capable de faire gagner des dizaines d'heures par semaine à son équipe.
+              </p>
+            </div>
+
+            <div className="space-y-4 p-6 rounded-2xl bg-gray-950/50 border border-gray-800/60">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Sparkles size={18} className="text-purple-400" />
+                4. L'IA comme Mentor et Accélérateur
+              </h3>
+              <p>
+                L'intelligence artificielle ne remplace pas le développeur : elle amplifie considérablement ses capacités. Sur Elsayf, nous intégrons les assistants IA générative (Google Antigravity, Gemini) comme des copilotes pédagogiques qui vous expliquent la logique d'un algorithme et vous aident à déboguer en temps réel.
+              </p>
+              <p className="text-xs text-gray-400">
+                Vous apprenez les bonnes pratiques du prompt engineering appliqué au génie logiciel dès vos premières leçons.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── 5. SECTION STUDIO CV PRO ── */}
+      {/* ── AdSense Slot 3 (Milieu de page / In-Article) ── */}
+      <AdSenseAd slot="1234567892" format="horizontal" />
+
+      {/* ── 6. SECTION STUDIO CV PRO ── */}
       <section className="container mx-auto px-4 py-8">
         <div className="relative rounded-3xl p-8 md:p-12 overflow-hidden border border-violet-500/30 bg-gradient-to-br from-violet-950/40 via-[#0a0f1d] to-indigo-950/40 backdrop-blur-xl shadow-2xl">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#a78bfa] rounded-full blur-[160px] opacity-15 pointer-events-none"></div>
@@ -644,7 +833,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 6. Espace Parents ── */}
+      {/* ── 7. Espace Parents ── */}
       <section className="container mx-auto px-4 py-12">
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#a78bfa]/10 via-night-blue to-night-blue border border-[#a78bfa]/30 p-8 md:p-14">
           <div className="flex flex-col md:flex-row items-center gap-10">
@@ -701,7 +890,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 7. Pricing / Plans d'Accès ── */}
+      {/* ── 8. Pricing / Plans d'Accès ── */}
       <section className="container mx-auto px-4 py-12 text-center">
         <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white">{t('pricing.title')}</h2>
 
@@ -797,7 +986,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── 8. SECTION FAQ PÉDAGOGIQUE ENRICHIE (Balisage Schema.org & Texte Haute Valeur AdSense) ── */}
+      {/* ── 9. SECTION FAQ PÉDAGOGIQUE ENRICHIE (Balisage Schema.org & Texte Haute Valeur AdSense) ── */}
       <section className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="text-center mb-10 space-y-2">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider">
@@ -837,9 +1026,18 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── AdSense Slot 3 (Avant le Mega-Footer) ── */}
-      <AdSenseAd slot="1234567892" format="horizontal" />
+      {/* ── AdSense Slot 4 (Avant le Mega-Footer) ── */}
+      <AdSenseAd slot="1234567893" format="horizontal" />
 
     </div>
+  );
+}
+
+function CompassIcon({ size = 16, className = '' }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="12" r="10"></circle>
+      <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+    </svg>
   );
 }
