@@ -150,10 +150,20 @@ Collez votre parcours brut, votre profil LinkedIn, vos notes d'expérience ou im
       });
 
       const data = await res.json();
+      const extractedCv = data.cvData || parseAutoFillPayload(data.answer);
+
       const assistantMsg = {
         role: 'assistant',
-        content: data.answer || "Désolé, je n'ai pas pu générer une réponse."
+        content: data.answer || "Désolé, je n'ai pas pu générer une réponse.",
+        cvData: extractedCv || null
       };
+
+      // REMPLISSAGE AUTOMATIQUE IMMÉDIAT DÈS RÉCEPTION !
+      if (extractedCv && onApplyToCV) {
+        onApplyToCV(extractedCv);
+        setAppliedNotice(true);
+        setTimeout(() => setAppliedNotice(false), 6000);
+      }
 
       setThreads((prev) => {
         const latestThread = prev.find((t) => t.id === activeThreadId);
@@ -428,7 +438,7 @@ Collez votre parcours brut, votre profil LinkedIn, vos notes d'expérience ou im
                 {/* Liste des messages */}
                 {currentMessages.map((msg, i) => {
                   const isUser = msg.role === 'user';
-                  const autoFillData = !isUser ? parseAutoFillPayload(msg.content) : null;
+                  const autoFillData = !isUser ? (msg.cvData || parseAutoFillPayload(msg.content)) : null;
                   const cleanContent = !isUser
                     ? msg.content.replace(/\[AUTO_FILL_CV:[\s\S]*?\]/, '').trim()
                     : msg.displayContent || msg.content;
@@ -436,7 +446,7 @@ Collez votre parcours brut, votre profil LinkedIn, vos notes d'expérience ou im
                   return (
                     <div key={i} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-2`}>
                       <div
-                        className={`max-w-[90%] sm:max-w-[85%] p-3.5 rounded-2xl leading-relaxed ${
+                        className={`max-w-[95%] sm:max-w-[88%] p-3.5 rounded-2xl leading-relaxed ${
                           isUser
                             ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-br-none shadow-md'
                             : 'bg-white/5 border border-white/10 text-gray-200 rounded-bl-none prose prose-invert prose-xs max-w-none'
@@ -449,51 +459,92 @@ Collez votre parcours brut, votre profil LinkedIn, vos notes d'expérience ou im
                         )}
                       </div>
 
-                      {/* Carte d'Auto-Fill si l'IA a extrait les informations du parcours */}
+                      {/* Carte Haute Définition d'Auto-Remplissage */}
                       {autoFillData && (
-                        <div className="w-full max-w-[90%] sm:max-w-[85%] p-3.5 rounded-2xl bg-gradient-to-br from-purple-950/60 via-indigo-950/40 to-slate-900 border-2 border-purple-500/40 space-y-3 shadow-xl">
+                        <div className="w-full max-w-[95%] p-4 rounded-2xl bg-gradient-to-br from-[#0c142c] via-purple-950/40 to-slate-900 border-2 border-emerald-500/60 space-y-3 shadow-2xl animate-in zoom-in-95 duration-200">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
-                              <Sparkles size={15} className="text-yellow-300 animate-pulse" />
-                              <strong className="text-white text-xs sm:text-sm">Parcours CV Extrait & Structuré</strong>
+                              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                              <Sparkles size={16} className="text-yellow-300" />
+                              <strong className="text-white text-xs sm:text-sm font-black">
+                                Champs du CV Remplis avec Succès
+                              </strong>
                             </div>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
-                              Prêt à injecter
+                            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40">
+                              Appliqué en direct ✓
                             </span>
                           </div>
 
-                          {/* Résumé des champs extraits */}
-                          <div className="grid grid-cols-2 gap-2 text-[11px] text-gray-300">
+                          {/* Détails du profil injecté */}
+                          <div className="p-3 rounded-xl bg-black/40 border border-white/10 space-y-2 text-xs">
                             {autoFillData.personal?.title && (
-                              <div className="col-span-2 flex items-center gap-1.5 truncate">
-                                <Briefcase size={12} className="text-purple-400 shrink-0" />
-                                <span className="text-white font-medium truncate">{autoFillData.personal.title}</span>
+                              <div className="flex items-center gap-1.5 font-bold text-white text-sm">
+                                <Briefcase size={14} className="text-purple-400 shrink-0" />
+                                <span className="truncate">{autoFillData.personal.title}</span>
                               </div>
                             )}
-                            {autoFillData.personal?.firstName && (
-                              <div className="truncate">
-                                👤 {autoFillData.personal.firstName} {autoFillData.personal.lastName || ''}
+                            {autoFillData.personal?.summary && (
+                              <div className="p-2.5 rounded-lg bg-white/5 border-l-2 border-purple-400 text-[11px] text-gray-200 leading-relaxed italic">
+                                « {autoFillData.personal.summary} »
                               </div>
                             )}
-                            {autoFillData.experiences?.length > 0 && (
-                              <div>💼 {autoFillData.experiences.length} expérience(s)</div>
-                            )}
+                            <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-gray-300">
+                              {autoFillData.personal?.firstName && (
+                                <div className="truncate">
+                                  👤 <strong className="text-white">{autoFillData.personal.firstName} {autoFillData.personal.lastName || ''}</strong>
+                                </div>
+                              )}
+                              {autoFillData.experiences?.length > 0 && (
+                                <div>
+                                  💼 <strong className="text-white">{autoFillData.experiences.length} exp.</strong> ({autoFillData.experiences[0]?.company || ''})
+                                </div>
+                              )}
+                              {autoFillData.education?.length > 0 && (
+                                <div className="truncate">
+                                  🎓 <strong className="text-white truncate">{autoFillData.education[0]?.degree || autoFillData.education[0]?.school || ''}</strong>
+                                </div>
+                              )}
+                              {autoFillData.skills?.length > 0 && (
+                                <div>
+                                  🛠️ <strong className="text-white">{autoFillData.skills.length} compétences</strong>
+                                </div>
+                              )}
+                            </div>
+
                             {autoFillData.skills?.length > 0 && (
-                              <div>🛠️ {autoFillData.skills.length} compétence(s)</div>
-                            )}
-                            {autoFillData.education?.length > 0 && (
-                              <div>🎓 {autoFillData.education.length} diplôme(s)</div>
+                              <div className="flex flex-wrap gap-1 pt-1.5 border-t border-white/10">
+                                {autoFillData.skills.slice(0, 7).map((sk, idx) => (
+                                  <span key={idx} className="px-2 py-0.5 rounded-md bg-purple-500/20 text-purple-200 text-[10px] font-semibold border border-purple-500/30">
+                                    {sk.name} ({sk.level}%)
+                                  </span>
+                                ))}
+                              </div>
                             )}
                           </div>
 
-                          {/* Bouton d'action pour appliquer sur le CV */}
-                          <button
-                            onClick={() => handleApplyPayload(autoFillData)}
-                            className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
-                          >
-                            <CheckCircle2 size={15} />
-                            <span>Remplir automatiquement mon CV</span>
-                          </button>
+                          {/* Bouton d'action pour voir l'aperçu A4 direct */}
+                          <div className="flex items-center gap-2 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                handleApplyPayload(autoFillData);
+                                setIsOpen(false);
+                              }}
+                              className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/50 hover:scale-[1.01] active:scale-[0.98] transition-all cursor-pointer"
+                            >
+                              <CheckCircle2 size={15} />
+                              <span>Voir le CV rempli en direct (A4)</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleApplyPayload(autoFillData)}
+                              className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/20 text-gray-200 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                              title="Ré-appliquer ces données sur le formulaire"
+                            >
+                              <RefreshCw size={13} />
+                              <span className="hidden sm:inline">Ré-appliquer</span>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
