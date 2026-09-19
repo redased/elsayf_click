@@ -93,6 +93,9 @@ export default function AdminDashboard() {
                     <Link href="/admin/invitations" className="bg-orange-600 hover:bg-orange-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
                         <Mail size={20} /> Invitations
                     </Link>
+                    <Link href="/admin/cv" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all text-white shadow-lg shadow-purple-900/30">
+                        <FileText size={20} /> Studio CV & MyCV
+                    </Link>
                     <Link href="/admin/courses" className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
                         <BookOpen size={20} /> {t('admin.courses')}
                     </Link>

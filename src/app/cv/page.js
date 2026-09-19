@@ -1,9 +1,9 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { 
   Sparkles, Printer, FileText, Download, Upload, Eye, Edit3, 
   CheckCircle2, ArrowRight, Lock, UserCheck, Loader2, ShieldCheck, 
-  HelpCircle, ChevronDown, Award, Briefcase, Zap, Star
+  HelpCircle, ChevronDown, Award, Briefcase, Zap, Star, Save
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import CVEditor from '@/components/cv/CVEditor';
@@ -28,6 +28,78 @@ export default function CVBuilderPage() {
   const [activeMobileView, setActiveMobileView] = useState('editor'); // 'editor' | 'preview'
   const [isLoaded, setIsLoaded] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
+  const [isCloudSaving, setIsCloudSaving] = useState(false);
+  const [cloudSaveSuccess, setCloudSaveSuccess] = useState(false);
+  const hasTrackedCreation = useRef(false);
+
+  // Réglages dynamiques administrables depuis /admin/cv
+  const [siteSettings, setSiteSettings] = useState({
+    theme: 'dark-cyber',
+    heroTitle: 'Générateur de CV Professionnel & Dynamique',
+    heroSubtitle: 'Créez un CV élégant, structuré et conforme aux attentes des recruteurs. Choisissez un modèle, pré-remplissez votre profil en 1 clic et exportez votre PDF instantanément.',
+    showAtsGuide: true,
+    showTemplates: true,
+    showFaq: true,
+    showAds: true,
+  });
+
+  // Styles visuels associés aux thèmes dynamiques
+  const themeStyles = {
+    'dark-cyber': {
+      container: 'bg-[#050a14] text-white',
+      heroCard: 'bg-gradient-to-r from-violet-950/40 via-purple-900/20 to-indigo-950/40 border-violet-500/20 text-white',
+      sectionCard: 'bg-[#0b1022] border-gray-800/80 text-white',
+      cardSub: 'text-gray-400',
+      badge: 'bg-[#a78bfa]/15 border-[#a78bfa]/30 text-[#a78bfa]',
+      gradientText: 'from-white via-purple-100 to-[#a78bfa]',
+    },
+    'minimal-light': {
+      container: 'bg-[#f8fafc] text-slate-900',
+      heroCard: 'bg-white border-slate-200 shadow-xl text-slate-900',
+      sectionCard: 'bg-white border-slate-200 shadow-lg text-slate-900',
+      cardSub: 'text-slate-600',
+      badge: 'bg-indigo-50 border-indigo-200 text-indigo-700',
+      gradientText: 'from-slate-950 via-slate-800 to-indigo-600',
+    },
+    'executive-navy': {
+      container: 'bg-[#0a1128] text-slate-100',
+      heroCard: 'bg-gradient-to-r from-[#0d1b3e] via-[#102454] to-[#0d1b3e] border-blue-500/30 text-white',
+      sectionCard: 'bg-[#0e1c40] border-blue-900/60 text-slate-100',
+      cardSub: 'text-slate-400',
+      badge: 'bg-blue-500/15 border-blue-400/30 text-blue-300',
+      gradientText: 'from-white via-sky-100 to-sky-400',
+    },
+    'emerald-modern': {
+      container: 'bg-[#051b14] text-slate-100',
+      heroCard: 'bg-gradient-to-r from-[#08291e] via-[#0b3829] to-[#08291e] border-emerald-500/30 text-white',
+      sectionCard: 'bg-[#07241b] border-emerald-900/60 text-slate-100',
+      cardSub: 'text-slate-400',
+      badge: 'bg-emerald-500/15 border-emerald-400/30 text-emerald-300',
+      gradientText: 'from-white via-emerald-100 to-emerald-400',
+    },
+    'sunset-gradient': {
+      container: 'bg-[#180d2b] text-slate-100',
+      heroCard: 'bg-gradient-to-r from-[#261245] via-[#3b1554] to-[#261245] border-rose-500/30 text-white',
+      sectionCard: 'bg-[#220f3d] border-rose-900/60 text-slate-100',
+      cardSub: 'text-slate-400',
+      badge: 'bg-rose-500/15 border-rose-400/30 text-rose-300',
+      gradientText: 'from-white via-rose-100 to-rose-400',
+    }
+  };
+
+  const currentTheme = themeStyles[siteSettings.theme] || themeStyles['dark-cyber'];
+
+  // Charger les réglages dynamiques du site
+  useEffect(() => {
+    fetch('/api/cv/settings')
+      .then((res) => res.json())
+      .then((d) => {
+        if (d?.settings) {
+          setSiteSettings(d.settings);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Titre dynamique selon le domaine
   useEffect(() => {
@@ -39,6 +111,26 @@ export default function CVBuilderPage() {
     }
   }, []);
 
+  // Télémétrie d'activité CV (Invités & Membres)
+  const trackCvAction = async (eventType) => {
+    try {
+      await fetch('/api/cv/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          eventType,
+          candidateTitle: data.personal?.title || '',
+          candidateName: `${data.personal?.firstName || ''} ${data.personal?.lastName || ''}`.trim(),
+          template: config.template,
+          data,
+          config,
+        }),
+      });
+    } catch (e) {
+      console.warn('Erreur trackCvAction:', e);
+    }
+  };
+
   // Charger depuis le localStorage au montage
   useEffect(() => {
     try {
@@ -47,7 +139,6 @@ export default function CVBuilderPage() {
       if (savedData) {
         setData(JSON.parse(savedData));
       } else if (session?.user?.name) {
-        // Pré-remplir avec les informations du compte connecté si premier usage
         const names = (session.user.name || '').trim().split(' ');
         const fName = names[0] || '';
         const lName = names.slice(1).join(' ') || '';
@@ -77,6 +168,12 @@ export default function CVBuilderPage() {
     try {
       localStorage.setItem(STORAGE_KEY_DATA, JSON.stringify(data));
       localStorage.setItem(STORAGE_KEY_CONFIG, JSON.stringify(config));
+      
+      // Tracer l'édition initiale une seule fois par session
+      if (!hasTrackedCreation.current && (data.personal?.firstName || data.personal?.title)) {
+        hasTrackedCreation.current = true;
+        trackCvAction('CREATE');
+      }
     } catch (e) {
       console.warn('Erreur sauvegarde localStorage CV:', e);
     }
@@ -93,6 +190,7 @@ export default function CVBuilderPage() {
       font: preset.font,
       spacing: preset.spacing,
     });
+    trackCvAction('LOAD_PRESET');
   };
 
   const handleReset = () => {
@@ -121,6 +219,7 @@ export default function CVBuilderPage() {
     a.download = `CV_${data.personal?.firstName || 'Candidat'}_${data.personal?.lastName || 'Professionnel'}.json`;
     a.click();
     URL.revokeObjectURL(url);
+    trackCvAction('EXPORT_JSON');
   };
 
   const handleImportJson = (e) => {
@@ -133,12 +232,25 @@ export default function CVBuilderPage() {
         if (imported.data) setData(imported.data);
         if (imported.config) setConfig(imported.config);
         alert('Votre profil CV a été importé avec succès !');
+        trackCvAction('IMPORT_JSON');
       } catch (err) {
         alert('Fichier JSON invalide.');
       }
     };
     reader.readAsText(file);
     e.target.value = '';
+  };
+
+  // Sauvegarde Cloud explicite pour membres
+  const handleCloudSave = async () => {
+    setIsCloudSaving(true);
+    try {
+      await trackCvAction('SAVE_CLOUD');
+      setCloudSaveSuccess(true);
+      setTimeout(() => setCloudSaveSuccess(false), 3000);
+    } finally {
+      setIsCloudSaving(false);
+    }
   };
 
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -150,11 +262,13 @@ export default function CVBuilderPage() {
   };
 
   const handlePrint = () => {
+    trackCvAction('PRINT');
     printViaIsolatedIframe('cv-printable-area', getCvTitle());
   };
 
   const handleDownloadPDF = async () => {
     setIsGeneratingPdf(true);
+    trackCvAction('DOWNLOAD_PDF');
     try {
       await downloadDirectPDF('cv-printable-area', `${getCvTitle()}.pdf`);
     } finally {
@@ -190,7 +304,7 @@ export default function CVBuilderPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#050a14] text-white py-6 px-3 sm:px-6 lg:px-8">
+    <div className={`min-h-screen py-6 px-3 sm:px-6 lg:px-8 transition-colors duration-300 ${currentTheme.container}`}>
       {/* Schema.org pour Google et AdSense */}
       <script
         type="application/ld+json"
@@ -319,23 +433,32 @@ export default function CVBuilderPage() {
                 </Link>
               </>
             ) : (
-              <span className="text-emerald-400 text-[11px] font-medium flex items-center gap-1">
-                <CheckCircle2 size={13} /> Profil synchronisé
-              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleCloudSave}
+                  disabled={isCloudSaving}
+                  className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold flex items-center gap-1.5 transition-all shadow cursor-pointer disabled:opacity-50"
+                  title="Sauvegarder immédiatement dans mon compte"
+                >
+                  {isCloudSaving ? <Loader2 size={12} className="animate-spin" /> : <Save size={12} />}
+                  <span>{cloudSaveSuccess ? 'Sauvegardé !' : 'Sauvegarder dans le Cloud'}</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl bg-gradient-to-r from-violet-950/40 via-purple-900/20 to-indigo-950/40 border border-violet-500/20 shadow-2xl relative overflow-hidden backdrop-blur-xl">
+        {/* Hero Card configurable via Admin */}
+        <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl border shadow-2xl relative overflow-hidden backdrop-blur-xl transition-all ${currentTheme.heroCard}`}>
           <div className="space-y-1 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#a78bfa]/15 border border-[#a78bfa]/30 text-[#a78bfa] text-xs font-bold uppercase tracking-wider mb-1">
+            <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-1 ${currentTheme.badge}`}>
               <Sparkles size={13} /> Studio CV Pro • 6 Templates A4 & Normes ATS
             </div>
-            <h1 className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-100 to-[#a78bfa]">
-              Générateur de CV Professionnel & Dynamique
+            <h1 className={`text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r ${currentTheme.gradientText}`}>
+              {siteSettings.heroTitle || 'Générateur de CV Professionnel & Dynamique'}
             </h1>
-            <p className="text-xs md:text-sm text-gray-400 max-w-2xl">
-              Créez un CV élégant, structuré et conforme aux attentes des recruteurs. Choisissez un modèle, pré-remplissez votre profil en 1 clic et exportez votre PDF instantanément.
+            <p className={`text-xs md:text-sm max-w-2xl leading-relaxed ${currentTheme.cardSub}`}>
+              {siteSettings.heroSubtitle || 'Créez un CV élégant, structuré et conforme aux attentes des recruteurs. Choisissez un modèle, pré-remplissez votre profil en 1 clic et exportez votre PDF instantanément.'}
             </p>
           </div>
 
@@ -421,133 +544,138 @@ export default function CVBuilderPage() {
       </div>
 
       {/* ========================================================================= */}
-      {/* SECTION ADVERTISING & RICH EDITORIAL CONTENT (PRINT:HIDDEN)               */}
-      {/* Crucial pour AdSense Policy, SEO & Conversion                             */}
+      {/* SECTION EDITORIALE, MODULES ATS, FAQ ET PUBLICITÉS                       */}
       {/* ========================================================================= */}
       <div className="max-w-7xl mx-auto mt-16 print:hidden space-y-16">
         
-        {/* Emplacement Publicitaire 1 (Format Bannière Responsive) */}
-        <AdSenseAd slot="cv-top-leaderboard" format="auto" className="my-6" />
+        {/* Emplacement Publicitaire 1 (Si activé par l'admin) */}
+        {siteSettings.showAds !== false && (
+          <AdSenseAd slot="cv-top-leaderboard" format="auto" className="my-6" />
+        )}
 
-        {/* Guide d'optimisation ATS */}
-        <section id="guide-ats" className="p-8 md:p-10 rounded-3xl bg-[#0b1022] border border-gray-800/80 shadow-2xl relative overflow-hidden scroll-mt-24">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
-          
-          <div className="max-w-3xl mb-8">
-            <span className="text-xs font-bold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-3 py-1 rounded-full border border-purple-500/20">
-              Guide Recrutement 2026
-            </span>
-            <h2 className="text-2xl md:text-3xl font-black text-white mt-3">
-              Comment réussir son CV et franchir les filtres ATS ?
-            </h2>
-            <p className="text-sm text-gray-400 mt-2 leading-relaxed">
-              Plus de 80% des grandes entreprises et cabinets de recrutement utilisent des logiciels ATS (Applicant Tracking Systems) pour filtrer automatiquement les candidatures avant l'examen humain. Voici les critères clés intégrés dans nos templates :
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold">
-                1
-              </div>
-              <h3 className="font-bold text-white text-base">Structure Standardisée</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Des sections reconnues (Expériences, Formations, Compétences) organisées par ordre antichronologique pour une indexation sans erreur.
+        {/* Guide d'optimisation ATS (Si activé par l'admin) */}
+        {siteSettings.showAtsGuide !== false && (
+          <section id="guide-ats" className={`p-8 md:p-10 rounded-3xl shadow-2xl relative overflow-hidden scroll-mt-24 ${currentTheme.sectionCard}`}>
+            <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="max-w-3xl mb-8">
+              <span className={`text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${currentTheme.badge}`}>
+                Guide Recrutement 2026
+              </span>
+              <h2 className="text-2xl md:text-3xl font-black mt-3">
+                Comment réussir son CV et franchir les filtres ATS ?
+              </h2>
+              <p className={`text-sm mt-2 leading-relaxed ${currentTheme.cardSub}`}>
+                Plus de 80% des grandes entreprises et cabinets de recrutement utilisent des logiciels ATS (Applicant Tracking Systems) pour filtrer automatiquement les candidatures avant l'examen humain. Voici les critères clés intégrés dans nos templates :
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">
-                2
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 font-bold">
+                  1
+                </div>
+                <h3 className="font-bold text-base">Structure Standardisée</h3>
+                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                  Des sections reconnues (Expériences, Formations, Compétences) organisées par ordre antichronologique pour une indexation sans erreur.
+                </p>
               </div>
-              <h3 className="font-bold text-white text-base">Mots-Clés Ciblés</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Valorisez les compétences techniques (outils, logiciels, langages) et les compétences comportementales en lien avec l'offre visée.
+
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 font-bold">
+                  2
+                </div>
+                <h3 className="font-bold text-base">Mots-Clés Ciblés</h3>
+                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                  Valorisez les compétences techniques (outils, logiciels, langages) et les compétences comportementales en lien avec l'offre visée.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
+                  3
+                </div>
+                <h3 className="font-bold text-base">Format PDF Calibré</h3>
+                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                  Exportation aux dimensions A4 exactes (210 x 297 mm) avec une typographie lisible et un texte net, sans marges blanches accidentelles.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
+                <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
+                  4
+                </div>
+                <h3 className="font-bold text-base">Résultats Chiffrés</h3>
+                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                  Apportez de la crédibilité en quantifiant vos succès : pourcentages de progression, budgets gérés, délais réduits ou volumes traités.
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Panorama des 6 modèles professionnels (Si activé par l'admin) */}
+        {siteSettings.showTemplates !== false && (
+          <section id="modeles" className="space-y-6 scroll-mt-24">
+            <div className="text-center max-w-2xl mx-auto space-y-2">
+              <span className={`text-xs font-bold uppercase tracking-wider ${currentTheme.badge}`}>
+                Designs & Typographies
+              </span>
+              <h2 className="text-2xl md:text-3xl font-black">
+                6 Modèles Pensés pour Chaque Secteur d'Activité
+              </h2>
+              <p className={`text-xs sm:text-sm ${currentTheme.cardSub}`}>
+                Adaptez le style visuel de votre candidature aux codes de votre métier en un clic.
               </p>
             </div>
 
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 font-bold">
-                3
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className={`p-6 rounded-2xl border space-y-3 ${currentTheme.sectionCard}`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-purple-400 uppercase tracking-wide">Tech & Ingénierie</span>
+                  <span className="px-2 py-0.5 text-[10px] rounded bg-purple-500/20 text-purple-300 font-semibold">Modèle ModernTech</span>
+                </div>
+                <h3 className="text-lg font-bold">Profil Développeur & Data</h3>
+                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                  Mise en valeur directe de la stack technologique, des projets GitHub, des certifications Cloud et des architectures logicielles.
+                </p>
               </div>
-              <h3 className="font-bold text-white text-base">Format PDF Calibré</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Exportation aux dimensions A4 exactes (210 x 297 mm) avec une typographie lisible et un texte net, sans marges blanches accidentelles.
-              </p>
-            </div>
 
-            <div className="p-5 rounded-2xl bg-white/5 border border-white/10 space-y-2.5">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 font-bold">
-                4
+              <div className={`p-6 rounded-2xl border space-y-3 ${currentTheme.sectionCard}`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-blue-400 uppercase tracking-wide">Management & RH</span>
+                  <span className="px-2 py-0.5 text-[10px] rounded bg-blue-500/20 text-blue-300 font-semibold">Modèle ExecutiveRH</span>
+                </div>
+                <h3 className="text-lg font-bold">Cadres & Dirigeants</h3>
+                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                  Clarté sobre et élégance corporate pour mettre en lumière le leadership, la gestion d'équipes et les accomplissements stratégiques.
+                </p>
               </div>
-              <h3 className="font-bold text-white text-base">Résultats Chiffrés</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Apportez de la crédibilité en quantifiant vos succès : pourcentages de progression, budgets gérés, délais réduits ou volumes traités.
-              </p>
-            </div>
-          </div>
-        </section>
 
-        {/* Panorama des 6 modèles professionnels */}
-        <section id="modeles" className="space-y-6 scroll-mt-24">
-          <div className="text-center max-w-2xl mx-auto space-y-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-purple-400">
-              Designs & Typographies
-            </span>
-            <h2 className="text-2xl md:text-3xl font-black text-white">
-              6 Modèles Pensés pour Chaque Secteur d'Activité
-            </h2>
-            <p className="text-xs sm:text-sm text-gray-400">
-              Adaptez le style visuel de votre candidature aux codes de votre métier en un clic.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="p-6 rounded-2xl bg-gradient-to-b from-[#0f172a] to-[#090d16] border border-gray-800 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-purple-400 uppercase tracking-wide">Tech & Ingénierie</span>
-                <span className="px-2 py-0.5 text-[10px] rounded bg-purple-500/20 text-purple-300 font-semibold">Modèle ModernTech</span>
+              <div className={`p-6 rounded-2xl border space-y-3 ${currentTheme.sectionCard}`}>
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">Polyvalent & Dense</span>
+                  <span className="px-2 py-0.5 text-[10px] rounded bg-emerald-500/20 text-emerald-300 font-semibold">Modèle DualColumn</span>
+                </div>
+                <h3 className="text-lg font-bold">Double Colonne Équilibrée</h3>
+                <p className={`text-xs leading-relaxed ${currentTheme.cardSub}`}>
+                  Optimisation maximale de la page A4 permettant de condenser expériences denses et compétences sans sensation d'encombrement.
+                </p>
               </div>
-              <h3 className="text-lg font-bold text-white">Profil Développeur & Data</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Mise en valeur directe de la stack technologique, des projets GitHub, des certifications Cloud et des architectures logicielles.
-              </p>
             </div>
-
-            <div className="p-6 rounded-2xl bg-gradient-to-b from-[#0f172a] to-[#090d16] border border-gray-800 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-blue-400 uppercase tracking-wide">Management & RH</span>
-                <span className="px-2 py-0.5 text-[10px] rounded bg-blue-500/20 text-blue-300 font-semibold">Modèle ExecutiveRH</span>
-              </div>
-              <h3 className="text-lg font-bold text-white">Cadres & Dirigeants</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Clarté sobre et élégance corporate pour mettre en lumière le leadership, la gestion d'équipes et les accomplissements stratégiques.
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl bg-gradient-to-b from-[#0f172a] to-[#090d16] border border-gray-800 space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wide">Polyvalent & Dense</span>
-                <span className="px-2 py-0.5 text-[10px] rounded bg-emerald-500/20 text-emerald-300 font-semibold">Modèle DualColumn</span>
-              </div>
-              <h3 className="text-lg font-bold text-white">Double Colonne Équilibrée</h3>
-              <p className="text-xs text-gray-400 leading-relaxed">
-                Optimisation maximale de la page A4 permettant de condenser expériences denses et compétences sans sensation d'encombrement.
-              </p>
-            </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Passerelle vers les formations certifiantes Elsayf */}
-        <section className="p-8 md:p-10 rounded-3xl bg-gradient-to-r from-purple-950/40 via-[#0b1022] to-indigo-950/40 border border-purple-500/30 flex flex-col md:flex-row items-center justify-between gap-8">
+        <section className={`p-8 md:p-10 rounded-3xl border flex flex-col md:flex-row items-center justify-between gap-8 ${currentTheme.heroCard}`}>
           <div className="space-y-3 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold">
               <Award size={14} /> Boostez vos qualifications
             </div>
-            <h2 className="text-2xl md:text-3xl font-black text-white">
+            <h2 className="text-2xl md:text-3xl font-black">
               Enrichissez votre CV avec des compétences en haute demande
             </h2>
-            <p className="text-xs md:text-sm text-gray-300 leading-relaxed">
+            <p className={`text-xs md:text-sm leading-relaxed ${currentTheme.cardSub}`}>
               Les recruteurs recherchent des compétences concrètes en Data, Intelligence Artificielle, Cybersécurité et Automatisation. Suivez nos formations interactives gratuites avec simulateur de code en ligne.
             </p>
           </div>
@@ -560,48 +688,54 @@ export default function CVBuilderPage() {
           </Link>
         </section>
 
-        {/* Emplacement Publicitaire 2 (Format Médium / Responsive) */}
-        <AdSenseAd slot="cv-middle-slot" format="auto" className="my-6" />
+        {/* Emplacement Publicitaire 2 */}
+        {siteSettings.showAds !== false && (
+          <AdSenseAd slot="cv-middle-slot" format="auto" className="my-6" />
+        )}
 
-        {/* FAQ Accordéon Recrutement & CV */}
-        <section id="faq" className="p-8 md:p-10 rounded-3xl bg-[#0b1022] border border-gray-800/80 space-y-6 scroll-mt-24">
-          <div className="flex items-center gap-2 text-purple-400 text-xs font-bold uppercase tracking-wider">
-            <HelpCircle size={16} /> Questions Fréquentes
-          </div>
-          <h2 className="text-2xl md:text-3xl font-black text-white">
-            Tout ce que vous devez savoir sur la création de votre CV
-          </h2>
+        {/* FAQ Accordéon Recrutement & CV (Si activé par l'admin) */}
+        {siteSettings.showFaq !== false && (
+          <section id="faq" className={`p-8 md:p-10 rounded-3xl border space-y-6 scroll-mt-24 ${currentTheme.sectionCard}`}>
+            <div className="flex items-center gap-2 text-purple-400 text-xs font-bold uppercase tracking-wider">
+              <HelpCircle size={16} /> Questions Fréquentes
+            </div>
+            <h2 className="text-2xl md:text-3xl font-black">
+              Tout ce que vous devez savoir sur la création de votre CV
+            </h2>
 
-          <div className="space-y-3 pt-2">
-            {faqItems.map((item, idx) => (
-              <div
-                key={idx}
-                className="rounded-xl border border-gray-800 bg-white/5 overflow-hidden transition-all"
-              >
-                <button
-                  onClick={() => toggleFaq(idx)}
-                  className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-sm text-white hover:text-purple-300 transition-colors cursor-pointer"
+            <div className="space-y-3 pt-2">
+              {faqItems.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="rounded-xl border border-gray-800 bg-white/5 overflow-hidden transition-all"
                 >
-                  <span>{item.q}</span>
-                  <ChevronDown
-                    size={18}
-                    className={`shrink-0 text-gray-400 transition-transform duration-200 ${
-                      openFaq === idx ? 'rotate-180 text-purple-400' : ''
-                    }`}
-                  />
-                </button>
-                {openFaq === idx && (
-                  <div className="px-6 pb-4 text-xs sm:text-sm text-gray-300 leading-relaxed border-t border-white/5 pt-3">
-                    {item.a}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
+                  <button
+                    onClick={() => toggleFaq(idx)}
+                    className="w-full px-6 py-4 flex items-center justify-between text-left font-bold text-sm hover:text-purple-400 transition-colors cursor-pointer"
+                  >
+                    <span>{item.q}</span>
+                    <ChevronDown
+                      size={18}
+                      className={`shrink-0 text-gray-400 transition-transform duration-200 ${
+                        openFaq === idx ? 'rotate-180 text-purple-400' : ''
+                      }`}
+                    />
+                  </button>
+                  {openFaq === idx && (
+                    <div className={`px-6 pb-4 text-xs sm:text-sm leading-relaxed border-t border-white/5 pt-3 ${currentTheme.cardSub}`}>
+                      {item.a}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Footer AdSense Slot */}
-        <AdSenseAd slot="cv-bottom-leaderboard" format="auto" className="my-6" />
+        {siteSettings.showAds !== false && (
+          <AdSenseAd slot="cv-bottom-leaderboard" format="auto" className="my-6" />
+        )}
 
       </div>
     </div>
