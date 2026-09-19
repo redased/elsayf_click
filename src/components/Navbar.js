@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, BookOpen, LogOut, User, ChevronDown, Monitor, BarChart2, Video, Search, FileText } from 'lucide-react';
+import { Menu, X, BookOpen, LogOut, User, ChevronDown, Monitor, BarChart2, Video, Search, FileText, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import StreamNotifications from './StreamNotifications';
