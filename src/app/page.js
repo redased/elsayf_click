@@ -257,8 +257,8 @@ const FAQ_ITEMS = [
     a: 'Absolument. En plus des compétences techniques acquises, Elsayf met à votre disposition le Studio CV Pro (accessible gratuitement sur mycv.click et elsayf.click) pour générer des CV professionnels au format A4 vectoriel adaptés aux critères stricts des recruteurs et aux logiciels de filtrage ATS.'
   },
   {
-    q: 'Délivrez-vous une attestation ou un certificat après avoir complété un cours ?',
-    a: 'Oui. Chaque étudiant qui termine l\'ensemble des leçons, quiz et projets pratiques d\'un cursus reçoit une attestation de compétences nominative avec identifiant unique vérifiable en ligne, valorisable sur LinkedIn et auprès des employeurs.'
+    q: 'Délivrez-vous un certificat ou un diplôme officiel à la fin des cours ?',
+    a: 'Non, Elsayf ne délivre pas de diplôme ou de certificat académique. Notre démarche est 100% orientée vers la pratique et les compétences réelles : chaque cours vous permet de développer des projets d\'entreprise concrets (Dashboards Power BI, scripts d\'automatisation, audits de sécurité) directement valorisables sur votre profil GitHub, votre portfolio et votre CV.'
   },
   {
     q: 'Comment les données personnelles des étudiants sont-elles protégées ?',
@@ -462,7 +462,7 @@ export default function Home() {
             <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-emerald-400" /> 10 Formations Publiées</span>
             <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-purple-400" /> Code Direct dans le Navigateur</span>
             <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-blue-400" /> Sans Carte Bancaire</span>
-            <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-yellow-400" /> Projets Réels & Certificats</span>
+            <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-yellow-400" /> Projets Concrets & Portfolio</span>
           </div>
         </motion.div>
       </section>
@@ -962,7 +962,7 @@ export default function Home() {
                     <ul className="text-left w-full space-y-2.5 mb-8 text-gray-300 text-xs sm:text-sm">
                       <li className="flex items-center gap-2"><CheckCircle size={16} className="text-purple-400 shrink-0" /> Accès complet sans publicité</li>
                       <li className="flex items-center gap-2"><CheckCircle size={16} className="text-purple-400 shrink-0" /> Support prioritaire avec les formateurs</li>
-                      <li className="flex items-center gap-2"><CheckCircle size={16} className="text-purple-400 shrink-0" /> Certificat d'achèvement de compétences</li>
+                      <li className="flex items-center gap-2"><CheckCircle size={16} className="text-purple-400 shrink-0" /> Projets concrets pour votre portfolio</li>
                     </ul>
                   </div>
                   <Link href="/pricing" className="btn bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white w-full text-base py-3.5 shadow-lg shadow-purple-500/20 rounded-xl font-bold">

@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import {
     CheckCircle, Clock, BarChart2, BookOpen, PlayCircle, Shield, Users, Code,
     ChevronDown, ChevronUp, Zap, Award, MessageCircle, Star, Lock, Globe,
-    Terminal, Brain, TrendingUp, Gift
+    Terminal, Brain, TrendingUp, Gift, Target, Sparkles
 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -212,8 +212,8 @@ export default function PublicCoursePage({ params }) {
                                     <span>Français</span>
                                 </div>
                                 <div className="flex items-center gap-2 text-gray-300">
-                                    <Award size={16} className="text-[#a78bfa]" />
-                                    <span>Attestation incluse</span>
+                                    <Sparkles size={16} className="text-[#a78bfa]" />
+                                    <span>Projets pratiques inclus</span>
                                 </div>
                             </div>
 
@@ -242,7 +242,7 @@ export default function PublicCoursePage({ params }) {
                                     { icon: Terminal, label: 'IDE intégré', desc: 'Codez sans installation' },
                                     { icon: Users, label: 'Communauté', desc: 'Forum et Q&A actifs' },
                                     { icon: TrendingUp, label: 'Progression', desc: 'Suivi XP et badges' },
-                                    { icon: Award, label: 'Attestation', desc: 'Certifiez vos compétences' },
+                                    { icon: Target, label: 'Projet réel', desc: 'Cas d\'usage d\'entreprise' },
                                     { icon: PlayCircle, label: 'Sessions live', desc: 'Avec les formateurs' },
                                 ].map(({ icon: Icon, label, desc }) => (
                                     <div key={label} className="flex items-start gap-3 bg-white/3 border border-white/8 rounded-xl p-3 hover:border-[#a78bfa]/30 transition-colors">
@@ -393,7 +393,7 @@ export default function PublicCoursePage({ params }) {
                                         { icon: Clock, text: 'Accès illimité à vie', color: 'text-blue-400' },
                                         { icon: Terminal, text: 'IDE en ligne inclus', color: 'text-emerald-400' },
                                         { icon: Brain, text: 'Assistant IA par leçon', color: 'text-purple-400' },
-                                        { icon: Award, text: 'Attestation de participation', color: 'text-amber-400' },
+                                        { icon: Target, text: 'Projet d\'application pratique', color: 'text-amber-400' },
                                         { icon: Users, text: 'Accès communauté', color: 'text-sky-400' },
                                     ].map(({ icon: Icon, text, color }) => (
                                         <li key={text} className="flex items-center gap-3 text-sm text-gray-300">
@@ -528,7 +528,7 @@ function EnrollCard({ course, userEnrollment, enrolling, sessionStatus, handleHe
                     {[
                         { icon: Shield, text: 'Accès immédiat après inscription' },
                         { icon: Clock, text: 'Accès à vie, aucune limite' },
-                        { icon: Award, text: 'Attestation de participation' },
+                        { icon: Target, text: 'Projet d\'application pratique' },
                     ].map(({ icon: Icon, text }) => (
                         <div key={text} className="flex items-center gap-2 text-xs text-gray-400">
                             <Icon size={13} className="text-[#a78bfa] flex-shrink-0" />

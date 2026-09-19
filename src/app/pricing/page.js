@@ -129,7 +129,7 @@ export default function PricingPage() {
                                 <p className="text-gray-500 text-sm">Pour toujours</p>
                             </div>
                             <ul className="space-y-3 mb-8">
-                                {['Accès aux leçons gratuites', 'Certificat de participation', 'Support communautaire'].map(f => (
+                                {['Accès aux leçons gratuites', 'Projets concrets d\'application', 'Support communautaire'].map(f => (
                                     <li key={f} className="flex items-start gap-2">
                                         <Check size={20} className="text-green-500 shrink-0 mt-0.5" />
                                         <span className="text-sm">{f}</span>
@@ -192,7 +192,7 @@ export default function PricingPage() {
                                         {[
                                             'Accès complet à tous les cours',
                                             'Sans publicité',
-                                            'Certificat professionnel',
+                                            'Projets concrets pour portfolio',
                                             'Support prioritaire',
                                             'Accès au forum privé',
                                             'Mises à jour gratuites',
