@@ -1,75 +1,6 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// Fonction robuste d'extraction du premier objet JSON équilibré { ... }
-function extractFirstBalancedJsonObject(text, startIndex = 0) {
-    const braceStart = text.indexOf('{', startIndex);
-    if (braceStart === -1) return null;
-
-    let depth = 0;
-    let inString = false;
-    let escape = false;
-
-    for (let i = braceStart; i < text.length; i++) {
-        const char = text[i];
-        if (escape) {
-            escape = false;
-            continue;
-        }
-        if (char === '\\') {
-            escape = true;
-            continue;
-        }
-        if (char === '"') {
-            inString = !inString;
-            continue;
-        }
-        if (!inString) {
-            if (char === '{') {
-                depth++;
-            } else if (char === '}') {
-                depth--;
-                if (depth === 0) {
-                    return {
-                        start: braceStart,
-                        end: i + 1,
-                        jsonStr: text.substring(braceStart, i + 1)
-                    };
-                }
-            }
-        }
-    }
-    return null;
-}
-
-// Analyseur tolérant aux retours chariot, caractères de contrôle et virgules traînantes
-function parseCandidateJson(rawJson) {
-    if (!rawJson || typeof rawJson !== 'string') return null;
-    try {
-        return JSON.parse(rawJson);
-    } catch (e1) {
-        try {
-            const sanitized = rawJson
-                .replace(/[\u0000-\u001F]+/g, (ctrl) => (ctrl === '\n' ? '\\n' : ctrl === '\t' ? '\\t' : ' '));
-            return JSON.parse(sanitized);
-        } catch (e2) {
-            try {
-                const evalFn = new Function(`return (${rawJson});`);
-                return evalFn();
-            } catch (e3) {
-                try {
-                    const cleaned = rawJson
-                        .replace(/,\s*([\]}])/g, '$1')
-                        .replace(/[\u0000-\u001F]+/g, (ctrl) => (ctrl === '\n' ? '\\n' : ctrl === '\t' ? '\\t' : ' '));
-                    return JSON.parse(cleaned);
-                } catch (e4) {
-                    return null;
-                }
-            }
-        }
-    }
-}
-
 // Fonction robuste d'extraction et nettoyage du JSON CV
 function extractCvDataFromAnswer(text) {
     if (!text) return { cleanText: text || '', cvData: null };
@@ -77,60 +8,53 @@ function extractCvDataFromAnswer(text) {
     let cvData = null;
     let cleanText = text;
 
-    // 1. Recherche par tag spécial [AUTO_FILL_CV: { ... }]
-    const tagIdx = text.indexOf('[AUTO_FILL_CV:');
-    if (tagIdx !== -1) {
-        const match = extractFirstBalancedJsonObject(text, tagIdx);
-        if (match) {
-            const parsed = parseCandidateJson(match.jsonStr);
-            if (parsed && (parsed.personal || parsed.experiences || parsed.skills || parsed.cv)) {
-                cvData = parsed.cv || parsed;
-                let tagEnd = text.indexOf(']', match.end);
-                if (tagEnd === -1) tagEnd = match.end;
-                else tagEnd += 1;
-                cleanText = (text.substring(0, tagIdx) + text.substring(tagEnd)).trim();
-            }
-        }
-    }
-
-    // 2. Recherche par bloc Markdown ```json { ... } ```
-    if (!cvData) {
-        const codeFenceIdx = text.indexOf('```');
-        if (codeFenceIdx !== -1) {
-            const match = extractFirstBalancedJsonObject(text, codeFenceIdx);
-            if (match) {
-                const parsed = parseCandidateJson(match.jsonStr);
-                if (parsed && (parsed.personal || parsed.experiences || parsed.skills || parsed.cv)) {
-                    cvData = parsed.cv || parsed;
-                    const closingFence = text.indexOf('```', match.end);
-                    const fenceEnd = closingFence !== -1 ? closingFence + 3 : match.end;
-                    cleanText = (text.substring(0, codeFenceIdx) + text.substring(fenceEnd)).trim();
+    // Pattern 1: Tag spécial [AUTO_FILL_CV: { ... }]
+    const tagMatch = text.match(/\[AUTO_FILL_CV:\s*({[\s\S]*?})\]/);
+    if (tagMatch) {
+        cleanText = text.replace(/\[AUTO_FILL_CV:\s*({[\s\S]*?})\]/, '').trim();
+        const rawJson = tagMatch[1];
+        try {
+            cvData = JSON.parse(rawJson);
+        } catch (e1) {
+            try {
+                // Nettoyage des retours chariot et caractères de contrôle à l'intérieur des chaînes
+                const sanitized = rawJson
+                    .replace(/[\u0000-\u001F]+/g, (ctrl) => (ctrl === '\n' ? '\\n' : ctrl === '\t' ? '\\t' : ' '));
+                cvData = JSON.parse(sanitized);
+            } catch (e2) {
+                try {
+                    // Fallback d'évaluation d'objet JS tolérant aux retours à la ligne
+                    const evalFn = new Function(`return (${rawJson});`);
+                    cvData = evalFn();
+                } catch (e3) {
+                    console.warn('[ai/cv-assistant] Impossible de parser le JSON CV:', e3.message);
                 }
             }
         }
     }
 
-    // 3. Recherche générale du premier objet JSON équilibré contenant des clés CV
+    // Pattern 2: Bloc de code markdown ```json { ... } ```
     if (!cvData) {
-        let cur = 0;
-        while (cur < text.length) {
-            const match = extractFirstBalancedJsonObject(text, cur);
-            if (!match) break;
-            const parsed = parseCandidateJson(match.jsonStr);
-            if (parsed && (parsed.personal || parsed.experiences || parsed.skills || parsed.cv)) {
-                cvData = parsed.cv || parsed;
-                cleanText = (text.substring(0, match.start) + text.substring(match.end)).trim();
-                break;
+        const codeMatch = text.match(/```(?:json)?\s*({[\s\S]*?})\s*```/);
+        if (codeMatch) {
+            try {
+                const parsed = JSON.parse(codeMatch[1]);
+                if (parsed.personal || parsed.experiences || parsed.skills || parsed.cv) {
+                    cvData = parsed.cv || parsed;
+                    cleanText = text.replace(/```(?:json)?\s*({[\s\S]*?})\s*```/, '').trim();
+                }
+            } catch (e) {
+                try {
+                    const evalFn = new Function(`return (${codeMatch[1]});`);
+                    const parsed = evalFn();
+                    if (parsed.personal || parsed.experiences || parsed.skills || parsed.cv) {
+                        cvData = parsed.cv || parsed;
+                        cleanText = text.replace(/```(?:json)?\s*({[\s\S]*?})\s*```/, '').trim();
+                    }
+                } catch (err) {}
             }
-            cur = match.start + 1;
         }
     }
-
-    // Nettoyer d'éventuels résidus orphelins comme [AUTO_FILL_CV: ...] ou ```json
-    cleanText = cleanText
-        .replace(/\[AUTO_FILL_CV:[\s\S]*?$/i, '')
-        .replace(/```(?:json)?\s*$/i, '')
-        .trim();
 
     return { cleanText, cvData };
 }
@@ -163,19 +87,17 @@ RÈGLES D'OR DE RÉDACTION :
    - [Conseil 1 pour maximiser le passage des filtres]
    - [Conseil 2 pour valoriser les réalisations]
 
-4. Termine OBLIGATOIREMENT ta réponse en insérant le tag spécial suivant à la TOUTE FIN :
+4. Termine OBLIGATOIREMENT ta réponse en insérant le tag spécial suivant sur UNE SEULE LIGNE :
    [AUTO_FILL_CV: {"personal":{"firstName":"","lastName":"","title":"","email":"","phone":"","city":"","mobility":"Télétravail & Hybride","website":"","linkedin":"","github":"","summary":""},"skills":[{"name":"","level":85,"category":"hard"}],"softSkills":[],"tools":[],"languages":[{"name":"","level":""}],"experiences":[{"id":"exp-1","position":"","company":"","city":"","startDate":"YYYY-MM","endDate":"","current":false,"description":"• Réalisation chiffrée avec verbe d'action"}],"education":[{"id":"edu-1","degree":"","school":"","city":"","year":"YYYY","description":""}],"projects":[]}]
 
 5. DÉTAIL DU JSON [AUTO_FILL_CV: ...] :
-   - Remplis TOUS les champs disponibles à partir des propos du candidat.
-   - Extrais le prénom ("firstName") et le nom ("lastName") si mentionnés.
+   - Extrais le prénom et le nom si mentionnés.
    - "personal.title" : Donne un intitulé de poste noble et précis (ex: "Lead Développeur Full-Stack Python & React / Cloud & SQL").
-   - "personal.summary" : Rédige une biographie professionnelle de haute volée (3-4 lignes denses, percutantes et axées sur l'impact).
+   - "personal.summary" : Rédige une biographie professionnelle de haute volée (3-4 lignes denses, engageantes, axées sur les résultats).
    - "experiences" : Transforme chaque expérience en puces percutantes commençant par des verbes d'action avec métriques (ex: "• Développement d'APIs REST sous Django et FastAPI traitant 50k requêtes/jour").
    - "skills" : Liste 4 à 8 compétences techniques majeures avec leur niveau (85 à 95).
    - "tools" : Les outils logiciels professionnels (Docker, Git, SQL, Linux, etc.).
-   - "education" : Le diplôme et l'école (ex: Master USTHB).
-   - RÈGLE TECHNIQUE : Le JSON doit être valide (guillemets doubles stricts, pas de virgule traînante).
+   - "education" : Le diplôme et l'école.
 
 Données actuelles du CV du candidat (si disponibles) :
 ${currentCvData ? JSON.stringify(currentCvData).substring(0, 3000) : 'Aucune donnée préalable'}`;

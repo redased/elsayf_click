@@ -234,49 +234,16 @@ Collez votre parcours brut, votre profil LinkedIn, vos notes d'expérience ou im
     }
   };
 
-  // Extraction tolérante du tag [AUTO_FILL_CV: {...}]
+  // Extraction et application du tag [AUTO_FILL_CV: {...}]
   const parseAutoFillPayload = (content) => {
     if (!content) return null;
-    const tagIdx = content.indexOf('[AUTO_FILL_CV:');
-    if (tagIdx === -1) return null;
-    const braceStart = content.indexOf('{', tagIdx);
-    if (braceStart === -1) return null;
-
-    let depth = 0;
-    let inString = false;
-    let escape = false;
-
-    for (let i = braceStart; i < content.length; i++) {
-      const char = content[i];
-      if (escape) { escape = false; continue; }
-      if (char === '\\') { escape = true; continue; }
-      if (char === '"') { inString = !inString; continue; }
-      if (!inString) {
-        if (char === '{') depth++;
-        else if (char === '}') {
-          depth--;
-          if (depth === 0) {
-            const rawJson = content.substring(braceStart, i + 1);
-            try {
-              return JSON.parse(rawJson);
-            } catch (e1) {
-              try {
-                const sanitized = rawJson.replace(/[\u0000-\u001F]+/g, (c) => (c === '\n' ? '\\n' : c === '\t' ? '\\t' : ' '));
-                return JSON.parse(sanitized);
-              } catch (e2) {
-                try {
-                  const evalFn = new Function('return (' + rawJson + ');');
-                  return evalFn();
-                } catch (e3) {
-                  return null;
-                }
-              }
-            }
-          }
-        }
-      }
+    const match = content.match(/\[AUTO_FILL_CV:\s*({[\s\S]*?})\]/);
+    if (!match || !match[1]) return null;
+    try {
+      return JSON.parse(match[1]);
+    } catch (e) {
+      return null;
     }
-    return null;
   };
 
   const handleApplyPayload = (payload) => {
@@ -472,14 +439,9 @@ Collez votre parcours brut, votre profil LinkedIn, vos notes d'expérience ou im
                 {currentMessages.map((msg, i) => {
                   const isUser = msg.role === 'user';
                   const autoFillData = !isUser ? (msg.cvData || parseAutoFillPayload(msg.content)) : null;
-                  let cleanContent = isUser ? (msg.displayContent || msg.content) : msg.content;
-                  if (!isUser && cleanContent) {
-                    const tagIdx = cleanContent.indexOf('[AUTO_FILL_CV:');
-                    if (tagIdx !== -1) {
-                      cleanContent = cleanContent.substring(0, tagIdx).trim();
-                    }
-                    cleanContent = cleanContent.replace(/\[AUTO_FILL_CV:[\s\S]*?$/i, '').trim();
-                  }
+                  const cleanContent = !isUser
+                    ? msg.content.replace(/\[AUTO_FILL_CV:[\s\S]*?\]/, '').trim()
+                    : msg.displayContent || msg.content;
 
                   return (
                     <div key={i} className={`flex flex-col ${isUser ? 'items-end' : 'items-start'} space-y-2`}>

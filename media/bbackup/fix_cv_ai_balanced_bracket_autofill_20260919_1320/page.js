@@ -74,7 +74,6 @@ export default function CVBuilderPage() {
   const [cloudSaveSuccess, setCloudSaveSuccess] = useState(false);
   const [showAtsAudit, setShowAtsAudit] = useState(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-  const [aiToast, setAiToast] = useState(null);
   const hasTrackedCreation = useRef(false);
 
   // Score ATS calculé en temps réel
@@ -243,108 +242,27 @@ export default function CVBuilderPage() {
     }
   }, [data, config, isLoaded]);
 
-  // Remplissage automatique des champs par l'IA avec normalisation stricte
+  // Remplissage automatique des champs par l'IA
   const handleAutoFillFromAI = (aiData) => {
     if (!aiData) return;
     setData((prev) => {
-      // 1. Infos personnelles
-      const p = aiData.personal || {};
-      const newPersonal = {
-        ...prev.personal,
-        firstName: p.firstName || prev.personal.firstName,
-        lastName: p.lastName || prev.personal.lastName,
-        title: p.title || prev.personal.title,
-        summary: p.summary || prev.personal.summary,
-        email: p.email || prev.personal.email,
-        phone: p.phone || prev.personal.phone,
-        city: p.city || prev.personal.city,
-        mobility: p.mobility || prev.personal.mobility,
-        website: p.website || prev.personal.website,
-        linkedin: p.linkedin || prev.personal.linkedin,
-        github: p.github || prev.personal.github,
-      };
-
-      // 2. Compétences techniques (conversion string -> objet si besoin)
-      let newSkills = prev.skills;
-      if (Array.isArray(aiData.skills) && aiData.skills.length > 0) {
-        newSkills = aiData.skills.map((s, idx) => {
-          if (typeof s === 'string') {
-            return { id: `skill-${Date.now()}-${idx}`, name: s, level: 85, category: 'hard' };
-          }
-          return {
-            id: s.id || `skill-${Date.now()}-${idx}`,
-            name: s.name || '',
-            level: Number(s.level) || 85,
-            category: s.category || 'hard'
-          };
-        });
-      }
-
-      // 3. Outils
-      let newTools = prev.tools;
-      if (Array.isArray(aiData.tools) && aiData.tools.length > 0) {
-        newTools = aiData.tools.map((t) => (typeof t === 'string' ? t : (t.name || String(t))));
-      }
-
-      // 4. Soft Skills
-      let newSoftSkills = prev.softSkills;
-      if (Array.isArray(aiData.softSkills) && aiData.softSkills.length > 0) {
-        newSoftSkills = aiData.softSkills.map((sk) => (typeof sk === 'string' ? sk : (sk.name || String(sk))));
-      }
-
-      // 5. Expériences professionnelles
-      let newExperiences = prev.experiences;
-      if (Array.isArray(aiData.experiences) && aiData.experiences.length > 0) {
-        newExperiences = aiData.experiences.map((exp, idx) => ({
-          id: exp.id || `exp-${Date.now()}-${idx}`,
-          position: exp.position || '',
-          company: exp.company || '',
-          city: exp.city || '',
-          startDate: exp.startDate || '',
-          endDate: exp.endDate || '',
-          current: Boolean(exp.current),
-          description: exp.description || ''
-        }));
-      }
-
-      // 6. Formations
-      let newEducation = prev.education;
-      if (Array.isArray(aiData.education) && aiData.education.length > 0) {
-        newEducation = aiData.education.map((edu, idx) => ({
-          id: edu.id || `edu-${Date.now()}-${idx}`,
-          degree: edu.degree || '',
-          school: edu.school || '',
-          city: edu.city || '',
-          year: edu.year || '',
-          description: edu.description || ''
-        }));
-      }
-
-      // 7. Langues
-      let newLanguages = prev.languages;
-      if (Array.isArray(aiData.languages) && aiData.languages.length > 0) {
-        newLanguages = aiData.languages.map((l, idx) => {
-          if (typeof l === 'string') return { name: l, level: 'Courant' };
-          return { name: l.name || '', level: l.level || 'Courant' };
-        });
-      }
-
-      return {
+      const merged = {
         ...prev,
-        personal: newPersonal,
-        skills: newSkills,
-        tools: newTools,
-        softSkills: newSoftSkills,
-        experiences: newExperiences,
-        education: newEducation,
-        languages: newLanguages,
+        personal: {
+          ...prev.personal,
+          ...(aiData.personal || {}),
+        },
+        skills: aiData.skills && aiData.skills.length > 0 ? aiData.skills : prev.skills,
+        softSkills: aiData.softSkills && aiData.softSkills.length > 0 ? aiData.softSkills : prev.softSkills,
+        tools: aiData.tools && aiData.tools.length > 0 ? aiData.tools : prev.tools,
+        languages: aiData.languages && aiData.languages.length > 0 ? aiData.languages : prev.languages,
+        experiences: aiData.experiences && aiData.experiences.length > 0 ? aiData.experiences : prev.experiences,
+        education: aiData.education && aiData.education.length > 0 ? aiData.education : prev.education,
         projects: aiData.projects && aiData.projects.length > 0 ? aiData.projects : prev.projects,
         certifications: aiData.certifications && aiData.certifications.length > 0 ? aiData.certifications : prev.certifications,
       };
+      return merged;
     });
-
-    setAiToast('✨ Tous vos champs de CV ont été remplis par l\'IA !');
-    setTimeout(() => setAiToast(null), 5000);
     trackCvAction('AI_AUTOFILL');
   };
 
@@ -713,14 +631,6 @@ export default function CVBuilderPage() {
           </div>
         )}
       </header>
- 
-      {/* Toast Notification IA Auto-Fill */}
-      {aiToast && (
-        <div className="fixed top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-full bg-emerald-600 text-white font-bold text-xs shadow-2xl flex items-center gap-2 border border-emerald-300 animate-in fade-in slide-in-from-top-3 duration-200">
-          <Sparkles size={14} className="text-yellow-300 animate-spin" />
-          <span>{aiToast}</span>
-        </div>
-      )}
 
       {/* ========================================================================= */}
       {/* 2. CONTENU PRINCIPAL & STUDIO WORKSPACE                                   */}
