@@ -9,6 +9,7 @@ import {
 import { useSession } from 'next-auth/react';
 import CVEditor from '@/components/cv/CVEditor';
 import CVPreview from '@/components/cv/CVPreview';
+import AskAICVButton from '@/components/cv/AskAICVButton';
 import { PRESET_PROFILES } from '@/components/cv/defaultPresets';
 import { downloadDirectPDF, printViaIsolatedIframe } from '@/components/cv/exportPDF';
 import AdSenseAd from '@/components/AdSenseAd';
@@ -240,6 +241,30 @@ export default function CVBuilderPage() {
       console.warn('Erreur sauvegarde localStorage CV:', e);
     }
   }, [data, config, isLoaded]);
+
+  // Remplissage automatique des champs par l'IA
+  const handleAutoFillFromAI = (aiData) => {
+    if (!aiData) return;
+    setData((prev) => {
+      const merged = {
+        ...prev,
+        personal: {
+          ...prev.personal,
+          ...(aiData.personal || {}),
+        },
+        skills: aiData.skills && aiData.skills.length > 0 ? aiData.skills : prev.skills,
+        softSkills: aiData.softSkills && aiData.softSkills.length > 0 ? aiData.softSkills : prev.softSkills,
+        tools: aiData.tools && aiData.tools.length > 0 ? aiData.tools : prev.tools,
+        languages: aiData.languages && aiData.languages.length > 0 ? aiData.languages : prev.languages,
+        experiences: aiData.experiences && aiData.experiences.length > 0 ? aiData.experiences : prev.experiences,
+        education: aiData.education && aiData.education.length > 0 ? aiData.education : prev.education,
+        projects: aiData.projects && aiData.projects.length > 0 ? aiData.projects : prev.projects,
+        certifications: aiData.certifications && aiData.certifications.length > 0 ? aiData.certifications : prev.certifications,
+      };
+      return merged;
+    });
+    trackCvAction('AI_AUTOFILL');
+  };
 
   // Presets en 1 clic
   const handleLoadPreset = (presetKey) => {
@@ -878,6 +903,9 @@ export default function CVBuilderPage() {
           </button>
         </div>
       </div>
+
+      {/* Assistant IA Flottant avec Remplissage Automatique */}
+      <AskAICVButton currentCvData={data} onApplyToCV={handleAutoFillFromAI} />
     </div>
   );
 }
