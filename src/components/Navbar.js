@@ -15,11 +15,18 @@ export default function Navbar() {
   const { data: session } = useSession();
 
   const isSuperAdmin = session?.user?.role === 'SUPER_ADMIN';
+  const [isMyCv, setIsMyCv] = useState(false);
   const hasRStatAccess =
     session?.user?.role === 'R_STAT_ADMIN' ||
     session?.user?.role === 'SUPER_ADMIN' ||
     session?.user?.role === 'ADMIN' ||
     session?.user?.rStatAdminAccess === true;
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsMyCv(window.location.hostname.toLowerCase().includes('mycv.click'));
+    }
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -77,74 +84,97 @@ export default function Navbar() {
     >
       <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="relative w-12 h-12 md:w-16 md:h-16 transition-transform group-hover:scale-110">
-            <img src="/logo.png?v=2" alt="El Sayf Logo" className="w-full h-full object-contain" />
+          <div className="relative w-10 h-10 md:w-12 md:h-12 transition-transform group-hover:scale-110">
+            <img src="/logo.png?v=2" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col leading-tight">
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-[#a78bfa]">
-              eL Sayf
+            <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white to-[#a78bfa]">
+              {isMyCv ? 'MyCV.click' : 'eL Sayf'}
             </span>
-            <span className="text-[10px] text-gray-400 font-arabic tracking-wider uppercase">
-              E-Learning Platform
+            <span className="text-[10px] text-gray-400 tracking-wider uppercase font-semibold">
+              {isMyCv ? 'Studio CV Pro • Formats A4 & ATS' : 'E-Learning Platform'}
             </span>
           </div>
         </Link>
 
-        <div className="hidden md:flex items-center gap-8">
-          <Link href="/" className="text-gray-300 hover:text-[#a78bfa] transition-colors">{t('nav.home')}</Link>
+        <div className="hidden md:flex items-center gap-7">
+          {isMyCv ? (
+            <>
+              <a href="#studio" className="text-white font-bold text-sm hover:text-[#a78bfa] transition-colors flex items-center gap-1.5">
+                <FileText size={15} className="text-[#a78bfa]" />
+                <span>Créer mon CV</span>
+              </a>
+              <a href="#guide-ats" className="text-gray-300 hover:text-[#a78bfa] transition-colors text-sm font-medium">
+                Guide ATS
+              </a>
+              <a href="#modeles" className="text-gray-300 hover:text-[#a78bfa] transition-colors text-sm font-medium">
+                6 Modèles A4
+              </a>
+              <a href="#faq" className="text-gray-300 hover:text-[#a78bfa] transition-colors text-sm font-medium">
+                FAQ
+              </a>
+              <a href="https://elsayf.click" target="_blank" rel="noopener noreferrer" className="text-[#a78bfa] hover:text-purple-300 transition-colors text-xs font-semibold px-2.5 py-1 rounded-lg bg-purple-500/15 border border-purple-500/30">
+                Formations Elsayf ↗
+              </a>
+            </>
+          ) : (
+            <>
+              <Link href="/" className="text-gray-300 hover:text-[#a78bfa] transition-colors">{t('nav.home')}</Link>
 
-          {/* Menu déroulant Formations */}
-          <div className="relative">
-            <button
-              onMouseEnter={() => setShowCoursesMenu(true)}
-              onClick={() => setShowCoursesMenu(!showCoursesMenu)}
-              className="flex items-center gap-1 text-gray-300 hover:text-[#a78bfa] transition-colors"
-            >
-              <BookOpen size={18} />
-              Formations
-              <ChevronDown size={16} className={`transition-transform ${showCoursesMenu ? 'rotate-180' : ''}`} />
-            </button>
+              {/* Menu déroulant Formations */}
+              <div className="relative">
+                <button
+                  onMouseEnter={() => setShowCoursesMenu(true)}
+                  onClick={() => setShowCoursesMenu(!showCoursesMenu)}
+                  className="flex items-center gap-1 text-gray-300 hover:text-[#a78bfa] transition-colors"
+                >
+                  <BookOpen size={18} />
+                  Formations
+                  <ChevronDown size={16} className={`transition-transform ${showCoursesMenu ? 'rotate-180' : ''}`} />
+                </button>
 
-            {showCoursesMenu && (
-              <div
-                style={{ animation: 'dropdownFadeIn 0.15s ease-out' }}
-                onMouseLeave={() => setShowCoursesMenu(false)}
-                className="absolute top-full left-0 mt-2 w-72 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50"
-              >
-                <div className="p-2">
-                  <Link
-                    href="/courses"
-                    className="block px-4 py-2 text-sm font-medium text-[#a78bfa] hover:bg-white/5 rounded-lg"
-                    onClick={() => setShowCoursesMenu(false)}
+                {showCoursesMenu && (
+                  <div
+                    style={{ animation: 'dropdownFadeIn 0.15s ease-out' }}
+                    onMouseLeave={() => setShowCoursesMenu(false)}
+                    className="absolute top-full left-0 mt-2 w-72 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50"
                   >
-                    Voir toutes les formations →
-                  </Link>
-                  <div className="border-t border-gray-700 my-2"></div>
-                  {courses.map((course) => (
-                    <Link
-                      key={course.slug}
-                      href={`/courses/${course.slug}`}
-                      onClick={() => setShowCoursesMenu(false)}
-                      className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                    >
-                      {course.title}
-                    </Link>
-                  ))}
-                </div>
+                    <div className="p-2">
+                      <Link
+                        href="/courses"
+                        className="block px-4 py-2 text-sm font-medium text-[#a78bfa] hover:bg-white/5 rounded-lg"
+                        onClick={() => setShowCoursesMenu(false)}
+                      >
+                        Voir toutes les formations →
+                      </Link>
+                      <div className="border-t border-gray-700 my-2"></div>
+                      {courses.map((course) => (
+                        <Link
+                          key={course.slug}
+                          href={`/courses/${course.slug}`}
+                          onClick={() => setShowCoursesMenu(false)}
+                          className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                        >
+                          {course.title}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          <Link
-            href="/cv"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600/30 via-purple-600/30 to-indigo-600/30 hover:from-violet-600/50 hover:to-indigo-600/50 text-white border border-violet-400/40 transition-all hover:scale-105 shadow-[0_0_15px_rgba(167,139,250,0.25)] group"
-          >
-            <FileText size={15} className="text-[#a78bfa]" />
-            <span className="font-bold text-xs tracking-wide">Créer mon CV</span>
-            <span className="px-1.5 py-0.2 text-[9px] font-black rounded-full bg-[#a78bfa] text-black">
-              PRO
-            </span>
-          </Link>
+              <Link
+                href="/cv"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-violet-600/30 via-purple-600/30 to-indigo-600/30 hover:from-violet-600/50 hover:to-indigo-600/50 text-white border border-violet-400/40 transition-all hover:scale-105 shadow-[0_0_15px_rgba(167,139,250,0.25)] group"
+              >
+                <FileText size={15} className="text-[#a78bfa]" />
+                <span className="font-bold text-xs tracking-wide">Créer mon CV</span>
+                <span className="px-1.5 py-0.2 text-[9px] font-black rounded-full bg-[#a78bfa] text-black">
+                  PRO
+                </span>
+              </Link>
+            </>
+          )}
 
           <LanguageSwitcher />
 

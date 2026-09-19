@@ -14,12 +14,6 @@ export function middleware(request) {
     if (pathname === '/') {
       return NextResponse.rewrite(new URL('/cv', request.url));
     }
-    
-    // Si l'utilisateur tape explicitement "/cv" sur mycv.click,
-    // on le redirige proprement vers "/" pour garder une URL courte et nette.
-    if (pathname === '/cv') {
-      return NextResponse.redirect(new URL('/', request.url));
-    }
   }
 
   return NextResponse.next();

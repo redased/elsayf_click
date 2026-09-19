@@ -29,6 +29,16 @@ export default function CVBuilderPage() {
   const [isLoaded, setIsLoaded] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
 
+  // Titre dynamique selon le domaine
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isMyCv = window.location.hostname.toLowerCase().includes('mycv.click');
+      document.title = isMyCv
+        ? 'MyCV.click • Créateur de CV en Ligne Gratuit & Professionnel (Format A4 & ATS)'
+        : 'Studio CV Pro • Créateur de CV en Ligne | Elsayf';
+    }
+  }, []);
+
   // Charger depuis le localStorage au montage
   useEffect(() => {
     try {
@@ -272,7 +282,7 @@ export default function CVBuilderPage() {
       `}</style>
 
       {/* Header Section */}
-      <div className="max-w-7xl mx-auto mb-6 print:hidden">
+      <div id="studio" className="max-w-7xl mx-auto mb-6 print:hidden">
         {/* Bandeau d'état (Connecté vs Visiteur invité) */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-2xl bg-gradient-to-r from-purple-950/40 via-slate-900/60 to-indigo-950/40 border border-purple-500/20 text-xs mb-4">
           <div className="flex items-center gap-2 text-gray-300">
@@ -420,7 +430,7 @@ export default function CVBuilderPage() {
         <AdSenseAd slot="cv-top-leaderboard" format="auto" className="my-6" />
 
         {/* Guide d'optimisation ATS */}
-        <section className="p-8 md:p-10 rounded-3xl bg-[#0b1022] border border-gray-800/80 shadow-2xl relative overflow-hidden">
+        <section id="guide-ats" className="p-8 md:p-10 rounded-3xl bg-[#0b1022] border border-gray-800/80 shadow-2xl relative overflow-hidden scroll-mt-24">
           <div className="absolute top-0 right-0 w-96 h-96 bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
           
           <div className="max-w-3xl mb-8">
@@ -479,7 +489,7 @@ export default function CVBuilderPage() {
         </section>
 
         {/* Panorama des 6 modèles professionnels */}
-        <section className="space-y-6">
+        <section id="modeles" className="space-y-6 scroll-mt-24">
           <div className="text-center max-w-2xl mx-auto space-y-2">
             <span className="text-xs font-bold uppercase tracking-wider text-purple-400">
               Designs & Typographies
@@ -554,7 +564,7 @@ export default function CVBuilderPage() {
         <AdSenseAd slot="cv-middle-slot" format="auto" className="my-6" />
 
         {/* FAQ Accordéon Recrutement & CV */}
-        <section className="p-8 md:p-10 rounded-3xl bg-[#0b1022] border border-gray-800/80 space-y-6">
+        <section id="faq" className="p-8 md:p-10 rounded-3xl bg-[#0b1022] border border-gray-800/80 space-y-6 scroll-mt-24">
           <div className="flex items-center gap-2 text-purple-400 text-xs font-bold uppercase tracking-wider">
             <HelpCircle size={16} /> Questions Fréquentes
           </div>

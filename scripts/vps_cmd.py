@@ -14,9 +14,11 @@ def run_vps_cmd(cmd):
     err = stderr.read().decode('ascii', 'replace')
     
     if out:
-        print(out)
+        sys.stdout.buffer.write(out.encode('utf-8', 'replace'))
+        sys.stdout.buffer.flush()
     if err:
-        sys.stderr.write(err + '\n')
+        sys.stderr.buffer.write(err.encode('utf-8', 'replace'))
+        sys.stderr.buffer.flush()
         
     ssh.close()
 
