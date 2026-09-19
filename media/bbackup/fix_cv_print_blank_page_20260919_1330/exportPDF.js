@@ -71,16 +71,16 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
 
   const iframe = document.createElement('iframe');
   iframe.id = 'cv-isolated-print-frame';
-  // Positionnée hors champ visible SANS la masquer par opacity:0.01 ou display:none
-  // pour que le moteur d'impression Chromium / Edge ne la rende pas blanche
+  // IMPORTANT : L'iframe DOIT avoir des dimensions physiques réelles (210mm x 297mm)
+  // sinon Chromium la considère comme vide et imprime une page blanche !
   iframe.style.position = 'fixed';
-  iframe.style.left = '-9999px';
-  iframe.style.top = '0';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
   iframe.style.width = '210mm';
   iframe.style.height = '297mm';
   iframe.style.border = 'none';
-  iframe.style.opacity = '1';
-  iframe.style.visibility = 'visible';
+  iframe.style.opacity = '0.01';
+  iframe.style.pointerEvents = 'none';
   iframe.style.zIndex = '-9999';
   document.body.appendChild(iframe);
 
@@ -91,12 +91,8 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
   }
 
   // Récupérer toutes les feuilles de styles Tailwind et polices
-  // en filtrant les styles parents qui masquent body * pour éviter de blanchir l'iframe
   let stylesHtml = '';
   document.querySelectorAll('link[rel="stylesheet"], style').forEach((node) => {
-    if (node.tagName === 'STYLE' && (node.textContent.includes('visibility: hidden') || node.textContent.includes('body *'))) {
-      return;
-    }
     stylesHtml += node.outerHTML;
   });
 
@@ -106,12 +102,11 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
     <html lang="fr">
     <head>
       <meta charset="utf-8">
-      <base href="${typeof window !== 'undefined' ? window.location.origin : ''}/">
       <title>${title}</title>
       ${stylesHtml}
       <style>
         @page {
-          size: 210mm 297mm !important;
+          size: A4 portrait !important;
           margin: 0mm !important;
         }
         *, *::before, *::after {
@@ -124,31 +119,27 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
           margin: 0 !important;
           padding: 0 !important;
           width: 210mm !important;
+          height: 297mm !important;
           min-height: 297mm !important;
+          max-height: 297mm !important;
           background: #ffffff !important;
           color: #000000 !important;
-          visibility: visible !important;
-          opacity: 1 !important;
-          overflow: visible !important;
+          overflow: hidden !important;
         }
-        /* GARANTIE FORMELLE : Visibilité et opacité totales sur l'ensemble de l'arbre DOM */
-        body, body *, #cv-printable-area, #cv-printable-area *, #cv-clean-wrapper, #cv-clean-wrapper * {
-          visibility: visible !important;
-          opacity: 1 !important;
-        }
-        #cv-printable-area, #cv-clean-wrapper {
+        #cv-clean-wrapper {
           width: 210mm !important;
+          height: 297mm !important;
           min-height: 297mm !important;
+          max-height: 297mm !important;
           margin: 0 !important;
           padding: 0 !important;
           transform: none !important;
           border: none !important;
           box-shadow: none !important;
           background: #ffffff !important;
-          overflow: visible !important;
-          position: static !important;
+          overflow: hidden !important;
         }
-        #cv-printable-area > div, #cv-clean-wrapper > div {
+        #cv-clean-wrapper > div {
           transform: none !important;
           margin: 0 !important;
           box-shadow: none !important;
@@ -157,7 +148,7 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
       </style>
     </head>
     <body>
-      <div id="cv-printable-area" class="cv-clean-wrapper">
+      <div id="cv-clean-wrapper">
         ${element.innerHTML}
       </div>
     </body>
@@ -165,24 +156,14 @@ export function printViaIsolatedIframe(elementId, title = 'CV Elsayf') {
   `);
   doc.close();
 
-  // Déclencher l'impression dès que les polices et ressources sont prêtes
-  const doPrint = () => {
+  // Attendre 500ms que le DOM et les polices de l'iframe soient évalués
+  setTimeout(() => {
     try {
       iframe.contentWindow?.focus();
       iframe.contentWindow?.print();
     } catch (e) {
-      console.warn('Erreur print iframe, bascule sur window.print:', e);
+      console.warn('Erreur print iframe:', e);
       window.print();
     }
-  };
-
-  if (iframe.contentWindow?.document?.fonts) {
-    iframe.contentWindow.document.fonts.ready.then(() => {
-      setTimeout(doPrint, 250);
-    }).catch(() => {
-      setTimeout(doPrint, 350);
-    });
-  } else {
-    setTimeout(doPrint, 350);
-  }
+  }, 500);
 }

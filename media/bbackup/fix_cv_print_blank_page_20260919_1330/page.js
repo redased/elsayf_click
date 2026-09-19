@@ -532,28 +532,33 @@ export default function CVBuilderPage() {
             filter: none !important;
             backdrop-filter: none !important;
           }
-          header, nav, footer, .print\\:hidden, #guide-ats {
+          header, nav, footer, .print\\:hidden {
             display: none !important;
+          }
+          body * {
+            visibility: hidden !important;
           }
           #cv-printable-area, #cv-printable-area * {
             visibility: visible !important;
-            opacity: 1 !important;
           }
           #cv-printable-area {
-            position: relative !important;
-            left: auto !important;
-            top: auto !important;
-            margin: 0 auto !important;
+            position: fixed !important;
+            left: 0mm !important;
+            top: 0mm !important;
+            margin: 0mm !important;
             padding: 0mm !important;
             width: 210mm !important;
             min-height: 297mm !important;
+            height: 297mm !important;
+            max-height: 297mm !important;
             transform: none !important;
             box-shadow: none !important;
             border: none !important;
             border-radius: 0 !important;
-            overflow: visible !important;
+            overflow: hidden !important;
             background: white !important;
             color: black !important;
+            z-index: 99999999 !important;
           }
         }
       `}</style>
@@ -773,7 +778,7 @@ export default function CVBuilderPage() {
           <div
             className={`lg:col-span-7 h-[calc(100vh-8.5rem)] min-h-[680px] ${
               activeMobileView === 'preview' ? 'block' : 'hidden lg:block'
-            } print:!block print:!w-full print:!col-span-12`}
+            } print:block print:w-full print:col-span-12`}
           >
             <CVPreview data={data} config={config} onPrint={handlePrint} />
           </div>

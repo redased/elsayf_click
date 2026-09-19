@@ -187,7 +187,7 @@ export default function CVPreview({ data, config, onPrint }) {
               left: 0,
               top: 0
             }}
-            className="bg-white text-black shrink-0 transition-all rounded-sm overflow-hidden print:!static print:!transform-none print:!m-0 print:!p-0 print:!w-[210mm] print:!h-[297mm] print:!min-h-[297mm] print:!shadow-none print:!rounded-none print:!visible print:!opacity-100"
+            className="bg-white text-black shrink-0 transition-all rounded-sm overflow-hidden print:!static print:!transform-none print:!m-0 print:!p-0 print:!w-[210mm] print:!h-[297mm] print:!min-h-[297mm] print:!shadow-none print:!rounded-none"
           >
             {renderTemplate()}
           </div>
