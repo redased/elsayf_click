@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   FileText, Users, Download, Printer, Save, Palette, Eye, 
   CheckCircle2, Sparkles, Sliders, ShieldAlert, ArrowLeft, 
-  Clock, Laptop, Smartphone, Search, RefreshCw, Layers, ExternalLink
+  Clock, Laptop, Smartphone, Search, RefreshCw, Layers, ExternalLink, Send
 } from 'lucide-react';
 
 export default function AdminCvPage() {
@@ -33,6 +33,27 @@ export default function AdminCvPage() {
   });
   const [isSavingDesign, setIsSavingDesign] = useState(false);
   const [saveSuccessMessage, setSaveSuccessMessage] = useState('');
+  const [isSendingTelegram, setIsSendingTelegram] = useState(false);
+  const [telegramStatus, setTelegramStatus] = useState('');
+
+  const handleSendTelegramReport = async () => {
+    setIsSendingTelegram(true);
+    setTelegramStatus('Envoi du rapport vers Telegram...');
+    try {
+      const res = await fetch('/api/admin/telegram/report', { method: 'POST' });
+      const data = await res.json();
+      if (data.success) {
+        setTelegramStatus('✅ Rapport envoyé sur Telegram avec succès !');
+      } else {
+        setTelegramStatus(`❌ Erreur: ${data.error || 'Vérifiez vos variables TELEGRAM dans .env'}`);
+      }
+    } catch (e) {
+      setTelegramStatus(`❌ Erreur réseau: ${e.message}`);
+    } finally {
+      setIsSendingTelegram(false);
+      setTimeout(() => setTelegramStatus(''), 7000);
+    }
+  };
 
   const themes = [
     {
@@ -227,8 +248,25 @@ export default function AdminCvPage() {
               <span>mycv.click</span>
               <ExternalLink size={14} />
             </a>
+
+            <button
+              onClick={handleSendTelegramReport}
+              disabled={isSendingTelegram}
+              className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-900/30 transition-all hover:scale-105 cursor-pointer"
+              title="Envoyer un rapport complet Étudiants & CV directement sur votre Telegram"
+            >
+              <Send size={14} className={isSendingTelegram ? 'animate-pulse' : ''} />
+              <span>{isSendingTelegram ? 'Envoi...' : 'Rapport Telegram'}</span>
+            </button>
           </div>
         </div>
+
+        {telegramStatus && (
+          <div className="p-3 rounded-xl bg-sky-950/60 border border-sky-500/40 text-xs sm:text-sm text-sky-200 flex items-center justify-between animate-fadeIn">
+            <span>{telegramStatus}</span>
+            <button onClick={() => setTelegramStatus('')} className="text-gray-400 hover:text-white text-xs">✕</button>
+          </div>
+        )}
 
         {/* Cartes Métriques Clés */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

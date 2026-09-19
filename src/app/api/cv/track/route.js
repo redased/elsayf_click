@@ -47,6 +47,22 @@ export async function POST(request) {
       },
     });
 
+    // Notification Telegram immédiate en cas de téléchargement de CV
+    if (eventType === 'DOWNLOAD_PDF') {
+      try {
+        const { notifyTelegramInstantEvent } = await import('@/lib/telegram');
+        notifyTelegramInstantEvent('CV_DOWNLOAD', {
+          candidateName: candidateName || (data?.personal?.firstName ? `${data.personal.firstName} ${data.personal.lastName || ''}`.trim() : 'Visiteur'),
+          candidateTitle: candidateTitle || data?.personal?.title || 'CV Professionnel',
+          template: template || config?.template || 'developer',
+          deviceType,
+          browser,
+        }).catch(() => {});
+      } catch (e) {
+        // Silencieux pour ne jamais bloquer l'expérience utilisateur
+      }
+    }
+
     // 2. Si l'utilisateur est connecté et que les données de son CV sont fournies,
     // on synchronise / sauvegarde son profil dans la base de données
     let savedProfile = null;

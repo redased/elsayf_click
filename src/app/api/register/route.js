@@ -66,6 +66,17 @@ export async function POST(request) {
             data: userData,
         });
 
+        // Notification Telegram automatique nouvel étudiant
+        try {
+            const { notifyTelegramInstantEvent } = await import('@/lib/telegram');
+            notifyTelegramInstantEvent('NEW_STUDENT', {
+                name: `${firstName} ${lastName}`.trim(),
+                email: email,
+            }).catch(() => {});
+        } catch (e) {
+            // Silencieux
+        }
+
         return NextResponse.json({ message: 'User created successfully', user }, { status: 201 });
 
     } catch (error) {
