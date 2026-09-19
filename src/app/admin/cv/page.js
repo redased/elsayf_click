@@ -193,7 +193,7 @@ export default function AdminCvPage() {
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 flex-wrap">
             <button
               onClick={loadData}
               className="p-2.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 hover:text-white transition-all"
@@ -201,13 +201,30 @@ export default function AdminCvPage() {
             >
               <RefreshCw size={16} />
             </button>
+            <Link
+              href="/cv/builder"
+              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-emerald-900/30 transition-all hover:scale-105"
+              title="Accéder au CV Builder (ancien design conservé)"
+            >
+              <FileText size={14} />
+              <span>CV Builder</span>
+              <ExternalLink size={12} />
+            </Link>
+            <Link
+              href="/cv"
+              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-indigo-900/30 transition-all hover:scale-105"
+            >
+              <Layers size={14} />
+              <span>Galerie Designs</span>
+              <ExternalLink size={12} />
+            </Link>
             <a
               href="https://mycv.click"
               target="_blank"
               rel="noopener noreferrer"
               className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-900/30 transition-all hover:scale-105"
             >
-              <span>Voir mycv.click en direct</span>
+              <span>mycv.click</span>
               <ExternalLink size={14} />
             </a>
           </div>
