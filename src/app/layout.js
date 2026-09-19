@@ -82,7 +82,7 @@ export default async function RootLayout({ children }) {
 
         <Script
           async
-          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-1168470266191675'}`}
           crossOrigin="anonymous"
           strategy="afterInteractive"
         />
