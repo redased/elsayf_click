@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { signIn } from 'next-auth/react';
 import { useSearchParams, useRouter } from 'next/navigation';
 
@@ -9,14 +9,42 @@ export const dynamic = 'force-dynamic';
 
 function LoginContent() {
     const searchParams = useSearchParams();
-    const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
     const router = useRouter();
+    const [isMyCv, setIsMyCv] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setIsMyCv(window.location.hostname.toLowerCase().includes('mycv'));
+        }
+    }, []);
+
+    const defaultCallback = isMyCv ? '/cv/builder' : '/dashboard';
+    const callbackUrl = searchParams.get('callbackUrl') || defaultCallback;
+    const urlError = searchParams.get('error');
 
     const [loadingGoogle, setLoadingGoogle] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loadingForm, setLoadingForm] = useState(false);
+
+    const getErrorMessage = (code) => {
+        if (!code) return '';
+        switch (code) {
+            case 'Configuration':
+                return "Un problème de configuration d'authentification est survenu. Veuillez réessayer.";
+            case 'AccessDenied':
+                return "Accès refusé. Vous n'avez pas l'autorisation de vous connecter.";
+            case 'OAuthCallbackError':
+                return "Erreur lors de la réponse de Google. Veuillez réessayer.";
+            case 'Verification':
+                return "Le lien de vérification a expiré ou a déjà été utilisé.";
+            case 'OAuthSignin':
+                return "Impossible de démarrer la connexion Google.";
+            default:
+                return "Une erreur est survenue lors de la connexion.";
+        }
+    };
 
     const handleGoogle = () => {
         setLoadingGoogle(true);
@@ -36,13 +64,25 @@ function LoginContent() {
         }
     };
 
+    const activeError = error || getErrorMessage(urlError);
+
     return (
         <div className="min-h-screen flex items-center justify-center px-4">
             <div className="glass-card p-8 md:p-12 w-full max-w-md">
                 <div className="text-center mb-8">
-                    <h2 className="text-3xl font-bold mb-2">Bon retour</h2>
-                    <p className="text-gray-400 text-sm">Connectez-vous à votre compte</p>
+                    <h2 className="text-3xl font-bold mb-2">
+                        {isMyCv ? 'MyCV.click' : 'Bon retour'}
+                    </h2>
+                    <p className="text-gray-400 text-sm">
+                        {isMyCv ? 'Connectez-vous pour sauvegarder votre CV en ligne' : 'Connectez-vous à votre compte'}
+                    </p>
                 </div>
+
+                {activeError && (
+                    <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-300 text-sm text-center">
+                        {activeError}
+                    </div>
+                )}
 
                 <div className="space-y-4">
                     <button

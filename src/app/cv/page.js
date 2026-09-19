@@ -1,11 +1,12 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useSession, signOut } from 'next-auth/react';
 import {
   Sparkles, Download, FileText, Zap, Shield, Star, ArrowRight,
   CheckCircle, ChevronRight, Play, Award, Users, Clock,
   Palette, Layout, Code2, Briefcase, GraduationCap, Brush,
-  Globe, Monitor, Smartphone, Check, ChevronDown, X
+  Globe, Monitor, Smartphone, Check, ChevronDown, X, LogIn, User
 } from 'lucide-react';
 
 // ─── Données des templates ──────────────────────────────────────────────────
@@ -337,6 +338,7 @@ function FaqItem({ q, a, isOpen, onToggle }) {
 
 // ─── Page principale ─────────────────────────────────────────────────────────
 export default function MyCVHomePage() {
+  const { data: session } = useSession();
   const [openFaq, setOpenFaq] = useState(null);
   const [activeTemplate, setActiveTemplate] = useState(TEMPLATES[0].id);
   const [isMyCvDomain, setIsMyCvDomain] = useState(false);
@@ -414,13 +416,40 @@ export default function MyCVHomePage() {
             <a href="#faq" className="hover:text-white transition-colors font-medium">FAQ</a>
           </nav>
 
-          <Link
-            href="/cv/builder"
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 transition-all hover:scale-105 shadow-lg shadow-violet-900/30"
-          >
-            <Sparkles size={14} />
-            Créer mon CV
-          </Link>
+          <div className="flex items-center gap-3">
+            {session?.user ? (
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-violet-600/30 border border-violet-500/40 flex items-center justify-center text-[11px] font-bold text-violet-300">
+                  {(session.user.name?.[0] || session.user.email?.[0] || 'U').toUpperCase()}
+                </div>
+                <span className="text-xs text-gray-300 font-medium hidden sm:inline max-w-[120px] truncate">
+                  {session.user.name || session.user.email}
+                </span>
+                <button
+                  onClick={() => signOut()}
+                  className="px-2.5 py-1 rounded-lg text-xs font-medium text-gray-400 hover:text-white hover:bg-white/5 border border-white/10 transition-all cursor-pointer"
+                >
+                  Déconnexion
+                </button>
+              </div>
+            ) : (
+              <Link
+                href="/login?callbackUrl=/cv/builder"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-gray-300 hover:text-white border border-white/10 hover:border-white/25 hover:bg-white/5 transition-all"
+              >
+                <LogIn size={13} />
+                Connexion
+              </Link>
+            )}
+
+            <Link
+              href="/cv/builder"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-black bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:from-violet-500 hover:to-indigo-500 transition-all hover:scale-105 shadow-lg shadow-violet-900/30"
+            >
+              <Sparkles size={14} />
+              Créer mon CV
+            </Link>
+          </div>
         </div>
       </header>
 

@@ -6,6 +6,12 @@ import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 
+// Détection dynamique multi-domaine (elsayf.click ET mycv.click)
+// Supprimer les URLs statiques qui forcent les redirections vers un seul domaine
+delete process.env.AUTH_URL;
+delete process.env.NEXTAUTH_URL;
+process.env.AUTH_TRUST_HOST = "true";
+
 // DEBUG: Check environment variables
 const googleId = process.env.GOOGLE_CLIENT_ID?.trim();
 const googleSecret = process.env.GOOGLE_CLIENT_SECRET?.trim();
@@ -117,6 +123,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 (session.user as any).rStatAdminAccess = token.rStatAdminAccess ?? false;
             }
             return session;
+        },
+        async redirect({ url, baseUrl }) {
+            // Permettre les redirections relatives
+            if (url.startsWith("/")) {
+                return `${baseUrl}${url}`;
+            }
+            // Autoriser les domaines autorisés du projet
+            try {
+                const parsed = new URL(url);
+                if (
+                    parsed.origin === baseUrl ||
+                    parsed.hostname.endsWith("elsayf.click") ||
+                    parsed.hostname.endsWith("mycv.click") ||
+                    parsed.hostname.endsWith("elsayf.statlabo.com") ||
+                    parsed.hostname === "localhost"
+                ) {
+                    return url;
+                }
+            } catch {
+                // Ignore invalid URL
+            }
+            return baseUrl;
         }
     },
     session: {
