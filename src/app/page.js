@@ -2,7 +2,28 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { ArrowRight, CheckCircle, Terminal, Video, Cpu, Zap, Crown, Globe, FileText, Sparkles } from 'lucide-react';
+import {
+  ArrowRight,
+  CheckCircle,
+  Terminal,
+  Video,
+  Cpu,
+  Zap,
+  Crown,
+  Globe,
+  FileText,
+  Sparkles,
+  Shield,
+  BookOpen,
+  Clock,
+  Award,
+  Layers,
+  Check,
+  HelpCircle,
+  ChevronDown,
+  Laptop,
+  Code2
+} from 'lucide-react';
 import CodeEditor from '../components/CodeEditor';
 import AdSenseAd from '../components/AdSenseAd';
 import { useLanguage } from '@/context/LanguageContext';
@@ -24,6 +45,215 @@ const safeParseFeatures = (val) => {
   try { return JSON.parse(val); } catch { return []; }
 };
 
+// 10 Formations Complètes structurées en 4 Pôles d'Excellence
+const ALL_COURSES = [
+  // ── Pôle 1 : Data Analytics & Business Intelligence ──
+  {
+    slug: 'power-bi-business-intelligence-data-analytics',
+    title: 'Power BI & Business Intelligence : Data Analytics, DAX & Dashboards',
+    pole: 'Data & BI',
+    level: 'Débutant à Avancé',
+    duration: '14h de pratique',
+    emoji: '📊',
+    color: 'from-amber-600 to-yellow-600',
+    border: 'border-yellow-500/40',
+    desc: 'Maîtrisez Power BI Desktop, la modélisation Power Query (ETL), les formules DAX avancées et construisez des tableaux de bord interactifs professionnels en Dark Mode.',
+    outcomes: [
+      'ETL complet avec Power Query & nettoyage de données',
+      'Calculs avancés DAX (CALCULATE, RELATED, Time Intelligence)',
+      'Design de Dashboards décisionnels interactifs pour dirigeants'
+    ],
+    project: 'Dashboard financier & commercial prêt à présenter en entreprise'
+  },
+  {
+    slug: 'analyse-donnees-quali-quanti',
+    title: 'Analyse de Données Qualitatives & Quantitatives : Excel et Python pour Novices',
+    pole: 'Data & BI',
+    level: 'Débutant',
+    duration: '10h de pratique',
+    emoji: '📋',
+    color: 'from-blue-600 to-cyan-600',
+    border: 'border-cyan-500/30',
+    desc: 'Apprenez à croiser des statistiques descriptives quantitatives avec des analyses qualitatives textuelles en utilisant la puissance combinée d\'Excel et de scripts Python.',
+    outcomes: [
+      'Statistiques descriptives, moyennes pondérées, écart-types',
+      'Segmentation, corrélations et visualisations graphiques',
+      'Traitement automatisé de questionnaires et feedbacks'
+    ],
+    project: 'Étude d\'impact statistique complète sur données d\'enquêtes réelles'
+  },
+  {
+    slug: 'recherche-operationnelle-python-ia',
+    title: 'Recherche Opérationnelle & Optimisation avec Python & IA',
+    pole: 'Data & BI',
+    level: 'Intermédiaire',
+    duration: '12h de pratique',
+    emoji: '🧠',
+    color: 'from-indigo-600 to-purple-600',
+    border: 'border-indigo-500/30',
+    desc: 'Résolvez des problèmes complexes de logistique, d\'allocation de ressources et de planification industrielle avec les solveurs linéaires Python (PuLP, SciPy) et l\'IA.',
+    outcomes: [
+      'Modélisation mathématique linéaire et programmation sous contraintes',
+      'Optimisation de tournées, gestion de flottes et stocks minimaux',
+      'Assistance IA pour formuler des équations d\'optimisation'
+    ],
+    project: 'Solveur d\'optimisation de chaîne logistique et réduction des coûts'
+  },
+
+  // ── Pôle 2 : Cybersécurité & Sécurité Défensive / Offensive ──
+  {
+    slug: 'cybersecurite-protection-systemes-defensive',
+    title: 'Cybersécurité & Protection des Systèmes : Defensive Security & SOC',
+    pole: 'Cybersécurité',
+    level: 'Intermédiaire',
+    duration: '16h de pratique',
+    emoji: '🛡️',
+    color: 'from-red-600 to-rose-700',
+    border: 'border-red-500/30',
+    desc: 'Devenez analyste SOC Blue Team : hardening Linux, pare-feu UFW, Fail2ban, SIEM Wazuh, détection d\'intrusion Suricata, gestion d\'infrastructure PKI et réponse aux incidents.',
+    outcomes: [
+      'Sécurisation des serveurs de production (Hardening, SSH, UFW, Fail2ban)',
+      'Déploiement et analyse des alertes SIEM avec Wazuh et Suricata',
+      'Procédures de réponse aux incidents et analyse forensique de logs'
+    ],
+    project: 'Mise en place d\'un SOC défensif complet avec alertes en temps réel'
+  },
+  {
+    slug: 'ethical-hacking-securite-web-pentest',
+    title: 'Ethical Hacking & Pentest : Sécurité des Applications Web & OWASP Top 10',
+    pole: 'Cybersécurité',
+    level: 'Intermédiaire à Avancé',
+    duration: '15h de pratique',
+    emoji: '⚔️',
+    color: 'from-cyan-600 to-blue-700',
+    border: 'border-cyan-500/30',
+    desc: 'Auditez la sécurité des sites web de manière éthique : injections SQL, XSS, CSRF, failles SSRF, RCE, IDOR, contournement d\'authentification JWT et scripts Python Red Team.',
+    outcomes: [
+      'Détection et exploitation éthique des failles de l\'OWASP Top 10',
+      'Audit de sécurité d\'APIs REST, tokens JWT et sessions utilisateurs',
+      'Rédaction d\'un rapport d\'audit de vulnérabilités professionnel'
+    ],
+    project: 'Audit de sécurité complet et pentest d\'une application web vulnérable'
+  },
+
+  // ── Pôle 3 : Automatisation & Gestion d'Entreprise ──
+  {
+    slug: 'automatisation-excel-comptabilite-detaillee',
+    title: 'Automatisation Excel & Comptabilité Détaillée avec Python & IA',
+    pole: 'Automatisation & Gestion',
+    level: 'Tous niveaux',
+    duration: '14h de pratique',
+    emoji: '🧾',
+    color: 'from-emerald-600 to-teal-700',
+    border: 'border-emerald-500/30',
+    desc: 'Automatisez la tenue comptable de A à Z : Journal, Grand Livre, Balance à 6 colonnes, Rapprochement bancaire, déclaration de TVA, Bilan et Compte de résultat automatisés.',
+    outcomes: [
+      'Génération automatique des écritures comptables sous Excel et Python',
+      'Rapprochement bancaire intelligent et détection des écarts',
+      'Calcul automatisé des états financiers (Bilan & Compte de Résultat)'
+    ],
+    project: 'Générateur de comptabilité automatisée clé en main pour entreprises'
+  },
+  {
+    slug: 'antigravity-business-excel',
+    title: 'Gestion d\'Entreprise avec Excel & Python : Guide Débutant TPE/PME',
+    pole: 'Automatisation & Gestion',
+    level: 'Débutant',
+    duration: '10h de pratique',
+    emoji: '📈',
+    color: 'from-orange-600 to-amber-600',
+    border: 'border-orange-500/30',
+    desc: 'Pilotez votre entreprise efficacement : suivi de trésorerie, gestion des stocks, gestion des fiches RH, facturation et génération automatique de devis sans logiciel payant.',
+    outcomes: [
+      'Suivi de trésorerie prévisionnelle et indicateurs financiers clés',
+      'Gestion automatisée des stocks et alertes de réapprovisionnement',
+      'Création et export de factures normalisées en PDF'
+    ],
+    project: 'Système ERP allégé Excel/Python pour piloter une PME en temps réel'
+  },
+  {
+    slug: 'python-automatisation-excel-word',
+    title: 'Python pour automatiser Excel & Word : Zéro Répétition',
+    pole: 'Automatisation & Gestion',
+    level: 'Débutant',
+    duration: '8h de pratique',
+    emoji: '⚡',
+    color: 'from-teal-600 to-emerald-600',
+    border: 'border-teal-500/30',
+    desc: 'Éliminez les corvées manuelles bureautiques. Manipulez des centaines de fichiers Excel et Word à la seconde grâce aux bibliothèques openpyxl, pandas et python-docx.',
+    outcomes: [
+      'Fusion, découpage et nettoyage de classeurs Excel en masse',
+      'Génération automatique de rapports et contrats Word personnalisés',
+      'Scripts d\'automatisation programmés sans intervention humaine'
+    ],
+    project: 'Script de génération automatique de 50 contrats et fiches de paie'
+  },
+
+  // ── Pôle 4 : Intelligence Artificielle & Code Augmenté ──
+  {
+    slug: 'google-antigravity-mastery',
+    title: 'Google Antigravity : Maîtrise de l\'IA & du Code Moderne',
+    pole: 'IA & Code',
+    level: 'Tous niveaux',
+    duration: '12h de pratique',
+    emoji: '🤖',
+    color: 'from-violet-600 to-blue-600',
+    border: 'border-violet-500/30',
+    desc: 'Maîtrisez l\'assistant de développement Antigravity pour coder 10x plus vite. Automatisez vos flux, refactorisez votre code et devenez un développeur augmenté par l\'IA.',
+    outcomes: [
+      'Prompting avancé pour l\'ingénierie logicielle et le debug automatique',
+      'Création d\'architectures complètes assistées par agents autonomes',
+      'Industrialisation et bonnes pratiques de clean code avec l\'IA'
+    ],
+    project: 'Développement d\'une application web complète assistée par Antigravity'
+  },
+  {
+    slug: 'antigravity-excel-advanced',
+    title: 'Google Antigravity : Automatisation Excel Avancée & Macros IA',
+    pole: 'IA & Code',
+    level: 'Intermédiaire',
+    duration: '9h de pratique',
+    emoji: '📊',
+    color: 'from-purple-600 to-indigo-600',
+    border: 'border-purple-500/30',
+    desc: 'Associez l\'intelligence artificielle d\'Antigravity avec Python pour générer des classeurs Excel ultra-dynamiques, des macros complexes et des analyses prédictives.',
+    outcomes: [
+      'Génération de formules complexes et scripts Python via requêtes en langage naturel',
+      'Analyse de données volumineuses et détection d\'anomalies par IA',
+      'Création de macros sans jamais avoir à coder en VBA traditionnel'
+    ],
+    project: 'Dashboard prédictif avec modèles d\'analyse automatisés par l\'IA'
+  }
+];
+
+// Données structurées FAQ (Balisage Schema.org pour AdSense & SEO)
+const FAQ_ITEMS = [
+  {
+    q: 'L\'accès aux 10 formations d\'Elsayf est-il réellement 100% gratuit ?',
+    a: 'Oui, l\'ensemble de nos 10 parcours de formation (Data Science, Power BI, Cybersécurité SOC, Pentest OWASP, Automatisation Excel et IA) est accessible gratuitement sans carte bancaire. La gratuité est rendue possible grâce à des partenariats et des publicités ciblées non intrusives conformes aux règles Google AdSense.'
+  },
+  {
+    q: 'Faut-il installer Python ou des logiciels lourds sur mon ordinateur ?',
+    a: 'Non, aucune installation préalable n\'est nécessaire. La plateforme Elsayf intègre un éditeur de code et un simulateur interactif directement dans le navigateur web. Vous pouvez rédiger, exécuter et tester vos scripts Python ou manipuler vos requêtes instantanément depuis n\'importe quel ordinateur.'
+  },
+  {
+    q: 'Quels sont les prérequis pour débuter en Cybersécurité ou en Data Analytics ?',
+    a: 'Nos formations sont calibrées pour accueillir aussi bien les novices complets que les profils en reconversion. Chaque parcours démarre par les fondamentaux conceptuels avant de progresser étape par étape vers des cas pratiques d\'entreprise et des projets concrets.'
+  },
+  {
+    q: 'Comment s\'articule la pédagogie par la pratique d\'Elsayf ?',
+    a: 'Nous rejetons l\'apprentissage purement théorique. Chaque chapitre contient des leçons détaillées, des extraits de code interactifs, des exercices d\'application immédiate et un projet de fin de formation réaliste pouvant être intégré à votre portfolio professionnel.'
+  },
+  {
+    q: 'Puis-je valoriser ces compétences sur mon CV professionnel ?',
+    a: 'Absolument. En plus des compétences techniques acquises, Elsayf met à votre disposition le Studio CV Pro (accessible gratuitement sur la plateforme) pour générer des CV professionnels au format A4 vectoriel adaptés aux critères des recruteurs et aux logiciels de filtrage ATS.'
+  },
+  {
+    q: 'Comment contacter l\'équipe pédagogique en cas de question ou de blocage ?',
+    a: 'Notre équipe de formateurs et développeurs est joignable 7j/7 via notre formulaire de contact ou directement par e-mail à contact@statlabo.com. Nous nous engageons à répondre à toutes les demandes techniques et pédagogiques sous 24 heures ouvrées.'
+  }
+];
+
 export default function Home() {
   const { t } = useLanguage();
   const fadeInUp = {
@@ -36,9 +266,10 @@ export default function Home() {
   const [country, setCountry] = useState('');
   const [plans, setPlans] = useState([]);
   const [plansLoading, setPlansLoading] = useState(true);
+  const [selectedPole, setSelectedPole] = useState('TOUS');
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   useEffect(() => {
-    // Détection géoloc + chargement plans en parallèle
     const fetchGeo = fetch('/api/geo/detect')
       .then(r => r.json())
       .then(d => { if (d.success) { setRegion(d.region); setCountry(d.country); } })
@@ -53,293 +284,273 @@ export default function Home() {
     Promise.all([fetchGeo, fetchPlans]);
   }, []);
 
-  // Plans actifs pour la région détectée (+ GLOBAL)
   const regionalPlans = plans.filter(p => p.region === region || p.region === 'GLOBAL');
-  // Plan le plus pertinent (premier de la région, sinon GLOBAL)
   const mainPlan = regionalPlans[0] || null;
+
+  const polesList = ['TOUS', 'Data & BI', 'Cybersécurité', 'Automatisation & Gestion', 'IA & Code'];
+  const filteredCourses = selectedPole === 'TOUS'
+    ? ALL_COURSES
+    : ALL_COURSES.filter(c => c.pole === selectedPole);
+
+  const toggleFaq = (index) => {
+    setOpenFaqIndex(openFaqIndex === index ? null : index);
+  };
 
   return (
     <div className="flex flex-col gap-20 pb-20 overflow-hidden">
 
-      {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex flex-col justify-center items-center text-center px-4 pt-20">
+      {/* Script JSON-LD FAQPage pour Google AdSense et SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            'mainEntity': FAQ_ITEMS.map(item => ({
+              '@type': 'Question',
+              'name': item.q,
+              'acceptedAnswer': {
+                '@type': 'Answer',
+                'text': item.a
+              }
+            }))
+          })
+        }}
+      />
+
+      {/* ── 1. Hero Section ── */}
+      <section className="relative min-h-[85vh] flex flex-col justify-center items-center text-center px-4 pt-16 sm:pt-20">
         <div className="absolute inset-0 -z-10 bg-[url('/grid.svg')] opacity-20"></div>
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#a78bfa] rounded-full blur-[150px] opacity-20 animate-pulse"></div>
 
         <motion.div {...fadeInUp} className="max-w-4xl mx-auto space-y-6">
-          <span className="px-4 py-2 rounded-full border border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[#a78bfa] text-sm font-semibold tracking-wider uppercase">
-            {t('hero.badge')}
+          <span className="px-4 py-2 rounded-full border border-[#a78bfa]/30 bg-[#a78bfa]/10 text-[#a78bfa] text-xs sm:text-sm font-semibold tracking-wider uppercase inline-flex items-center gap-2">
+            <Sparkles size={14} /> {t('hero.badge')}
           </span>
-          <h1 className="text-5xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-[#a78bfa] leading-tight" dangerouslySetInnerHTML={{ __html: t('hero.title') }}>
+          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-[#a78bfa] leading-tight" dangerouslySetInnerHTML={{ __html: t('hero.title') }}>
           </h1>
-          <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
             {t('hero.subtitle')}
           </p>
-          <div className="flex flex-wrap justify-center gap-4 pt-4">
-            <Link href="/register" className="btn btn-primary text-lg px-8 py-3 rounded-xl flex items-center gap-2">
+
+          <div className="flex flex-wrap justify-center gap-3 sm:gap-4 pt-4">
+            <Link href="/register" className="btn btn-primary text-base sm:text-lg px-7 sm:px-8 py-3 rounded-xl flex items-center gap-2 shadow-lg shadow-purple-600/30">
               {t('hero.start_free')} <ArrowRight size={20} />
             </Link>
+
             <Link
               href="/cv"
-              className="group relative px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white font-bold hover:shadow-[0_0_35px_rgba(167,139,250,0.6)] hover:scale-105 transition-all flex items-center gap-2.5 overflow-hidden border border-violet-400/50"
+              className="group relative px-6 sm:px-8 py-3 rounded-xl bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 text-white font-bold hover:shadow-[0_0_35px_rgba(167,139,250,0.6)] hover:scale-105 transition-all flex items-center gap-2.5 overflow-hidden border border-violet-400/50"
             >
               <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-pink-500"></span>
-              </span>
               <FileText size={18} className="relative z-10 text-yellow-300" />
-              <span className="relative z-10">Créer mon CV Pro</span>
+              <span className="relative z-10 text-sm sm:text-base">Studio CV Pro</span>
               <span className="relative z-10 px-2 py-0.5 text-[10px] font-black rounded-full bg-yellow-300 text-black uppercase tracking-wider">
-                Nouveau
+                Gratuit
               </span>
             </Link>
-            <Link href="/formation-ia" className="group relative px-8 py-3 rounded-xl bg-gray-900 border border-violet-500/50 text-white font-semibold hover:border-violet-500 hover:shadow-[0_0_20px_rgba(167,139,250,0.3)] transition-all flex items-center gap-2 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-violet-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
-              </span>
-              <span className="relative z-10">{t('hero.new_ia')}</span>
+
+            <Link href="#formations" className="btn btn-outline text-base sm:text-lg px-7 sm:px-8 py-3 rounded-xl border-gray-700 text-gray-200 hover:text-white">
+              Découvrir les 10 Formations
             </Link>
-            <Link href="/courses/antigravity-business-excel" className="group relative px-8 py-3 rounded-xl bg-gray-900 border border-emerald-500/50 text-white font-semibold hover:border-emerald-500 hover:shadow-[0_0_20px_rgba(52,211,153,0.3)] transition-all flex items-center gap-2 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/20 to-teal-600/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-              <span className="relative z-10">📈 Gestion Entreprise — GRATUIT</span>
-            </Link>
-            <Link href="#demo" className="btn btn-outline text-lg px-8 py-3 rounded-xl">
-              {t('hero.view_demo')}
-            </Link>
+          </div>
+
+          {/* Badges de Réassurance */}
+          <div className="flex flex-wrap items-center justify-center gap-6 pt-6 text-xs text-gray-400">
+            <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-emerald-400" /> 10 Formations Publiées</span>
+            <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-purple-400" /> Code Direct dans le Navigateur</span>
+            <span className="flex items-center gap-1.5"><CheckCircle size={14} className="text-blue-400" /> Sans Carte Bancaire</span>
           </div>
         </motion.div>
       </section>
 
-      {/* Code Demo Section */}
+      {/* ── 2. Code Demo Section (Valeur Applicative Majeure) ── */}
       <section id="demo" className="container mx-auto px-4">
-        <div className="text-center mb-10">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Codez directement dans le navigateur</h2>
-          <p className="text-gray-400">Environnement pré-configuré pour Python, Django, Docker.</p>
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold uppercase tracking-wider mb-3">
+            <Terminal size={14} /> Environnement Cloud Intégré
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-white">Codez Directement dans Votre Navigateur</h2>
+          <p className="text-gray-400 max-w-xl mx-auto text-sm sm:text-base">
+            Aucun logiciel à installer. Exécutez vos scripts Python, testez vos algorithmes et manipulez vos données en toute sécurité.
+          </p>
         </div>
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
+          initial={{ opacity: 0, scale: 0.96 }}
           whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
+          transition={{ duration: 0.7 }}
           viewport={{ once: true }}
-          className="relative"
+          className="relative max-w-5xl mx-auto"
         >
           <div className="absolute -inset-1 bg-gradient-to-r from-[#a78bfa] to-blue-600 rounded-2xl blur opacity-30"></div>
           <CodeEditor />
         </motion.div>
       </section>
 
-      {/* AdSense Slot 1 */}
+      {/* ── AdSense Slot 1 (Sous la démo de code) ── */}
       <AdSenseAd slot="1234567890" format="horizontal" />
 
-      {/* Features Grid */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="glass-card p-8 hover:bg-[#a78bfa]/5 group">
-            <div className="w-14 h-14 rounded-xl bg-[#a78bfa]/10 flex items-center justify-center text-[#a78bfa] mb-6 group-hover:scale-110 transition-transform">
-              <Terminal size={30} />
-            </div>
-            <h3 className="text-2xl font-bold mb-3">Dev Fullstack</h3>
-            <p className="text-gray-400">Apprenez Django, Docker, et les meilleures pratiques GitHub. De zéro à héros.</p>
+      {/* ── 3. SECTION FORMATIONS ENRICHIE (10 Formations en 4 Pôles d'Excellence) ── */}
+      <section id="formations" className="container mx-auto px-4 py-8 relative">
+        <div className="text-center max-w-3xl mx-auto mb-10 space-y-3">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-xs font-semibold uppercase tracking-wider border border-emerald-500/20">
+            <Award size={14} /> 100% Gratuit & Libre d'Accès
           </div>
-          <div className="glass-card p-8 hover:bg-[#a78bfa]/5 group">
-            <div className="w-14 h-14 rounded-xl bg-[#a78bfa]/10 flex items-center justify-center text-[#a78bfa] mb-6 group-hover:scale-110 transition-transform">
-              <Video size={30} />
-            </div>
-            <h3 className="text-2xl font-bold mb-3">Live Mentoring</h3>
-            <p className="text-gray-400">Intégration native Zoom & Google Meet. Sessions de code en direct avec nos experts.</p>
-          </div>
-          <div className="glass-card p-8 hover:bg-[#a78bfa]/5 group">
-            <div className="w-14 h-14 rounded-xl bg-[#a78bfa]/10 flex items-center justify-center text-[#a78bfa] mb-6 group-hover:scale-110 transition-transform">
-              <Cpu size={30} />
-            </div>
-            <h3 className="text-2xl font-bold mb-3">AI Powered</h3>
-            <p className="text-gray-400">Assistance par Gemini et GPT intégrée. Configurez vos propres clés API pour une expérience personnalisée.</p>
-          </div>
-        </div>
-      </section>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white">
+            Nos Parcours de Formation d'Élite
+          </h2>
+          <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+            Explorez nos 10 formations spécialisées créées par des experts métiers. Projets concrets, cas réels d'entreprise et compétences immédiatement opérationnelles.
+          </p>
 
-      {/* Formations disponibles */}
-      <section className="container mx-auto px-4 py-10 relative mb-20">
-        <div className="text-center mb-10">
-          <span className="px-3 py-1 bg-violet-500/10 text-violet-400 rounded-full text-sm font-semibold mb-4 inline-block border border-violet-500/20">
-            100% Gratuit
-          </span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-3">Nos Formations Disponibles</h2>
-          <p className="text-gray-400">Commencez dès maintenant, aucun paiement requis.</p>
+          {/* Filtres par Pôles d'Excellence */}
+          <div className="flex flex-wrap items-center justify-center gap-2 pt-4">
+            {polesList.map((pole) => (
+              <button
+                key={pole}
+                onClick={() => setSelectedPole(pole)}
+                className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  selectedPole === pole
+                    ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg shadow-purple-600/30'
+                    : 'bg-gray-900/80 text-gray-400 hover:text-white hover:bg-gray-800 border border-gray-800'
+                }`}
+              >
+                {pole === 'TOUS' ? 'Toutes les Formations (10)' : pole}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="grid md:grid-cols-3 gap-6">
-          {[
-            {
-              emoji: '📊',
-              title: 'Power BI & Business Intelligence : Data Analytics & DAX',
-              desc: 'Interface Power BI Desktop, modélisation Power Query (ETL), formules DAX, tableaux de bord interactifs Dark Mode et TP pratique.',
-              slug: 'power-bi-business-intelligence-data-analytics',
-              color: 'from-yellow-600 to-amber-600',
-              border: 'border-yellow-500/40',
-              badge: 'Power BI & Data Analytics'
-            },
-            {
-              emoji: '🛡️',
-              title: 'Cybersécurité & Protection des Systèmes (SOC)',
-              desc: 'Hardening Linux, UFW, Fail2ban, SIEM Wazuh, IDS Suricata, PKI et Réponse aux Incidents. Protection complète Blue Team.',
-              slug: 'cybersecurite-protection-systemes-defensive',
-              color: 'from-red-600 to-rose-700',
-              border: 'border-red-500/30',
-              badge: 'Cybersécurité & SOC'
-            },
-            {
-              emoji: '⚔️',
-              title: 'Ethical Hacking & Audit Web OWASP Top 10',
-              desc: 'Injections SQL, XSS, CSRF, SSRF, RCE, IDOR, Pentesting d\'APIs JWT et scripts Python d\'attaque éthique Red Team.',
-              slug: 'ethical-hacking-securite-web-pentest',
-              color: 'from-cyan-600 to-blue-700',
-              border: 'border-cyan-500/30',
-              badge: 'Ethical Hacking & Pentest'
-            },
-            {
-              emoji: '🧾',
-              title: 'Automatisation Excel & Comptabilité Détaillée',
-              desc: 'Journal, Grand Livre, Balance 6 colonnes, Rapprochement bancaire, TVA, Bilan & Compte de résultat automatisés avec Python.',
-              slug: 'automatisation-excel-comptabilite-detaillee',
-              color: 'from-emerald-600 to-teal-700',
-              border: 'border-emerald-500/30',
-              badge: 'Comptabilité & Finance'
-            },
-            {
-              emoji: '🤖',
-              title: 'Google Antigravity : Maîtrise IA & Code',
-              desc: 'Maîtrisez l\'assistant Antigravity pour coder plus vite grâce à l\'IA. Automatisez vos tâches et devenez un développeur augmenté.',
-              slug: 'google-antigravity-mastery',
-              color: 'from-violet-600 to-blue-600',
-              border: 'border-violet-500/30',
-              badge: 'IA & Productivité'
-            },
-            {
-              emoji: '📊',
-              title: 'Antigravity : Automatisation Excel Avancée',
-              desc: 'Automatisez vos fichiers Excel avec Python et Antigravity. Formules, macros, rapports automatiques — zéro répétition.',
-              slug: 'antigravity-excel-advanced',
-              color: 'from-emerald-600 to-teal-600',
-              border: 'border-emerald-500/30',
-              badge: 'Excel & Python'
-            },
-            {
-              emoji: '📈',
-              title: 'Gestion d\'Entreprise avec Excel & Python',
-              desc: 'Gérez votre TPE/PME avec Excel et Python. Guide complet pour débutants : comptabilité, RH, stocks, rapports — tout automatisé.',
-              slug: 'antigravity-business-excel',
-              color: 'from-orange-600 to-amber-600',
-              border: 'border-orange-500/30',
-              badge: 'Business & Gestion'
-            },
-          ].map((c) => (
-            <Link key={c.slug} href={`/courses/${c.slug}`}
-              className={`group glass-card p-6 border ${c.border} hover:scale-[1.02] transition-all duration-300 flex flex-col gap-4`}>
-              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${c.color} flex items-center justify-center text-2xl shadow-lg`}>
-                {c.emoji}
+
+        {/* Grille des Formations */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
+          {filteredCourses.map((c) => (
+            <div
+              key={c.slug}
+              className={`glass-card p-6 border ${c.border} rounded-3xl hover:border-purple-500/50 hover:scale-[1.01] transition-all duration-300 flex flex-col justify-between bg-gradient-to-b from-gray-900/90 to-[#070c18] group`}
+            >
+              <div className="space-y-4">
+                {/* Header Carte */}
+                <div className="flex items-start justify-between gap-3">
+                  <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${c.color} flex items-center justify-center text-2xl shadow-lg shrink-0`}>
+                    {c.emoji}
+                  </div>
+                  <div className="flex flex-col items-end gap-1">
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 uppercase tracking-wider">
+                      {c.pole}
+                    </span>
+                    <span className="text-[10px] text-gray-400 flex items-center gap-1">
+                      <Clock size={11} /> {c.duration}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Titre & Description */}
+                <div>
+                  <div className="text-xs text-gray-400 font-medium mb-1">{c.level}</div>
+                  <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors leading-snug">
+                    {c.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-400 mt-2 leading-relaxed">
+                    {c.desc}
+                  </p>
+                </div>
+
+                {/* Compétences clés acquises (Valeur Pédagogique AdSense) */}
+                <div className="space-y-1.5 pt-2 border-t border-gray-800/80">
+                  <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Ce que vous apprenez :</div>
+                  {c.outcomes.map((out, idx) => (
+                    <div key={idx} className="flex items-start gap-1.5 text-xs text-gray-300">
+                      <Check size={13} className="text-emerald-400 shrink-0 mt-0.5" />
+                      <span>{out}</span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Projet concret */}
+                <div className="p-2.5 rounded-xl bg-gray-950/60 border border-gray-800/60 text-[11px] text-purple-300">
+                  <strong className="text-white">Projet pratique :</strong> {c.project}
+                </div>
               </div>
-              <div className="flex-1">
-                <span className="text-xs text-gray-500 uppercase tracking-wider">{c.badge}</span>
-                <h3 className="text-lg font-bold text-white mt-1 mb-2 group-hover:text-violet-300 transition-colors">{c.title}</h3>
-                <p className="text-sm text-gray-400 leading-relaxed">{c.desc}</p>
-              </div>
-              <div className="flex items-center justify-between pt-2 border-t border-white/8">
-                <span className="text-xs font-bold text-emerald-400">✓ GRATUIT</span>
-                <span className="text-xs text-violet-400 group-hover:translate-x-1 transition-transform flex items-center gap-1">
-                  Commencer <ArrowRight size={12} />
+
+              {/* Bouton d'accès */}
+              <div className="flex items-center justify-between pt-4 mt-4 border-t border-gray-800/80">
+                <span className="text-xs font-bold text-emerald-400 flex items-center gap-1">
+                  ✓ ACCÈS GRATUIT
                 </span>
+                <Link
+                  href={`/courses/${c.slug}`}
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-purple-600/20 text-purple-300 hover:bg-purple-600 hover:text-white border border-purple-500/30 font-semibold text-xs transition-all group-hover:shadow-lg group-hover:shadow-purple-600/20"
+                >
+                  Suivre la formation <ArrowRight size={14} />
+                </Link>
               </div>
-            </Link>
+            </div>
           ))}
         </div>
-        <div className="text-center mt-8">
-          <Link href="/courses" className="text-sm text-gray-400 hover:text-white transition-colors underline underline-offset-4">
-            Voir toutes les formations →
+
+        <div className="text-center mt-10">
+          <Link
+            href="/courses"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-gray-900 hover:bg-gray-800 border border-gray-700 text-white font-semibold text-sm transition-all shadow-lg"
+          >
+            <BookOpen size={16} /> Explorer l'ensemble du catalogue de cours
           </Link>
         </div>
       </section>
 
-      {/* AdSense Slot 2 */}
-      <AdSenseAd slot="1234567891" format="rectangle" />
+      {/* ── AdSense Slot 2 (Entre catalogue et Méthodologie) ── */}
+      <AdSenseAd slot="1234567891" format="horizontal" />
 
-      {/* ── Parents Section ── */}
-      <section className="container mx-auto px-4 py-20">
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#a78bfa]/10 via-night-blue to-night-blue border border-[#a78bfa]/30 p-8 md:p-16">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#a78bfa]/20 rounded-full blur-3xl -z-10 translate-x-1/2 -translate-y-1/2"></div>
+      {/* ── 4. SECTION MÉTHODOLOGIE & POURQUOI CHOISIR ELSAYF (Contenu éditorial à forte valeur AdSense) ── */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="text-center max-w-2xl mx-auto space-y-2">
+            <span className="text-xs font-bold text-purple-400 uppercase tracking-wider">
+              Une pédagogie conçue pour l'action
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white">
+              Pourquoi se former sur Elsayf ?
+            </h2>
+            <p className="text-gray-400 text-sm sm:text-base">
+              Nous combinons la puissance des environnements web interactifs avec des projets réels d'entreprise pour vous offrir une formation immédiatement valorisable sur le marché de l'emploi.
+            </p>
+          </div>
 
-          <div className="flex flex-col md:flex-row items-center gap-12">
-            <div className="flex-1 space-y-6">
-              <span className="px-4 py-2 rounded-full border border-green-500/30 bg-green-500/10 text-green-400 text-sm font-semibold tracking-wider uppercase">
-                {t('parents.title')}
-              </span>
-              <h2 className="text-4xl md:text-5xl font-bold text-white">
-                {t('parents.title')}
-              </h2>
-              <p className="text-lg text-gray-400">
-                {t('parents.subtitle')}
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="p-8 rounded-3xl bg-gray-900/60 border border-gray-800 hover:border-purple-500/30 transition-all space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                <Laptop size={28} />
+              </div>
+              <h3 className="text-xl font-bold text-white">Apprentissage par la Pratique</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Chaque module est accompagné d'exercices concrets et d'ateliers de code. Vous n'écoutez pas passivement : vous construisez vos propres solutions logicielles dès la première minute.
               </p>
-
-              <div className="grid sm:grid-cols-2 gap-4 pt-4">
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 p-1 bg-green-500/20 rounded-full text-green-500">
-                    <CheckCircle size={16} />
-                  </div>
-                  <p className="text-gray-300 text-sm">{t('parents.card_1_title')}</p>
-                </div>
-                <div className="flex items-start gap-3">
-                  <div className="mt-1 p-1 bg-green-500/20 rounded-full text-green-500">
-                    <CheckCircle size={16} />
-                  </div>
-                  <p className="text-gray-300 text-sm">{t('parents.card_3_title')}</p>
-                </div>
-              </div>
-
-              <div className="pt-6">
-                <Link href="/parents" className="group relative px-8 py-4 rounded-xl bg-green-600 text-white font-bold hover:bg-green-500 transition-all flex items-center gap-2 w-fit shadow-lg shadow-green-500/20">
-                  {t('parents.cta')} <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
             </div>
 
-            <div className="flex-1 relative w-full aspect-video md:aspect-auto">
-              <div className="glass-card p-6 border-green-500/20 relative animate-float">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center text-green-500">
-                    <Globe size={24} />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-white">Espace Parent</h4>
-                    <p className="text-xs text-gray-400 underline lowercase">elsayf.click/parents</p>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
-                    <div className="h-full bg-green-500 w-3/4"></div>
-                  </div>
-                  <div className="flex justify-between text-xs">
-                    <span className="text-gray-500">Progression Enfant</span>
-                    <span className="text-green-500">75%</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="h-8 bg-gray-900 rounded border border-gray-800"></div>
-                    <div className="h-8 bg-gray-900 rounded border border-gray-800"></div>
-                    <div className="h-8 bg-gray-900 rounded border border-gray-800"></div>
-                  </div>
-                </div>
+            <div className="p-8 rounded-3xl bg-gray-900/60 border border-gray-800 hover:border-blue-500/30 transition-all space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                <Shield size={28} />
               </div>
+              <h3 className="text-xl font-bold text-white">Compétences Métiers Très Demandées</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Nos cursus ciblent les domaines les plus recherchés par les recruteurs : analyse décisionnelle Power BI, cybersécurité défensive SOC, audits web éthiques et automatisation Python.
+              </p>
+            </div>
+
+            <div className="p-8 rounded-3xl bg-gray-900/60 border border-gray-800 hover:border-emerald-500/30 transition-all space-y-4">
+              <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                <Cpu size={28} />
+              </div>
+              <h3 className="text-xl font-bold text-white">Accompagnement Assisté par l'IA</h3>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                Découvrez comment démultiplier votre vitesse d'apprentissage grâce aux assistants d'IA générative intégrés (Gemini, Antigravity) pour expliquer les erreurs et refactoriser vos scripts.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── Section Studio CV Pro ── */}
+      {/* ── 5. SECTION STUDIO CV PRO ── */}
       <section className="container mx-auto px-4 py-8">
         <div className="relative rounded-3xl p-8 md:p-12 overflow-hidden border border-violet-500/30 bg-gradient-to-br from-violet-950/40 via-[#0a0f1d] to-indigo-950/40 backdrop-blur-xl shadow-2xl">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#a78bfa] rounded-full blur-[160px] opacity-15 pointer-events-none"></div>
@@ -347,16 +558,16 @@ export default function Home() {
           <div className="grid lg:grid-cols-12 gap-8 items-center relative z-10">
             <div className="lg:col-span-7 space-y-6 text-left">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#a78bfa]/15 border border-[#a78bfa]/30 text-[#a78bfa] text-xs font-bold uppercase tracking-wider">
-                <Sparkles size={14} /> NOUVEAUTÉ • STUDIO CV PRO
+                <Sparkles size={14} /> OUTIL INTÉGRÉ GRATUIT • STUDIO CV PRO
               </div>
               <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
-                Créez un CV d'élite <br />
+                Créez un CV d'Élite <br />
                 <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#a78bfa] via-purple-300 to-indigo-300">
-                  Adapté à votre Spécialité
+                  Calibré pour Décrocher des Entretiens
                 </span>
               </h2>
               <p className="text-gray-300 text-sm md:text-base leading-relaxed">
-                Que vous soyez <strong className="text-white">Développeur</strong>, <strong className="text-white">Responsable RH</strong>, <strong className="text-white">Designer UI/UX</strong> ou <strong className="text-white">Data Analyst</strong>, générez un CV moderne, dynamique et calibré A4 prêt à imprimer et exporter en PDF haute fidélité.
+                Valorisez les compétences acquises dans nos cours. Que vous postuliez comme <strong className="text-white">Data Analyst</strong>, <strong className="text-white">Développeur Python</strong>, <strong className="text-white">Analyste Cybersécurité</strong> ou <strong className="text-white">Gestionnaire financier</strong>, exportez un CV A4 vectoriel optimisé pour les recruteurs et les systèmes ATS.
               </p>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
@@ -370,7 +581,7 @@ export default function Home() {
                 </div>
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
                   <div className="text-lg font-bold text-cyan-400">100%</div>
-                  <div className="text-[11px] text-gray-400">ATS Friendly</div>
+                  <div className="text-[11px] text-gray-400">ATS Compatible</div>
                 </div>
                 <div className="p-3 rounded-xl bg-white/5 border border-white/10 text-center">
                   <div className="text-lg font-bold text-purple-400">Gratuit</div>
@@ -406,11 +617,11 @@ export default function Home() {
                     </div>
                     <div>
                       <div className="text-xs font-bold">Sofiane Mansouri</div>
-                      <div className="text-[10px] text-gray-500">Dev Full-Stack & IA</div>
+                      <div className="text-[10px] text-gray-500">Dev Full-Stack & Data</div>
                     </div>
                   </div>
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-violet-100 text-violet-700">
-                    Template Tech
+                    Template Tech A4
                   </span>
                 </div>
                 <div className="space-y-2 text-[11px]">
@@ -418,14 +629,14 @@ export default function Home() {
                   <div className="h-1.5 bg-gray-200 rounded w-4/5"></div>
                   <div className="pt-2 flex flex-wrap gap-1">
                     <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">Python</span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">Next.js</span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">IA & Gemini</span>
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">Docker</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">Power BI</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">Cybersécurité</span>
+                    <span className="px-1.5 py-0.5 rounded bg-slate-100 text-[9px] font-mono text-slate-700">Antigravity IA</span>
                   </div>
                 </div>
                 <div className="mt-4 pt-3 border-t border-gray-100 flex justify-between items-center text-[10px] text-gray-400">
                   <span>Prêt pour recruteurs & ATS</span>
-                  <span className="text-violet-600 font-bold">A4 Vectoriel</span>
+                  <span className="text-violet-600 font-bold">PDF Haute Définition</span>
                 </div>
               </div>
             </div>
@@ -433,16 +644,72 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Pricing / Access Plans ── */}
-      <section className="container mx-auto px-4 py-20 text-center">
-        <h2 className="text-4xl font-bold mb-4">{t('pricing.title')}</h2>
+      {/* ── 6. Espace Parents ── */}
+      <section className="container mx-auto px-4 py-12">
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#a78bfa]/10 via-night-blue to-night-blue border border-[#a78bfa]/30 p-8 md:p-14">
+          <div className="flex flex-col md:flex-row items-center gap-10">
+            <div className="flex-1 space-y-5">
+              <span className="px-4 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 text-green-400 text-xs font-semibold tracking-wider uppercase inline-flex items-center gap-1.5">
+                <Globe size={14} /> Suivi Pédagogique
+              </span>
+              <h2 className="text-3xl md:text-4xl font-bold text-white">
+                {t('parents.title')}
+              </h2>
+              <p className="text-gray-300 text-sm sm:text-base leading-relaxed">
+                {t('parents.subtitle')}
+              </p>
+              <div className="grid sm:grid-cols-2 gap-3 pt-2">
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle size={16} className="text-green-400 mt-1 shrink-0" />
+                  <p className="text-gray-300 text-xs sm:text-sm">{t('parents.card_1_title')}</p>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <CheckCircle size={16} className="text-green-400 mt-1 shrink-0" />
+                  <p className="text-gray-300 text-xs sm:text-sm">{t('parents.card_3_title')}</p>
+                </div>
+              </div>
+              <div className="pt-4">
+                <Link href="/parents" className="group px-7 py-3 rounded-xl bg-green-600 text-white font-bold hover:bg-green-500 transition-all inline-flex items-center gap-2 text-sm shadow-lg shadow-green-600/20">
+                  {t('parents.cta')} <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </div>
 
-        {/* Indicateur de région */}
+            <div className="flex-1 w-full max-w-md">
+              <div className="glass-card p-6 border-green-500/20">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center text-green-400">
+                    <Globe size={20} />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-white text-sm">Tableau de Bord Parent</h4>
+                    <p className="text-[11px] text-gray-400">Suivi en temps réel des leçons complétées</p>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <div className="h-2 w-full bg-gray-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-green-500 w-3/4"></div>
+                  </div>
+                  <div className="flex justify-between text-xs text-gray-400">
+                    <span>Progression Globale</span>
+                    <span className="text-green-400 font-bold">75%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 7. Pricing / Plans d'Accès ── */}
+      <section className="container mx-auto px-4 py-12 text-center">
+        <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-white">{t('pricing.title')}</h2>
+
         {country && (
-          <p className="text-sm text-gray-500 mb-10 flex items-center justify-center gap-1.5">
+          <p className="text-xs sm:text-sm text-gray-400 mb-8 flex items-center justify-center gap-1.5">
             <Globe size={14} />
             Prix affichés pour&nbsp;
-            <span className="text-gray-300 font-medium">
+            <span className="text-purple-300 font-medium">
               {region === 'ALGERIA' ? '🇩🇿 Algérie (DZD)' : region === 'EUROPE' ? '🇪🇺 Europe (EUR)' : '🌍 International'}
             </span>
             &nbsp;·&nbsp;
@@ -453,32 +720,32 @@ export default function Home() {
         )}
 
         <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-
           {/* Plan Gratuit */}
-          <div className="glass-card p-8 border-t-4 border-[#a78bfa] relative transform hover:scale-105 transition-transform">
-            <div className="absolute top-0 right-0 bg-[#a78bfa] text-black text-xs font-bold px-3 py-1 rounded-bl-xl">POPULAIRE</div>
-            <h3 className="text-2xl font-bold mb-2">{t('pricing.student_plan')}</h3>
-            <div className="text-4xl font-bold text-[#a78bfa] my-4">
-              0 {region === 'ALGERIA' ? 'DZD' : '€'}
+          <div className="glass-card p-8 border-t-4 border-[#a78bfa] relative rounded-3xl flex flex-col justify-between">
+            <div>
+              <div className="absolute top-0 right-0 bg-[#a78bfa] text-black text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-3xl">POPULAIRE</div>
+              <h3 className="text-2xl font-bold mb-2 text-white">{t('pricing.student_plan')}</h3>
+              <div className="text-4xl font-bold text-[#a78bfa] my-4">
+                0 {region === 'ALGERIA' ? 'DZD' : '€'}
+              </div>
+              <p className="text-gray-400 text-xs sm:text-sm mb-6 flex items-center justify-center gap-2">
+                <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Accès Immédiat aux 10 Formations
+              </p>
+              <ul className="text-left w-full space-y-2.5 mb-8 text-gray-300 text-xs sm:text-sm">
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-[#a78bfa] shrink-0" /> Accès complet à tous les 10 cours</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-[#a78bfa] shrink-0" /> Simulateur de code Cloud dans le navigateur</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-[#a78bfa] shrink-0" /> Studio CV Pro A4 gratuit</li>
+                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-[#a78bfa] shrink-0" /> Forum d'entraide communautaire</li>
+              </ul>
             </div>
-            <p className="text-gray-400 mb-6 flex items-center justify-center gap-2">
-              <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span> Accès Immédiat
-            </p>
-            <ul className="text-left w-full space-y-3 mb-8 text-gray-300">
-              <li className="flex items-center gap-2"><CheckCircle size={16} className="text-[#a78bfa]" /> {t('pricing.features.access_all')}</li>
-              <li className="flex items-center gap-2"><CheckCircle size={16} className="text-[#a78bfa]" /> {t('pricing.features.cloud')}</li>
-              <li className="flex items-center gap-2"><CheckCircle size={16} className="text-[#a78bfa]" /> {t('pricing.features.community')}</li>
-              <li className="flex items-center gap-2"><CheckCircle size={16} className="text-[#a78bfa]" /> {t('pricing.features.mentoring')}</li>
-              <li className="flex items-center gap-2"><CheckCircle size={16} className="text-[#a78bfa]" /> {t('pricing.features.certif')}</li>
-            </ul>
-            <Link href="/register?plan=student" className="btn btn-primary w-full mt-auto text-lg py-4 shadow-lg shadow-violet-500/20">
-              {t('pricing.select')}
+            <Link href="/register?plan=student" className="btn btn-primary w-full text-base py-3.5 shadow-lg shadow-violet-500/20 rounded-xl font-bold">
+              Commencer Gratuitement
             </Link>
           </div>
 
-          {/* Plan payant (dynamique) ou Coming Soon */}
+          {/* Plan Premium / Dynamique */}
           {plansLoading ? (
-            <div className="glass-card p-8 flex items-center justify-center">
+            <div className="glass-card p-8 flex items-center justify-center rounded-3xl">
               <div className="w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
             </div>
           ) : mainPlan ? (
@@ -486,73 +753,91 @@ export default function Home() {
               const { amount, currency } = getDisplayPrice(mainPlan, region);
               const features = safeParseFeatures(mainPlan.features);
               return (
-                <div className="glass-card p-8 border-t-4 border-purple-500 relative transform hover:scale-105 transition-transform flex flex-col">
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl">
-                    {region === 'ALGERIA' ? '🇩🇿 ALGÉRIE' : region === 'EUROPE' ? '🇪🇺 EUROPE' : 'PREMIUM'}
+                <div className="glass-card p-8 border-t-4 border-purple-500 relative rounded-3xl flex flex-col justify-between">
+                  <div>
+                    <div className="absolute top-0 right-0 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs font-bold px-3 py-1 rounded-bl-xl rounded-tr-3xl">
+                      {region === 'ALGERIA' ? '🇩🇿 ALGÉRIE' : region === 'EUROPE' ? '🇪🇺 EUROPE' : 'PREMIUM'}
+                    </div>
+                    <div className="flex items-center justify-center mb-2">
+                      {mainPlan.region === 'ALGERIA'
+                        ? <Crown size={36} className="text-yellow-500" />
+                        : <Zap size={36} className="text-purple-400" />}
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2 text-white">{mainPlan.name}</h3>
+                    <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 my-4">
+                      {amount} {currency}
+                      <span className="text-sm text-gray-500 font-normal ml-1">
+                        /{mainPlan.duration === 30 ? 'mois' : `${mainPlan.duration}j`}
+                      </span>
+                    </div>
+                    <ul className="text-left w-full space-y-2.5 mb-8 text-gray-300 text-xs sm:text-sm">
+                      <li className="flex items-center gap-2"><CheckCircle size={16} className="text-purple-400 shrink-0" /> Accès complet sans publicité</li>
+                      <li className="flex items-center gap-2"><CheckCircle size={16} className="text-purple-400 shrink-0" /> Support prioritaire avec les formateurs</li>
+                      <li className="flex items-center gap-2"><CheckCircle size={16} className="text-purple-400 shrink-0" /> Certificat d'achèvement de compétences</li>
+                    </ul>
                   </div>
-
-                  <div className="flex items-center justify-center mb-2">
-                    {mainPlan.region === 'ALGERIA'
-                      ? <Crown size={36} className="text-yellow-500" />
-                      : <Zap size={36} className="text-purple-400" />}
-                  </div>
-                  <h3 className="text-2xl font-bold mb-2">{mainPlan.name}</h3>
-                  {mainPlan.description && <p className="text-gray-400 text-sm mb-2">{mainPlan.description}</p>}
-
-                  <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500 my-4">
-                    {amount} {currency}
-                    <span className="text-sm text-gray-500 font-normal ml-1">
-                      /{mainPlan.duration === 30 ? 'mois' : `${mainPlan.duration}j`}
-                    </span>
-                  </div>
-
-                  <ul className="text-left w-full space-y-3 mb-8 text-gray-300 flex-1">
-                    {['Accès complet à tous les cours', 'Sans publicité', 'Certificat professionnel', 'Support prioritaire'].map(f => (
-                      <li key={f} className="flex items-center gap-2">
-                        <CheckCircle size={16} className="text-purple-400 shrink-0" /> {f}
-                      </li>
-                    ))}
-                    {features.slice(0, 3).map((f, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <CheckCircle size={16} className="text-purple-400 shrink-0" /> {f}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link href="/pricing" className="btn bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white w-full mt-auto text-lg py-4 shadow-lg shadow-purple-500/20 rounded-xl font-bold text-center block">
-                    Voir tous les plans →
+                  <Link href="/pricing" className="btn bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white w-full text-base py-3.5 shadow-lg shadow-purple-500/20 rounded-xl font-bold">
+                    Voir les formules Premium
                   </Link>
-
-                  {mainPlan.region === 'ALGERIA' && (
-                    <p className="text-center text-xs text-gray-500 mt-3">Paiement via Chargily (CIB, eddahabia)</p>
-                  )}
                 </div>
               );
             })()
           ) : (
-            <div className="glass-card p-8 border-t-4 border-gray-600 flex flex-col items-center opacity-75 grayscale hover:grayscale-0 hover:opacity-100 transition-all cursor-not-allowed relative overflow-hidden">
-              <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center backdrop-blur-[1px]">
-                <span className="bg-white/10 backdrop-blur-md border border-white/20 text-white font-bold px-6 py-2 rounded-full rotate-[-15deg] shadow-2xl">
-                  {t('pricing.coming_soon')}
-                </span>
+            <div className="glass-card p-8 border-t-4 border-gray-600 flex flex-col justify-between rounded-3xl">
+              <div>
+                <h3 className="text-2xl font-bold mb-2 text-gray-400">Offre Premium</h3>
+                <div className="text-4xl font-bold text-gray-500 my-4">Bientôt disponible</div>
+                <p className="text-xs text-gray-400 mb-6">Nos formules pour entreprises et accompagnement intensif arrivent sous peu.</p>
               </div>
-              <h3 className="text-2xl font-bold mb-2 text-gray-400">{t('pricing.individual_plan')}</h3>
-              <div className="text-4xl font-bold text-gray-500 my-4">--€<span className="text-sm text-gray-600">/mois</span></div>
-              <ul className="text-left w-full space-y-3 mb-8 text-gray-500 blur-[1px]">
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-gray-600" /> {t('pricing.features.access_all')}</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-gray-600" /> {t('pricing.features.cloud')}</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-gray-600" /> {t('pricing.features.premium_support')}</li>
-                <li className="flex items-center gap-2"><CheckCircle size={16} className="text-gray-600" /> {t('pricing.features.projects')}</li>
-              </ul>
-              <button disabled className="btn btn-outline w-full mt-auto border-gray-700 text-gray-600 cursor-not-allowed">
-                {t('pricing.coming_soon')}
-              </button>
+              <Link href="/courses" className="btn btn-outline w-full py-3 rounded-xl border-gray-700 text-gray-300">
+                Explorer les formations gratuites
+              </Link>
             </div>
           )}
         </div>
       </section>
 
-      {/* AdSense Slot 3 */}
+      {/* ── 8. SECTION FAQ PÉDAGOGIQUE ENRICHIE (Balisage Schema.org & Texte Haute Valeur AdSense) ── */}
+      <section className="container mx-auto px-4 py-12 max-w-4xl">
+        <div className="text-center mb-10 space-y-2">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-semibold uppercase tracking-wider">
+            <HelpCircle size={14} /> Questions Fréquentes
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-white">Tout ce qu'il faut savoir sur Elsayf</h2>
+          <p className="text-gray-400 text-sm sm:text-base">
+            Retrouvez les réponses aux questions les plus courantes sur le fonctionnement de la plateforme et nos formations.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {FAQ_ITEMS.map((item, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl bg-gray-900/70 border border-gray-800 overflow-hidden transition-all"
+            >
+              <button
+                onClick={() => toggleFaq(idx)}
+                className="w-full px-6 py-4 text-left font-bold text-white flex items-center justify-between gap-4 hover:text-purple-300 transition-colors cursor-pointer text-sm sm:text-base"
+              >
+                <span>{item.q}</span>
+                <ChevronDown
+                  size={18}
+                  className={`shrink-0 text-purple-400 transition-transform duration-200 ${
+                    openFaqIndex === idx ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+              {openFaqIndex === idx && (
+                <div className="px-6 pb-5 pt-1 text-xs sm:text-sm text-gray-300 leading-relaxed border-t border-gray-800/60">
+                  {item.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── AdSense Slot 3 (Avant le Mega-Footer) ── */}
       <AdSenseAd slot="1234567892" format="horizontal" />
 
     </div>

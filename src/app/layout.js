@@ -1,6 +1,7 @@
 import { Inter } from 'next/font/google';
 import './globals.css';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 import { Providers } from '../components/Providers';
 import CookieBanner from '../components/CookieBanner';
 import AffiliateTracker from '../components/AffiliateTracker';
@@ -111,9 +112,7 @@ export default async function RootLayout({ children }) {
             <main className="min-h-screen pt-20">
               {children}
             </main>
-            <footer className="py-8 bg-[#050a14] border-t border-[rgba(255,255,255,0.05)] text-center text-gray-500">
-              <p>© 2024 E-Learning AI. Tous droits réservés.</p>
-            </footer>
+            <Footer />
             <CookieBanner />
             <PWAInstallPrompt />
             <ChatWidget />

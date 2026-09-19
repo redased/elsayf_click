@@ -33,11 +33,13 @@ export default function CookieBanner() {
         }
         setAnimateOut(true);
         setTimeout(() => setShowBanner(false), 300);
-        // Ici vous pouvez activer Google Analytics
+        // Mise à niveau Google Consent Mode v2
         if (typeof window !== 'undefined' && window.gtag) {
             window.gtag('consent', 'update', {
                 'analytics_storage': 'granted',
-                'ad_storage': 'granted'
+                'ad_storage': 'granted',
+                'ad_user_data': 'granted',
+                'ad_personalization': 'granted'
             });
         }
     };
@@ -51,11 +53,13 @@ export default function CookieBanner() {
         }
         setAnimateOut(true);
         setTimeout(() => setShowBanner(false), 300);
-        // Désactiver le tracking
+        // Désactiver le tracking Google Consent Mode v2
         if (typeof window !== 'undefined' && window.gtag) {
             window.gtag('consent', 'update', {
                 'analytics_storage': 'denied',
-                'ad_storage': 'denied'
+                'ad_storage': 'denied',
+                'ad_user_data': 'denied',
+                'ad_personalization': 'denied'
             });
         }
     };
