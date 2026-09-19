@@ -14,8 +14,10 @@ export default function AdSenseAd({ slot, format = 'auto', className = '', label
     }
   }, []);
 
-  // Ne pas afficher d'espace vide si le client ID n'est pas encore configuré
-  if (!process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID) {
+  const clientId = process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || 'ca-pub-1168470266191675';
+
+  // Ne pas afficher d'espace vide si le client ID n'est pas encore configure
+  if (!clientId) {
     return null;
   }
 
@@ -31,7 +33,7 @@ export default function AdSenseAd({ slot, format = 'auto', className = '', label
           ref={adRef}
           className="adsbygoogle"
           style={{ display: 'block', width: '100%' }}
-          data-ad-client={process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}
+          data-ad-client={clientId}
           data-ad-slot={slot}
           data-ad-format={format}
           data-full-width-responsive="true"
