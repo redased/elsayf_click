@@ -109,6 +109,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                     } catch (e) {
                         console.error("Auto-enroll error:", e);
                     }
+
+                    // Notification Telegram instantanée lors d'une connexion ou inscription Google
+                    if (account?.provider === 'google') {
+                        try {
+                            const { notifyTelegramInstantEvent } = await import('@/lib/telegram');
+                            notifyTelegramInstantEvent('GOOGLE_AUTH', {
+                                name: user.name || '',
+                                email: user.email || '',
+                                isNewUser: Boolean((user as any).isNewUser),
+                                source: 'MyCV.click / Elsayf (Google OAuth)',
+                            }).catch(() => {});
+                        } catch (e) {
+                            // Silencieux pour ne pas bloquer l'authentification
+                        }
+                    }
                 } else {
                     token.role = (user as any).role ?? 'STUDENT';
                     token.rStatAdminAccess = (user as any).rStatAdminAccess ?? false;

@@ -13,7 +13,7 @@ export async function GET() {
     // 1. Profils enregistrés par les utilisateurs connectés
     const profiles = await prisma.cvProfile.findMany({
       orderBy: { updatedAt: 'desc' },
-      take: 100,
+      take: 200,
       include: {
         user: {
           select: {
@@ -22,27 +22,87 @@ export async function GET() {
             email: true,
             image: true,
             createdAt: true,
+            accounts: {
+              select: {
+                provider: true,
+              }
+            }
           }
         }
       }
     });
 
-    // 2. Activités récentes (Invités ET Membres)
+    // 2. Utilisateurs inscrits avec Google ou compte Gmail
+    const googleUsers = await prisma.user.findMany({
+      where: {
+        OR: [
+          { accounts: { some: { provider: 'google' } } },
+          { email: { endsWith: '@gmail.com' } }
+        ]
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 200,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        image: true,
+        role: true,
+        createdAt: true,
+        lastLoginDate: true,
+        accounts: {
+          select: {
+            provider: true,
+          }
+        },
+        cvProfiles: {
+          select: {
+            id: true,
+            title: true,
+            candidateName: true,
+            template: true,
+            downloadsCount: true,
+            updatedAt: true,
+            lastAction: true,
+          }
+        }
+      }
+    });
+
+    // 3. Activités récentes (Invités ET Membres)
     const recentEvents = await prisma.cvEvent.findMany({
       orderBy: { createdAt: 'desc' },
       take: 150,
     });
 
-    // 3. Agrégations & Métriques clés
-    const [totalProfiles, totalEvents, totalPdfDownloads, totalGuestEvents, totalRegisteredEvents] = await Promise.all([
+    // 4. Agrégations & Métriques clés
+    const [
+      totalProfiles, 
+      totalEvents, 
+      totalPdfDownloads, 
+      totalGuestEvents, 
+      totalRegisteredEvents,
+      totalGoogleUsers
+    ] = await Promise.all([
       prisma.cvProfile.count(),
       prisma.cvEvent.count(),
       prisma.cvEvent.count({ where: { eventType: 'DOWNLOAD_PDF' } }),
       prisma.cvEvent.count({ where: { userType: 'GUEST' } }),
       prisma.cvEvent.count({ where: { userType: 'REGISTERED' } }),
+      prisma.user.count({
+        where: {
+          OR: [
+            { accounts: { some: { provider: 'google' } } },
+            { email: { endsWith: '@gmail.com' } }
+          ]
+        }
+      }),
     ]);
 
-    // 4. Distribution par modèles
+    // Utilisateurs Google ayant créé/sauvegardé au moins 1 CV
+    const googleUsersWithCvCount = googleUsers.filter(u => u.cvProfiles && u.cvProfiles.length > 0).length;
+
+    // 5. Distribution par modèles
     const templateCounts = {};
     recentEvents.forEach(ev => {
       const t = ev.template || 'developer';
@@ -57,9 +117,12 @@ export async function GET() {
         totalPdfDownloads,
         totalGuestEvents,
         totalRegisteredEvents,
+        totalGoogleUsers,
+        googleUsersWithCvCount,
         templateCounts,
       },
       profiles,
+      googleUsers,
       recentEvents,
     });
   } catch (error) {

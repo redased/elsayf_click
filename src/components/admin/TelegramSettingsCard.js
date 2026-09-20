@@ -19,6 +19,8 @@ export default function TelegramSettingsCard({ className = '' }) {
     chatId: '',
     notifyOnCvDownload: true,
     notifyOnNewStudent: true,
+    notifyOnGoogleSignup: true,
+    notifyOnCvSaved: true,
     dailyReportEnabled: true,
     dailyReportTime: '20:00',
     dailyReportFrequency: 'daily',
@@ -263,6 +265,38 @@ export default function TelegramSettingsCard({ className = '' }) {
                   type="checkbox"
                   checked={form.notifyOnNewStudent}
                   onChange={(e) => handleChange('notifyOnNewStudent', e.target.checked)}
+                  className="w-4 h-4 accent-sky-500 rounded cursor-pointer"
+                />
+              </label>
+
+              <label className="flex items-center justify-between p-3 rounded-xl bg-gray-950/60 border border-gray-800 hover:border-gray-700 cursor-pointer">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-4 h-4 flex items-center justify-center font-bold text-xs text-sky-400">G</span>
+                  <div>
+                    <div className="text-xs font-bold text-white">Compte Google / Gmail (MyCV & Elsayf)</div>
+                    <div className="text-[11px] text-gray-400">Alerte avec nom et email Gmail lors d'une connexion ou inscription</div>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={form.notifyOnGoogleSignup !== false}
+                  onChange={(e) => handleChange('notifyOnGoogleSignup', e.target.checked)}
+                  className="w-4 h-4 accent-sky-500 rounded cursor-pointer"
+                />
+              </label>
+
+              <label className="flex items-center justify-between p-3 rounded-xl bg-gray-950/60 border border-gray-800 hover:border-gray-700 cursor-pointer">
+                <div className="flex items-center gap-2.5">
+                  <Sparkles size={16} className="text-indigo-400" />
+                  <div>
+                    <div className="text-xs font-bold text-white">CV Enregistré dans le Cloud (MyCV)</div>
+                    <div className="text-[11px] text-gray-400">Alerte immédiate quand un utilisateur sauvegarde son profil CV</div>
+                  </div>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={form.notifyOnCvSaved !== false}
+                  onChange={(e) => handleChange('notifyOnCvSaved', e.target.checked)}
                   className="w-4 h-4 accent-sky-500 rounded cursor-pointer"
                 />
               </label>

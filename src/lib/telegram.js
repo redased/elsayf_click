@@ -10,6 +10,8 @@ export const DEFAULT_TELEGRAM_SETTINGS = {
   chatId: process.env.TELEGRAM_CHAT_ID || '1706545248',
   notifyOnCvDownload: true,      // Alerte en direct : Téléchargement d'un CV en PDF
   notifyOnNewStudent: true,      // Alerte en direct : Nouvel étudiant inscrit
+  notifyOnGoogleSignup: true,    // Alerte en direct : Inscription / Connexion Google ou Gmail
+  notifyOnCvSaved: true,         // Alerte en direct : Sauvegarde d'un CV dans le Cloud
   dailyReportEnabled: true,      // Rapport quotidien automatique
   dailyReportTime: '20:00',      // Heure d'envoi du rapport (format 24h)
   dailyReportFrequency: 'daily', // 'daily' | 'twice_daily'
@@ -108,6 +110,7 @@ export async function getAggregatedStats() {
     totalPdfDownloads,
     pdfDownloadsToday,
     totalProfiles,
+    totalGoogleUsers,
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { createdAt: { gte: startOfDay } } }),
@@ -118,6 +121,14 @@ export async function getAggregatedStats() {
     prisma.cvEvent.count({ where: { eventType: 'DOWNLOAD_PDF' } }),
     prisma.cvEvent.count({ where: { eventType: 'DOWNLOAD_PDF', createdAt: { gte: startOfDay } } }),
     prisma.cvProfile.count(),
+    prisma.user.count({
+      where: {
+        OR: [
+          { accounts: { some: { provider: 'google' } } },
+          { email: { endsWith: '@gmail.com' } }
+        ]
+      }
+    }),
   ]);
 
   const recentCvEventsToday = await prisma.cvEvent.findMany({
@@ -144,6 +155,7 @@ export async function getAggregatedStats() {
       today: newUsersToday,
       totalEnrollments,
       enrollmentsToday: newEnrollmentsToday,
+      totalGoogle: totalGoogleUsers,
     },
     cv: {
       totalEvents: totalCvEvents,
@@ -175,9 +187,10 @@ export async function sendDailyTelegramReport(customSettings = null) {
   // Section Étudiants
   if (settings.includeStudentStats) {
     sections.push(`
-🎓 <b>ÉTUDIANTS & FORMATIONS</b>
+🎓 <b>ÉTUDIANTS & COMPTES</b>
 ├ 👤 Nouveaux inscrits aujourd'hui : <b>+${stats.students.today}</b>
 ├ 👥 Total étudiants enregistrés : <b>${stats.students.total}</b>
+├ 🌐 Comptes Google / Gmail : <b>${stats.students.totalGoogle}</b>
 ├ 📚 Inscriptions cours aujourd'hui : <b>+${stats.students.enrollmentsToday}</b>
 └ 📈 Total inscriptions cumulées : <b>${stats.students.totalEnrollments}</b>
     `.trim());
@@ -242,6 +255,26 @@ export async function notifyTelegramInstantEvent(type, payload = {}) {
 🎓 <b>Nouvel Étudiant Inscrit !</b>
 👤 <b>Nom :</b> ${payload.name || 'Anonyme'}
 📧 <b>Email :</b> ${payload.email || 'Non renseigné'}
+🕒 <b>Heure :</b> ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+    `.trim();
+  } else if (type === 'GOOGLE_AUTH') {
+    if (settings.notifyOnGoogleSignup === false) return { skipped: true };
+    const isNew = payload.isNewUser;
+    text = `
+🌐 <b>${isNew ? 'Nouveau Compte Google / Gmail Créé !' : 'Connexion Google / Gmail'}</b>
+👤 <b>Nom :</b> ${payload.name || 'Utilisateur'}
+📧 <b>Email :</b> ${payload.email || 'Non renseigné'}
+🎯 <b>Plateforme :</b> ${payload.source || 'MyCV.click / Elsayf'}
+🕒 <b>Heure :</b> ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+    `.trim();
+  } else if (type === 'CV_SAVED') {
+    if (settings.notifyOnCvSaved === false) return { skipped: true };
+    text = `
+💾 <b>CV Enregistré dans le Cloud (MyCV) !</b>
+👤 <b>Utilisateur :</b> ${payload.userName || 'Membre'} (${payload.userEmail || 'Email non renseigné'})
+💼 <b>Intitulé Poste :</b> ${payload.candidateTitle || 'CV Professionnel'}
+👤 <b>Nom Candidat :</b> ${payload.candidateName || 'Non renseigné'}
+🎨 <b>Modèle :</b> ${payload.template || 'developer'}
 🕒 <b>Heure :</b> ${new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
     `.trim();
   } else if (type === 'CV_DOWNLOAD') {

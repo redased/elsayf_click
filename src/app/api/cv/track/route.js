@@ -107,6 +107,22 @@ export async function POST(request) {
           },
         });
       }
+
+      // Notification Telegram lors de l'enregistrement d'un CV
+      if (eventType === 'SAVE_CLOUD' || !existingProfile) {
+        try {
+          const { notifyTelegramInstantEvent } = await import('@/lib/telegram');
+          notifyTelegramInstantEvent('CV_SAVED', {
+            userName: session.user.name || userName || 'Membre',
+            userEmail: session.user.email || userEmail || '',
+            candidateTitle: title,
+            candidateName: cName,
+            template: savedProfile?.template || config?.template || template || 'developer',
+          }).catch(() => {});
+        } catch (e) {
+          // Silencieux
+        }
+      }
     }
 
     return NextResponse.json({
