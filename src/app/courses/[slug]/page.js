@@ -11,6 +11,7 @@ import {
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useLanguage } from '@/context/LanguageContext';
+import AddSkillToCVModal from '@/components/cv/AddSkillToCVModal';
 
 export default function PublicCoursePage({ params }) {
     const { slug } = use(params);
@@ -27,6 +28,7 @@ export default function PublicCoursePage({ params }) {
     const [couponCode, setCouponCode] = useState('');
     const [couponStatus, setCouponStatus] = useState(null); // null | { valid, discount, message }
     const [validatingCoupon, setValidatingCoupon] = useState(false);
+    const [showCvModal, setShowCvModal] = useState(false);
 
     useEffect(() => {
         if (!slug) return;
@@ -232,6 +234,7 @@ export default function PublicCoursePage({ params }) {
                                     validateCoupon={validateCoupon}
                                     discountedPrice={discountedPrice}
                                     session={session}
+                                    onOpenCvModal={() => setShowCvModal(true)}
                                 />
                             </div>
 
@@ -274,6 +277,7 @@ export default function PublicCoursePage({ params }) {
                                     validateCoupon={validateCoupon}
                                     discountedPrice={discountedPrice}
                                     session={session}
+                                    onOpenCvModal={() => setShowCvModal(true)}
                                 />
                             </div>
                         </div>
@@ -415,13 +419,22 @@ export default function PublicCoursePage({ params }) {
                     </div>
                 </div>
             </div>
+
+            {/* Modal Valorisation CV (MyCV.click) */}
+            {course && (
+                <AddSkillToCVModal
+                    course={course}
+                    isOpen={showCvModal}
+                    onClose={() => setShowCvModal(false)}
+                />
+            )}
         </div>
     );
 }
 
 /* ── Enroll Card Component ── */
 function EnrollCard({ course, userEnrollment, enrolling, sessionStatus, handleHeroEnroll,
-    couponCode, setCouponCode, couponStatus, validatingCoupon, validateCoupon, discountedPrice, session }) {
+    couponCode, setCouponCode, couponStatus, validatingCoupon, validateCoupon, discountedPrice, session, onOpenCvModal }) {
 
     return (
         <div className="bg-gradient-to-b from-[#111827] to-[#0d1117] border border-[#1f2937] rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
@@ -536,6 +549,20 @@ function EnrollCard({ course, userEnrollment, enrolling, sessionStatus, handleHe
                         </div>
                     ))}
                 </div>
+
+                {/* Synergie MyCV: Export de compétences et projets */}
+                {onOpenCvModal && (
+                    <div className="mt-4 pt-4 border-t border-[#1f2937]">
+                        <button
+                            type="button"
+                            onClick={onOpenCvModal}
+                            className="w-full py-2.5 px-3 rounded-xl bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-semibold flex items-center justify-center gap-2 transition hover:scale-[1.01]"
+                        >
+                            <span>💼</span>
+                            <span>Ajouter les acquis à mon CV</span>
+                        </button>
+                    </div>
+                )}
             </div>
         </div>
     );

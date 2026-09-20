@@ -92,32 +92,42 @@ export default function Footer() {
           {/* Colonne 3: Outils & Services */}
           <div className="space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">
-              Outils & Pratique
+              Outils & Carrière
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm">
               <li>
+                <Link href="/parcours" className="hover:text-purple-400 transition-colors font-medium text-white flex items-center gap-1.5">
+                  <span className="text-purple-400">🚀</span> Parcours Métiers Certifiants
+                </Link>
+              </li>
+              <li>
+                <Link href="/simulateur-entretien" className="hover:text-purple-400 transition-colors flex items-center gap-1.5 text-cyan-300">
+                  <span>⚡</span> Simulateur d'Entretien IA
+                </Link>
+              </li>
+              <li>
+                <Link href="/ressources" className="hover:text-purple-400 transition-colors flex items-center gap-1.5">
+                  <span>📚</span> Fiches & Cheatsheets
+                </Link>
+              </li>
+              <li>
+                <Link href="/blog" className="hover:text-purple-400 transition-colors flex items-center gap-1.5">
+                  <span>✍️</span> Blog & Guides Techniques
+                </Link>
+              </li>
+              <li>
                 <Link href="/cv" className="hover:text-purple-400 transition-colors flex items-center gap-1.5">
-                  <FileText size={14} className="text-purple-400" /> Studio CV Pro A4
+                  <FileText size={14} className="text-purple-400" /> Studio CV Pro (MyCV.click)
+                </Link>
+              </li>
+              <li>
+                <Link href="/cv/job-scanner" className="hover:text-purple-400 transition-colors flex items-center gap-1.5">
+                  <span>🎯</span> Scanner d'Offre ATS IA
                 </Link>
               </li>
               <li>
                 <Link href="/#demo" className="hover:text-purple-400 transition-colors flex items-center gap-1.5">
                   <Terminal size={14} className="text-blue-400" /> Éditeur Python en Ligne
-                </Link>
-              </li>
-              <li>
-                <Link href="/parents" className="hover:text-purple-400 transition-colors">
-                  Espace Parents
-                </Link>
-              </li>
-              <li>
-                <Link href="/pricing" className="hover:text-purple-400 transition-colors">
-                  Grille Tarifaire & Options
-                </Link>
-              </li>
-              <li>
-                <Link href="/register" className="text-emerald-400 hover:underline">
-                  Créer un compte gratuit
                 </Link>
               </li>
             </ul>

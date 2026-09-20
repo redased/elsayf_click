@@ -662,6 +662,32 @@ export default function Home() {
               );
             })}
           </div>
+
+          {/* CTA vers la page dédiée aux Parcours Métiers Certifiants & Simulateur */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-purple-950/50 via-slate-900 to-blue-950/50 border border-purple-500/30 flex flex-col sm:flex-row items-center justify-between gap-6 text-center sm:text-left">
+            <div>
+              <h3 className="text-xl font-bold text-white mb-1">
+                Envie de voir les grilles de salaires et les projets de validation ?
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400">
+                Consultez le détail des 3 cursus d'excellence avec livrables professionnels et entraînez-vous face à notre recruteur IA.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href="/parcours"
+                className="px-6 py-3 rounded-xl font-bold text-xs sm:text-sm bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg shadow-purple-600/20 whitespace-nowrap transition"
+              >
+                Explorer les Parcours Détaillés &rarr;
+              </Link>
+              <Link
+                href="/simulateur-entretien"
+                className="px-4 py-3 rounded-xl font-semibold text-xs sm:text-sm bg-slate-800 hover:bg-slate-700 text-cyan-300 border border-cyan-500/30 whitespace-nowrap transition"
+              >
+                ⚡ Simuler un Entretien
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -786,6 +812,13 @@ export default function Home() {
                   <FileText size={18} />
                   <span>Créer mon CV Pro</span>
                   <ArrowRight size={18} />
+                </Link>
+                <Link
+                  href="/cv/job-scanner"
+                  className="px-5 py-3.5 rounded-xl bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:text-white hover:bg-purple-500/20 transition-all text-sm font-semibold flex items-center gap-1.5"
+                >
+                  <span>🎯</span>
+                  <span>Scanner une Offre d'Emploi (IA)</span>
                 </Link>
                 <Link
                   href="/cv"

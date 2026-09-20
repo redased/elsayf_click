@@ -124,6 +124,17 @@ export default function Navbar() {
             <>
               <Link href="/" className="text-gray-300 hover:text-[#a78bfa] transition-colors">{t('nav.home')}</Link>
 
+              {/* Parcours Métiers */}
+              <Link
+                href="/parcours"
+                className="text-gray-300 hover:text-[#a78bfa] transition-colors flex items-center gap-1.5"
+              >
+                <span>Parcours</span>
+                <span className="px-1.5 py-0.5 text-[9px] font-black rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                  3 CARRIÈRES
+                </span>
+              </Link>
+
               {/* Menu déroulant Formations */}
               <div className="relative">
                 <button
@@ -165,6 +176,25 @@ export default function Navbar() {
                   </div>
                 )}
               </div>
+
+              {/* Ressources & Cheatsheets */}
+              <Link href="/ressources" className="text-gray-300 hover:text-[#a78bfa] transition-colors">
+                Ressources
+              </Link>
+
+              {/* Blog */}
+              <Link href="/blog" className="text-gray-300 hover:text-[#a78bfa] transition-colors">
+                Blog
+              </Link>
+
+              {/* Simulateur Entretien */}
+              <Link
+                href="/simulateur-entretien"
+                className="text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1"
+                title="Simulateur d'Entretien IA"
+              >
+                <span>⚡ Simulateur IA</span>
+              </Link>
 
               <Link
                 href="/cv"
@@ -302,7 +332,16 @@ export default function Navbar() {
         >
           <div className="flex flex-col p-6 gap-4">
             <Link href="/" onClick={() => setIsOpen(false)} className="text-gray-300">{t('nav.home')}</Link>
+            <Link href="/parcours" onClick={() => setIsOpen(false)} className="text-gray-300 flex items-center justify-between">
+              <span>Parcours Métiers</span>
+              <span className="px-1.5 py-0.5 text-[9px] font-black rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">3 CARRIÈRES</span>
+            </Link>
             <Link href="/courses" onClick={() => setIsOpen(false)} className="text-gray-300">{t('nav.courses')}</Link>
+            <Link href="/ressources" onClick={() => setIsOpen(false)} className="text-gray-300">Fiches & Cheatsheets</Link>
+            <Link href="/blog" onClick={() => setIsOpen(false)} className="text-gray-300">Blog & Guides Tech</Link>
+            <Link href="/simulateur-entretien" onClick={() => setIsOpen(false)} className="text-cyan-400 font-semibold flex items-center gap-1.5">
+              <span>⚡ Simulateur d'Entretien IA</span>
+            </Link>
             <Link href="/cv" onClick={() => setIsOpen(false)} className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600/40 to-indigo-600/40 border border-violet-400/40 text-white font-bold flex items-center justify-between shadow-lg shadow-purple-900/20">
               <span className="flex items-center gap-2">
                 <FileText size={16} className="text-[#a78bfa]" />
