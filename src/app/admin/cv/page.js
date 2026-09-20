@@ -5,8 +5,9 @@ import Link from 'next/link';
 import { 
   FileText, Users, Download, Printer, Save, Palette, Eye, 
   CheckCircle2, Sparkles, Sliders, ShieldAlert, ArrowLeft, 
-  Clock, Laptop, Smartphone, Search, RefreshCw, Layers, ExternalLink, Send
+  Clock, Laptop, Smartphone, Search, RefreshCw, Layers, ExternalLink, Send, Bell
 } from 'lucide-react';
+import TelegramSettingsCard from '@/components/admin/TelegramSettingsCard';
 
 export default function AdminCvPage() {
   const { data: session, status } = useSession();
@@ -351,6 +352,18 @@ export default function AdminCvPage() {
           >
             <Sliders size={16} />
             <span>Personnaliser le Design du Site</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('telegram')}
+            className={`px-5 py-3 rounded-xl font-bold text-xs sm:text-sm flex items-center gap-2 transition-all cursor-pointer ${
+              activeTab === 'telegram'
+                ? 'bg-sky-600/25 text-sky-300 border border-sky-500/40 shadow-lg shadow-sky-900/20'
+                : 'text-gray-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            <Send size={16} className="text-sky-400" />
+            <span>Automatisation Telegram</span>
           </button>
         </div>
 
@@ -697,6 +710,13 @@ export default function AdminCvPage() {
               </button>
             </div>
           </form>
+        )}
+
+        {/* ========================================================================= */}
+        {/* ONGLET 4 : AUTOMATISATION ET RÉGLAGES TELEGRAM                            */}
+        {/* ========================================================================= */}
+        {activeTab === 'telegram' && (
+          <TelegramSettingsCard />
         )}
 
         {/* Modal de Prévisualisation des Détails du CV Membre */}

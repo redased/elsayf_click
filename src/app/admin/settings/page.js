@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Save, Settings as SettingsIcon, Shield, Activity, Cpu } from 'lucide-react';
+import TelegramSettingsCard from '@/components/admin/TelegramSettingsCard';
 
 export default function AdminSettingsPage() {
     const [loading, setLoading] = useState(true);
@@ -202,6 +203,9 @@ export default function AdminSettingsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Section Automatisation & Paramètres Telegram */}
+            <TelegramSettingsCard className="mt-8" />
         </div>
     );
 }
