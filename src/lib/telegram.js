@@ -60,7 +60,7 @@ export async function getAggregatedStats() {
     prisma.user.count(),
     prisma.user.count({ where: { createdAt: { gte: startOfDay } } }),
     prisma.courseEnrollment.count(),
-    prisma.courseEnrollment.count({ where: { createdAt: { gte: startOfDay } } }),
+    prisma.courseEnrollment.count({ where: { enrolledAt: { gte: startOfDay } } }),
     prisma.cvEvent.count(),
     prisma.cvEvent.count({ where: { createdAt: { gte: startOfDay } } }),
     prisma.cvEvent.count({ where: { eventType: 'DOWNLOAD_PDF' } }),
