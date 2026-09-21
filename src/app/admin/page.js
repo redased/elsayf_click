@@ -410,13 +410,13 @@ export default function AdminDashboard() {
             </aside>
 
             {/* CONTENU PRINCIPAL À DROITE DU SIDEBAR VERTICAL */}
-            <main
-                className={`flex-1 min-w-0 transition-all duration-300 pt-20 px-4 sm:px-6 lg:px-8 pb-16 ${
+            <div
+                className={`flex-1 min-w-0 transition-all duration-300 pt-2 sm:pt-4 px-4 sm:px-6 lg:px-8 pb-16 ${
                     sidebarExpanded ? 'md:ml-64' : 'md:ml-20'
                 }`}
             >
                 {/* Barre Supérieure du Contenu Principal */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-800/80 pb-5">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-800/80 pb-4">
                     <div>
                         <div className="flex items-center gap-3 flex-wrap">
                             <h1 className="text-2xl sm:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-[#a78bfa]">
@@ -461,8 +461,6 @@ export default function AdminDashboard() {
                                 <span className="text-sm font-black text-white">{enrolledCount}</span>
                             </div>
                         </div>
-
-                        <LanguageSwitcher />
                     </div>
                 </div>
 
@@ -890,7 +888,7 @@ export default function AdminDashboard() {
                         </div>
                     </div>
                 )}
-            </main>
+            </div>
         </div>
     );
 }

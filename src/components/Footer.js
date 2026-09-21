@@ -1,8 +1,14 @@
 'use client';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Shield, BookOpen, FileText, Mail, Heart, ExternalLink, Terminal, Sparkles } from 'lucide-react';
 
 export default function Footer() {
+  const pathname = usePathname();
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/super-admin')) {
+    return null;
+  }
+
   const openCookieSettings = () => {
     try {
       localStorage.removeItem('cookieConsent');

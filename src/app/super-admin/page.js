@@ -462,13 +462,13 @@ export default function SuperAdminDashboard() {
             </aside>
 
             {/* CONTENU PRINCIPAL À DROITE DU SIDEBAR VERTICAL */}
-            <main
-                className={`flex-1 min-w-0 transition-all duration-300 pt-20 px-4 sm:px-6 lg:px-8 pb-16 ${
+            <div
+                className={`flex-1 min-w-0 transition-all duration-300 pt-2 sm:pt-4 px-4 sm:px-6 lg:px-8 pb-16 ${
                     sidebarExpanded ? 'md:ml-64' : 'md:ml-20'
                 }`}
             >
                 {/* Barre Supérieure du Contenu Principal */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-800/80 pb-5">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-800/80 pb-4">
                     <div>
                         <div className="flex items-center gap-3 flex-wrap">
                             <h1 className="text-2xl sm:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-amber-100 to-amber-400">
@@ -492,7 +492,7 @@ export default function SuperAdminDashboard() {
                     <div className="flex items-center gap-3 self-stretch md:self-auto justify-between md:justify-end flex-wrap">
                         <button
                             onClick={fetchUsers}
-                            className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                            className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
                             title="Actualiser la liste"
                         >
                             <RefreshCw size={16} className={loading ? 'animate-spin text-amber-400' : ''} />
@@ -500,13 +500,11 @@ export default function SuperAdminDashboard() {
 
                         <button
                             onClick={() => setShowCreateModal(true)}
-                            className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-all cursor-pointer"
+                            className="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-yellow-500 hover:from-amber-600 hover:to-orange-600 text-black font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 hover:scale-[1.02] transition-all cursor-pointer"
                         >
                             <UserPlus size={16} />
                             <span>Créer Utilisateur</span>
                         </button>
-
-                        <LanguageSwitcher />
                     </div>
                 </div>
 
@@ -1100,7 +1098,7 @@ export default function SuperAdminDashboard() {
                         </div>
                     </div>
                 )}
-            </main>
+            </div>
         </div>
     );
 }
