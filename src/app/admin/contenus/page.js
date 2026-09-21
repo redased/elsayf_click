@@ -287,7 +287,7 @@ const INTERVIEW_QUESTIONS = [
 ];
 
 export default function AdminContentHubPage() {
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState('blog'); // 'blog' | 'parcours' | 'cheatsheets' | 'interview'
   const [selectedArticleSlug, setSelectedArticleSlug] = useState(BLOG_POSTS[0]?.slug || '');
   const [fontSize, setFontSize] = useState('text-base'); // 'text-sm' | 'text-base' | 'text-lg'
@@ -301,6 +301,41 @@ export default function AdminContentHubPage() {
     setCopiedSnippet(id);
     setTimeout(() => setCopiedSnippet(null), 2500);
   };
+
+  if (status === 'loading') {
+    return (
+      <div className="min-h-screen bg-[#050a14] pt-24 text-center text-slate-400 flex items-center justify-center">
+        <div className="inline-block w-8 h-8 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mr-3" />
+        <span>Vérification des accès administrateur...</span>
+      </div>
+    );
+  }
+
+  const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN' ||
+                  session?.user?.role === 'R_STAT_ADMIN' || session?.user?.role === 'MARKETING_ADMIN' ||
+                  session?.user?.rStatAdminAccess === true;
+
+  if (!session || !isAdmin) {
+    return (
+      <div className="min-h-screen bg-[#050a14] pt-24 px-4 flex items-center justify-center">
+        <div className="p-10 text-center max-w-md border border-red-500/30 rounded-3xl bg-slate-900/90 shadow-2xl backdrop-blur-md">
+          <div className="mx-auto w-16 h-16 bg-red-500/10 text-red-500 border border-red-500/20 rounded-2xl flex items-center justify-center mb-6">
+            <ShieldAlert size={32} />
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-2">Accès Administrateur Requis</h1>
+          <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+            Ce hub de lecture et de référence est strictement réservé aux administrateurs de la plateforme Elsayf.
+          </p>
+          <Link
+            href="/login?callbackUrl=/admin/contenus"
+            className="w-full inline-block py-3 px-6 rounded-xl font-bold text-sm bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-lg shadow-purple-600/20 transition"
+          >
+            Se connecter en tant qu'Admin
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#050a14] text-slate-100 selection:bg-purple-500 selection:text-white pt-24 pb-20 px-4 sm:px-6">
