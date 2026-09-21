@@ -73,12 +73,17 @@ export default function SuperAdminLayout({ children }) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
+  // Sur /super-admin, on rend directement page.js qui intègre son propre Studio complet (sidebar rétractable, header sync, tabs)
+  if (pathname === '/super-admin') {
+    return children;
+  }
+
   const isActive = (href) => pathname === href || pathname.startsWith(href + '/');
 
   return (
-    <div className="flex min-h-screen pt-20">
+    <div className="flex min-h-screen">
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0a0e17] border-r border-gray-800 fixed left-0 top-20 bottom-0 overflow-y-auto z-40">
+      <aside className="w-64 bg-[#0a0e17] border-r border-gray-800 fixed left-0 top-16 bottom-0 overflow-y-auto z-40">
         <div className="p-4">
           {/* User Info */}
           <div className="mb-6 p-4 bg-gradient-to-r from-yellow-600/20 to-orange-600/20 rounded-xl border border-yellow-600/30">
