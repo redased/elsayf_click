@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Users, Wifi, MonitorPlay, ShieldAlert, Trophy, Award, Zap, Crown, BookOpen, Gift, Mail, UserCog, BarChart3, Brain, Code, FileText, Sparkles } from 'lucide-react';
+import { Users, Wifi, MonitorPlay, ShieldAlert, Trophy, Award, Zap, Crown, BookOpen, Gift, Mail, UserCog, BarChart3, Brain, Code, FileText, Sparkles, Tag } from 'lucide-react';
 import { useSession } from "next-auth/react"
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -80,56 +80,207 @@ export default function AdminDashboard() {
     const COLORS = ['#a78bfa', '#3b82f6', '#10b981'];
 
     return (
-        <div className="min-h-screen pt-24 px-4 container mx-auto">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-10 border-b border-gray-800 pb-6">
+        <div className="min-h-screen pt-24 px-4 container mx-auto max-w-7xl">
+            {/* Header supérieur avec titre, statut et compteurs */}
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-800/80 pb-6">
                 <div>
-                    <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-[#a78bfa]">
-                        {t('admin.title')}
-                    </h1>
-                    <p className="text-gray-400 mt-2">{t('admin.analytics')} & {t('admin.revenue')}</p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <h1 className="text-3xl sm:text-4xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-[#a78bfa]">
+                            {t('admin.title')}
+                        </h1>
+                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 flex items-center gap-1.5 shadow-sm">
+                            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            {session?.user?.role || 'ADMIN'}
+                        </span>
+                    </div>
+                    <p className="text-slate-400 text-sm mt-1.5">
+                        Console de pilotage, supervision pédagogique et gestion des accès
+                    </p>
                 </div>
-                <div className="flex items-center gap-4">
-                    <LanguageSwitcher />
-                    <Link href="/admin/contenus" className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:opacity-90 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all text-white shadow-lg shadow-purple-900/40 border border-purple-400/30">
-                        <BookOpen size={20} /> 📖 Hub Lecture
-                    </Link>
-                    <Link href="/admin/invitations" className="bg-orange-600 hover:bg-orange-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
-                        <Mail size={20} /> Invitations
-                    </Link>
-                    <Link href="/admin/cv" className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all text-white shadow-lg shadow-purple-900/30">
-                        <FileText size={20} /> Studio CV & MyCV
-                    </Link>
-                    <Link href="/admin/courses" className="bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
-                        <BookOpen size={20} /> {t('admin.courses')}
-                    </Link>
-                    <Link href="/admin/grant-access" className="bg-green-600 hover:bg-green-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
-                        <Gift size={20} /> Accès Gratuit
-                    </Link>
-                    <Link href="/admin/r-stat-access" className="bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
-                        <ShieldAlert size={20} /> R Stat Admin
-                    </Link>
-                    <Link href="/admin/manage-admins" className="bg-pink-600 hover:bg-pink-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
-                        <UserCog size={20} /> Gérer les Admins
-                    </Link>
-                    <Link href="/admin/analytics" className="bg-blue-600 hover:bg-blue-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
-                        <BarChart3 size={20} /> Analytics
-                    </Link>
-                    <Link href="/admin/coupons" className="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
-                        <Gift size={20} /> Coupons
-                    </Link>
-                    <Link href="/admin/python-registrations" className="bg-yellow-600 hover:bg-yellow-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
-                        <Code size={20} /> Python Inscriptions
-                    </Link>
-                    <Link href="/admin/ai-config" className="bg-cyan-600 hover:bg-cyan-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
-                        <Brain size={20} /> IA Config
-                    </Link>
-                    <div className="glass px-6 py-3 rounded-xl flex items-center gap-3">
-                        <Users className="text-[#a78bfa]" />
+
+                <div className="flex items-center gap-3 self-stretch md:self-auto justify-between md:justify-end flex-wrap">
+                    <div className="px-4 py-2 rounded-xl bg-slate-900/90 border border-slate-800 flex items-center gap-3 shadow-inner">
+                        <div className="w-9 h-9 rounded-lg bg-[#a78bfa]/15 text-[#a78bfa] flex items-center justify-center">
+                            <Users size={18} />
+                        </div>
                         <div>
-                            <span className="block text-xs text-gray-500 uppercase tracking-wider">{t('admin.users')}</span>
-                            <span className="text-2xl font-bold">{total}</span>
+                            <span className="block text-[10px] uppercase font-bold text-slate-400 tracking-wider">{t('admin.users')}</span>
+                            <span className="text-xl font-black text-white">{total}</span>
                         </div>
                     </div>
+                    <LanguageSwitcher />
+                </div>
+            </div>
+
+            {/* Centre de Commandes Admin - Grille Moderne & Responsive (Zero débordement) */}
+            <div className="mb-8 p-4 sm:p-5 rounded-2xl bg-slate-900/50 border border-slate-800/90 backdrop-blur-xl shadow-xl">
+                <div className="flex items-center justify-between mb-4 px-1">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                        <span className="text-xs font-black uppercase tracking-wider text-slate-300">
+                            Modules & Raccourcis Rapides
+                        </span>
+                    </div>
+                    <span className="text-[11px] text-slate-500 hidden sm:inline">11 outils de gestion actifs</span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3">
+                    {/* Hub Lecture - En vedette */}
+                    <Link
+                        href="/admin/contenus"
+                        className="group col-span-2 sm:col-span-1 p-3 rounded-xl bg-gradient-to-br from-purple-950/70 via-slate-900 to-indigo-950/70 border border-purple-500/40 hover:border-purple-400 transition-all duration-200 shadow-md hover:shadow-purple-500/20 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-purple-500/20 text-purple-300 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <BookOpen size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-white group-hover:text-purple-300 flex items-center gap-1.5 truncate">
+                                <span>Hub Lecture</span>
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-black bg-purple-500 text-white">VIP</span>
+                            </div>
+                            <div className="text-[10px] text-purple-300/70 truncate">Parcours & SEO</div>
+                        </div>
+                    </Link>
+
+                    {/* Studio CV & MyCV */}
+                    <Link
+                        href="/admin/cv"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-indigo-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-indigo-500/15 text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <FileText size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">Studio MyCV</div>
+                            <div className="text-[10px] text-slate-500 truncate">Créations de CV</div>
+                        </div>
+                    </Link>
+
+                    {/* Formations */}
+                    <Link
+                        href="/admin/courses"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-blue-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-blue-500/15 text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <BookOpen size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">{t('admin.courses')}</div>
+                            <div className="text-[10px] text-slate-500 truncate">Gestion catalogue</div>
+                        </div>
+                    </Link>
+
+                    {/* Inscriptions Python */}
+                    <Link
+                        href="/admin/python-registrations"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-amber-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <Code size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">Inscriptions Python</div>
+                            <div className="text-[10px] text-slate-500 truncate">Demandes & Accès</div>
+                        </div>
+                    </Link>
+
+                    {/* Invitations */}
+                    <Link
+                        href="/admin/invitations"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-orange-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-orange-500/15 text-orange-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <Mail size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">Invitations</div>
+                            <div className="text-[10px] text-slate-500 truncate">Envoi d'invitations</div>
+                        </div>
+                    </Link>
+
+                    {/* Accès Gratuit */}
+                    <Link
+                        href="/admin/grant-access"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-emerald-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <Gift size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">Accès Gratuit</div>
+                            <div className="text-[10px] text-slate-500 truncate">Débloquer un cours</div>
+                        </div>
+                    </Link>
+
+                    {/* Coupons */}
+                    <Link
+                        href="/admin/coupons"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-teal-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-teal-500/15 text-teal-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <Tag size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">Coupons Promo</div>
+                            <div className="text-[10px] text-slate-500 truncate">Réductions & Codes</div>
+                        </div>
+                    </Link>
+
+                    {/* Analytics */}
+                    <Link
+                        href="/admin/analytics"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-sky-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-sky-500/15 text-sky-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <BarChart3 size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">Analytics</div>
+                            <div className="text-[10px] text-slate-500 truncate">Audience & Clics</div>
+                        </div>
+                    </Link>
+
+                    {/* IA Config */}
+                    <Link
+                        href="/admin/ai-config"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-violet-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-violet-500/15 text-violet-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <Brain size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">IA & Telegram</div>
+                            <div className="text-[10px] text-slate-500 truncate">Clés API & Rapports</div>
+                        </div>
+                    </Link>
+
+                    {/* R Stat Admin */}
+                    <Link
+                        href="/admin/r-stat-access"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-fuchsia-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-fuchsia-500/15 text-fuchsia-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <ShieldAlert size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">R Stat Admin</div>
+                            <div className="text-[10px] text-slate-500 truncate">Validations R</div>
+                        </div>
+                    </Link>
+
+                    {/* Gérer les Admins */}
+                    <Link
+                        href="/admin/manage-admins"
+                        className="group p-3 rounded-xl bg-slate-950/60 hover:bg-slate-850 border border-slate-800 hover:border-rose-500/40 transition-all duration-200 hover:-translate-y-0.5 flex items-center gap-3"
+                    >
+                        <div className="w-9 h-9 rounded-lg bg-rose-500/15 text-rose-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                            <UserCog size={18} />
+                        </div>
+                        <div className="min-w-0">
+                            <div className="text-xs font-bold text-slate-200 group-hover:text-white truncate">Gérer Admins</div>
+                            <div className="text-[10px] text-slate-500 truncate">Rôles & Permissions</div>
+                        </div>
+                    </Link>
                 </div>
             </div>
 

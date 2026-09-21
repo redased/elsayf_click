@@ -136,7 +136,10 @@ export default function Navbar() {
               </Link>
 
               {/* Menu déroulant Formations */}
-              <div className="relative">
+              <div 
+                className="relative"
+                onMouseLeave={() => setShowCoursesMenu(false)}
+              >
                 <button
                   onMouseEnter={() => setShowCoursesMenu(true)}
                   onClick={() => setShowCoursesMenu(!showCoursesMenu)}
@@ -150,7 +153,6 @@ export default function Navbar() {
                 {showCoursesMenu && (
                   <div
                     style={{ animation: 'dropdownFadeIn 0.15s ease-out' }}
-                    onMouseLeave={() => setShowCoursesMenu(false)}
                     className="absolute top-full left-0 mt-2 w-72 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl overflow-hidden z-50"
                   >
                     <div className="p-2">
