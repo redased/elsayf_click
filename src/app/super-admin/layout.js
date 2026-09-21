@@ -73,8 +73,8 @@ export default function SuperAdminLayout({ children }) {
   const pathname = usePathname();
   const { data: session } = useSession();
 
-  // Sur /super-admin, on rend directement page.js qui intègre son propre Studio complet (sidebar rétractable, header sync, tabs)
-  if (pathname === '/super-admin') {
+  // Sur /super-admin et /super-admin/activity, on rend directement page.js qui intègre son propre Studio complet (sidebar rétractable, header sync, tabs)
+  if (pathname === '/super-admin' || pathname === '/super-admin/activity') {
     return children;
   }
 
