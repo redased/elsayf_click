@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { Users, Wifi, MonitorPlay, ShieldAlert, Trophy, Award, Zap, Crown, BookOpen, Gift, Mail, UserCog, BarChart3, Brain, Code } from 'lucide-react';
+import { Users, Wifi, MonitorPlay, ShieldAlert, Trophy, Award, Zap, Crown, BookOpen, Gift, Mail, UserCog, BarChart3, Brain, Code, FileText, Sparkles } from 'lucide-react';
 import { useSession } from "next-auth/react"
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
@@ -90,6 +90,9 @@ export default function AdminDashboard() {
                 </div>
                 <div className="flex items-center gap-4">
                     <LanguageSwitcher />
+                    <Link href="/admin/contenus" className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:opacity-90 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-all text-white shadow-lg shadow-purple-900/40 border border-purple-400/30">
+                        <BookOpen size={20} /> 📖 Hub Lecture
+                    </Link>
                     <Link href="/admin/invitations" className="bg-orange-600 hover:bg-orange-500 px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors text-white">
                         <Mail size={20} /> Invitations
                     </Link>
@@ -127,6 +130,53 @@ export default function AdminDashboard() {
                             <span className="text-2xl font-bold">{total}</span>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Section spéciale Hub de Lecture des nouveaux modules */}
+            <div className="mb-10 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-purple-950/40 via-slate-900 to-blue-950/40 border border-purple-500/30 shadow-2xl relative overflow-hidden">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                    <div className="space-y-2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30">
+                            <Sparkles size={14} className="text-purple-400" /> Mode Lecture & Consultation Admin
+                        </div>
+                        <h2 className="text-2xl sm:text-3xl font-black text-white">
+                            Hub Pédagogique : Parcours, Articles SEO & Fiches Mémos
+                        </h2>
+                        <p className="text-slate-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
+                            Consultez à votre aise l'intégralité des 3 parcours métiers avec grilles de salaires, les 4 articles de fond du blog rédigés pour Google AdSense, les cheatsheets techniques prêtes à l'emploi et la banque de questions/réponses du recruteur IA.
+                        </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                        <Link
+                            href="/admin/contenus"
+                            className="px-6 py-3.5 rounded-xl font-black text-sm bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white shadow-lg shadow-purple-600/30 transition-all flex items-center gap-2 hover:scale-105"
+                        >
+                            <BookOpen size={18} />
+                            <span>Ouvrir l'Espace de Lecture &rarr;</span>
+                        </Link>
+                    </div>
+                </div>
+
+                {/* 4 cartes raccourcis rapides */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-slate-800/80">
+                    <Link href="/admin/contenus" className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-purple-500/40 transition group">
+                        <div className="text-xs font-bold text-white group-hover:text-purple-300 transition">🚀 3 Parcours Métiers</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">Data, Pentest, IA (Salaires DZD/€)</div>
+                    </Link>
+                    <Link href="/admin/contenus" className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-purple-500/40 transition group">
+                        <div className="text-xs font-bold text-white group-hover:text-purple-300 transition">✍️ 4 Articles Blog SEO</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">DAX, OWASP, Python, Normes ATS</div>
+                    </Link>
+                    <Link href="/admin/contenus" className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-purple-500/40 transition group">
+                        <div className="text-xs font-bold text-white group-hover:text-purple-300 transition">📚 4 Fiches Mémos</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">DAX, Excel, Nmap, Prompting</div>
+                    </Link>
+                    <Link href="/admin/contenus" className="p-3.5 rounded-xl bg-slate-950/60 border border-slate-800 hover:border-purple-500/40 transition group">
+                        <div className="text-xs font-bold text-white group-hover:text-purple-300 transition">🎯 Recruteur IA</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">Questions & Réponses Modèles</div>
+                    </Link>
                 </div>
             </div>
 
