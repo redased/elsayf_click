@@ -213,6 +213,25 @@ export default function AdminDashboard() {
                                 {sidebarExpanded && <span className="truncate">Analytics & Cours</span>}
                             </button>
 
+                            {/* Suivi Activité & Temps Passé (Super Admin) */}
+                            <Link
+                                href="/super-admin/activity"
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30 transition-all ${
+                                    !sidebarExpanded && 'justify-center px-0'
+                                }`}
+                                title="Temps passé sur chaque cours et logs par étudiant"
+                            >
+                                <div className="flex items-center gap-3.5 min-w-0">
+                                    <Clock size={18} className="text-cyan-400" />
+                                    {sidebarExpanded && <span className="truncate">Temps Passé Cours</span>}
+                                </div>
+                                {sidebarExpanded && (
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                                        LOGS
+                                    </span>
+                                )}
+                            </Link>
+
                             {/* Classement & Gamification */}
                             <button
                                 onClick={() => handleTabSelect('gamification')}
@@ -461,6 +480,16 @@ export default function AdminDashboard() {
                                 <span className="text-sm font-black text-white">{enrolledCount}</span>
                             </div>
                         </div>
+
+                        {/* Bouton Temps Passé Cours */}
+                        <Link
+                            href="/super-admin/activity"
+                            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-900/30 hover:scale-[1.02] transition-all cursor-pointer"
+                            title="Suivi du temps passé sur chaque cours et logs par étudiant"
+                        >
+                            <Clock size={14} className="text-cyan-300" />
+                            <span>Temps Passé Cours</span>
+                        </Link>
                     </div>
                 </div>
 
@@ -699,6 +728,30 @@ export default function AdminDashboard() {
                 {/* VUE 3 : ANALYTICS & COURS */}
                 {activeTab === 'analytics' && (
                     <div className="space-y-6">
+                        {/* Bannière d'accès direct au Suivi Temps Passé & Activité */}
+                        <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-slate-900 border border-purple-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                            <div className="flex items-center gap-3.5">
+                                <div className="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                                    <Clock size={22} />
+                                </div>
+                                <div>
+                                    <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                                        <span>Temps Passé par Cours & Suivi d'Activité Étudiants</span>
+                                        <span className="text-[10px] px-2 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-extrabold">LIVE</span>
+                                    </h3>
+                                    <p className="text-xs text-slate-400 mt-0.5">
+                                        Visualisez exactement qui a passé du temps sur quel cours, les leçons suivies et les sessions d'apprentissage.
+                                    </p>
+                                </div>
+                            </div>
+                            <Link
+                                href="/super-admin/activity"
+                                className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-black text-xs flex items-center gap-2 transition-all shadow-md shadow-cyan-500/20 shrink-0"
+                            >
+                                <span>Voir les logs détaillés</span>
+                                <ExternalLink size={14} />
+                            </Link>
+                        </div>
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                             {/* Course Stats */}
                             <div className="glass-card p-6 rounded-2xl border border-slate-800">

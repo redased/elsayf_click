@@ -7,7 +7,7 @@ import {
     CheckCircle, XCircle, Search, Filter, Code, ExternalLink,
     Video, Send, DollarSign, Lock, MessageCircle, Menu, X,
     LayoutDashboard, ChevronRight, Sparkles, RefreshCw, BarChart2,
-    Award, ShieldAlert, Check
+    Award, ShieldAlert, Check, Clock, Activity
 } from 'lucide-react';
 import LanguageSwitcher from '@/components/LanguageSwitcher';
 import AdminChatPanel from '@/components/admin/AdminChatPanel';
@@ -303,6 +303,44 @@ export default function SuperAdminDashboard() {
                                 )}
                             </button>
 
+                            {/* Suivi Activité & Temps Passé Cours */}
+                            <Link
+                                href="/super-admin/activity"
+                                className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-cyan-500/10 border border-transparent hover:border-cyan-500/30 transition-all ${
+                                    !sidebarExpanded && 'justify-center px-0'
+                                }`}
+                                title="Temps passé par cours et logs d'activité étudiants"
+                            >
+                                <Clock size={18} className="text-cyan-400" />
+                                {sidebarExpanded && (
+                                    <div className="flex-1 flex items-center justify-between truncate">
+                                        <span>Temps Passé & Logs</span>
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-cyan-500/20 text-cyan-300 font-bold">
+                                            Activité
+                                        </span>
+                                    </div>
+                                )}
+                            </Link>
+
+                            {/* Analytics Plateforme */}
+                            <Link
+                                href="/super-admin/analytics"
+                                className={`flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-emerald-500/10 border border-transparent hover:border-emerald-500/30 transition-all ${
+                                    !sidebarExpanded && 'justify-center px-0'
+                                }`}
+                                title="Analytics détaillés de la plateforme"
+                            >
+                                <BarChart2 size={18} className="text-emerald-400" />
+                                {sidebarExpanded && (
+                                    <div className="flex-1 flex items-center justify-between truncate">
+                                        <span>Analytics Global</span>
+                                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-bold">
+                                            Stats
+                                        </span>
+                                    </div>
+                                )}
+                            </Link>
+
                             {/* Onglet Accès Rapide */}
                             <button
                                 onClick={() => { setActiveTab('access'); setMobileDrawerOpen(false); }}
@@ -489,7 +527,27 @@ export default function SuperAdminDashboard() {
                     </div>
 
                     {/* Actions d'En-tête */}
-                    <div className="flex items-center gap-3 self-stretch md:self-auto justify-between md:justify-end flex-wrap">
+                    <div className="flex items-center gap-2.5 self-stretch md:self-auto justify-between md:justify-end flex-wrap">
+                        {/* Bouton Temps Passé & Activité Cours */}
+                        <Link
+                            href="/super-admin/activity"
+                            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 hover:from-purple-500 hover:to-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-900/30 hover:scale-[1.02] transition-all cursor-pointer"
+                            title="Suivi du temps passé sur chaque cours et détails par étudiant"
+                        >
+                            <Clock size={15} className="text-cyan-300" />
+                            <span>Temps Passé Cours</span>
+                        </Link>
+
+                        {/* Bouton Analytics Global */}
+                        <Link
+                            href="/super-admin/analytics"
+                            className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-slate-500 text-slate-200 hover:text-white font-bold text-xs flex items-center gap-2 transition-all cursor-pointer"
+                            title="Analytics détaillés et statistiques de la plateforme"
+                        >
+                            <BarChart2 size={15} className="text-emerald-400" />
+                            <span>Analytics</span>
+                        </Link>
+
                         <button
                             onClick={fetchUsers}
                             className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
@@ -545,6 +603,24 @@ export default function SuperAdminDashboard() {
                         <MessageCircle size={15} />
                         <span>Messagerie Étudiants</span>
                     </button>
+
+                    <Link
+                        href="/super-admin/activity"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 bg-gradient-to-r from-purple-950/60 to-indigo-950/60 hover:from-purple-900/80 hover:to-indigo-900/80 text-cyan-300 border border-cyan-500/30 shadow-sm"
+                        title="Voir qui a passé du temps sur chaque cours et les logs détaillés"
+                    >
+                        <Clock size={15} className="text-cyan-400" />
+                        <span>Temps Passé par Cours & Activité ↗</span>
+                    </Link>
+
+                    <Link
+                        href="/super-admin/analytics"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all shrink-0 bg-slate-900/80 text-slate-300 hover:text-white hover:bg-slate-800 border border-slate-800/80"
+                        title="Voir les analytics détaillés de la plateforme"
+                    >
+                        <BarChart2 size={15} className="text-emerald-400" />
+                        <span>Analytics Plateforme ↗</span>
+                    </Link>
                 </div>
 
                 {/* VUE 1 : UTILISATEURS & ROLES */}

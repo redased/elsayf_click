@@ -128,26 +128,33 @@ export default function SuperAdminActivity() {
     );
 
     return (
-        <div className="min-h-screen pt-24 px-4 pb-12 bg-[#050a14] text-white">
+        <div className="min-h-screen pt-4 px-4 pb-12 bg-[#050a14] text-white">
             <div className="container mx-auto max-w-7xl">
                 {/* Header */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 border-b border-gray-800 pb-6 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-gray-800 pb-5 gap-4">
                     <div className="flex items-center gap-4">
-                        <Activity size={40} className="text-[#a78bfa]" />
+                        <Activity size={36} className="text-[#a78bfa]" />
                         <div>
-                            <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#a78bfa] to-purple-500">
+                            <h1 className="text-3xl sm:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#a78bfa] to-purple-500">
                                 Suivi d'Activité Étudiants
                             </h1>
-                            <p className="text-gray-400 mt-1">Logs d'apprentissage et temps passé sur la plateforme</p>
+                            <p className="text-gray-400 text-xs sm:text-sm mt-1">Logs d'apprentissage et temps passé sur la plateforme</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-4 shrink-0">
+                    <div className="flex items-center gap-3 shrink-0 flex-wrap">
+                        <Link
+                            href="/super-admin"
+                            className="bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white px-3.5 py-2 rounded-xl font-bold text-xs flex items-center gap-2 transition-all border border-slate-700/60 shadow-sm"
+                        >
+                            <ArrowLeft size={15} />
+                            <span>Super Admin</span>
+                        </Link>
                         <LanguageSwitcher />
                         <button
                             onClick={exportActivityData}
-                            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all border border-gray-700/60"
+                            className="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-md shadow-purple-900/20"
                         >
-                            <Download size={18} />
+                            <Download size={15} />
                             Exporter les logs
                         </button>
                     </div>
