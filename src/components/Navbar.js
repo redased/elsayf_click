@@ -1,13 +1,18 @@
 'use client';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Menu, X, BookOpen, LogOut, User, ChevronDown, Monitor, BarChart2, Video, Search, FileText, Sparkles } from 'lucide-react';
+import { usePathname } from 'next/navigation';
+import { Menu, X, BookOpen, LogOut, User, ChevronDown, Monitor, BarChart2, Video, Search, FileText, Sparkles, ExternalLink, Crown } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import StreamNotifications from './StreamNotifications';
 import { useSession, signOut } from 'next-auth/react';
 
 export default function Navbar() {
+  const pathname = usePathname();
+  const isAdminPage = pathname?.startsWith('/admin') || pathname?.startsWith('/super-admin');
+  const [adminSearchQuery, setAdminSearchQuery] = useState('');
+
   const [scrolled, setScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [showCoursesMenu, setShowCoursesMenu] = useState(false);
@@ -76,6 +81,123 @@ export default function Navbar() {
   }, []);
 
   const courses = coursesList;
+
+  if (isAdminPage) {
+    return (
+      <header className="fixed top-0 left-0 right-0 h-16 z-50 bg-[#0a0e17]/95 backdrop-blur-md border-b border-slate-800/80 px-3 md:px-6 flex items-center justify-between">
+        {/* Left: Hamburger + Logo + Studio Badge */}
+        <div className="flex items-center gap-3 md:gap-4 shrink-0">
+          <button
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                window.dispatchEvent(new CustomEvent('toggle-admin-sidebar'));
+              }
+            }}
+            className="p-2 text-slate-400 hover:text-white hover:bg-slate-800/80 rounded-xl transition-colors cursor-pointer"
+            title="Menu Studio (Réduire / Développer)"
+            aria-label="Toggle Studio Sidebar"
+          >
+            <Menu size={22} />
+          </button>
+
+          <Link href="/admin" className="flex items-center gap-2.5 group">
+            <div className="relative w-8 h-8 md:w-9 md:h-9 transition-transform group-hover:scale-105">
+              <img src="/logo.png?v=2" alt="Logo" className="w-full h-full object-contain" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-base md:text-xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-purple-200 to-purple-400">
+                eL Sayf
+              </span>
+              <span className="px-2 py-0.5 text-[10px] font-black uppercase tracking-wider rounded-md bg-purple-500/20 text-purple-300 border border-purple-500/40 shadow-sm">
+                Studio
+              </span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Center: Search Bar (Style YouTube Studio) */}
+        <div className="hidden md:flex items-center flex-1 max-w-lg mx-6">
+          <div className="relative w-full">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <input
+              type="text"
+              placeholder="Rechercher sur votre plateforme (cours, étudiants, stats)..."
+              value={adminSearchQuery}
+              onChange={(e) => {
+                setAdminSearchQuery(e.target.value);
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('admin-global-search', { detail: e.target.value }));
+                }
+              }}
+              className="w-full bg-slate-900/90 border border-slate-700/80 focus:border-purple-500 rounded-full pl-10 pr-4 py-2 text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-purple-500 transition-all shadow-inner"
+            />
+            {adminSearchQuery && (
+              <button
+                onClick={() => {
+                  setAdminSearchQuery('');
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('admin-global-search', { detail: '' }));
+                  }
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              >
+                <X size={14} />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Right: Actions */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* Lien retour site public */}
+          <Link
+            href="/"
+            target="_blank"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white text-xs font-semibold border border-slate-700/60 transition-all shadow-sm group"
+            title="Ouvrir le site public"
+          >
+            <span>Voir le site</span>
+            <ExternalLink size={13} className="text-purple-400 group-hover:translate-x-0.5 transition-transform" />
+          </Link>
+
+          {/* Hub Pédagogique */}
+          <Link
+            href="/admin/contenus"
+            className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600/20 to-indigo-600/20 hover:from-purple-600/40 hover:to-indigo-600/40 text-purple-200 text-xs font-bold border border-purple-500/30 transition-all"
+            title="Hub Pédagogique (VIP)"
+          >
+            <Sparkles size={14} className="text-purple-400" />
+            <span>Hub VIP</span>
+          </Link>
+
+          <LanguageSwitcher />
+
+          {/* User Role Badge */}
+          <div className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-300 text-[11px] font-bold">
+            <Crown size={12} className="text-amber-400" />
+            <span>{session?.user?.role || 'ADMIN'}</span>
+          </div>
+
+          {/* User Avatar + Logout */}
+          <div className="flex items-center gap-2 pl-1 border-l border-slate-800/80">
+            <div
+              className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center text-white text-xs font-bold border border-purple-400/30 shadow-md"
+              title={session?.user?.email || session?.user?.name || 'Administrateur'}
+            >
+              {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : (session?.user?.email ? session.user.email.charAt(0).toUpperCase() : 'A')}
+            </div>
+            <button
+              onClick={() => signOut({ callbackUrl: '/' })}
+              className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors cursor-pointer"
+              title="Se déconnecter"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <nav

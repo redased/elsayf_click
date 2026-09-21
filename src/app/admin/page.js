@@ -33,6 +33,31 @@ export default function AdminDashboard() {
     // Active View Tab on page: 'overview' | 'students' | 'analytics' | 'gamification' | 'hub'
     const [activeTab, setActiveTab] = useState('overview');
 
+    // Connect with Studio Header in Navbar
+    useEffect(() => {
+        const handleToggle = () => {
+            if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                setMobileDrawerOpen(prev => !prev);
+            } else {
+                setSidebarExpanded(prev => !prev);
+            }
+        };
+
+        const handleSearch = (e) => {
+            if (e.detail !== undefined) {
+                setSearchTerm(e.detail);
+            }
+        };
+
+        window.addEventListener('toggle-admin-sidebar', handleToggle);
+        window.addEventListener('admin-global-search', handleSearch);
+
+        return () => {
+            window.removeEventListener('toggle-admin-sidebar', handleToggle);
+            window.removeEventListener('admin-global-search', handleSearch);
+        };
+    }, []);
+
     useEffect(() => {
         const isAdmin = session?.user?.role === 'ADMIN' || session?.user?.role === 'SUPER_ADMIN';
 
@@ -111,35 +136,22 @@ export default function AdminDashboard() {
 
             {/* SIDEBAR VERTICAL STYLE YOUTUBE */}
             <aside
-                className={`fixed top-16 md:top-20 bottom-0 left-0 z-50 bg-[#0a0e17] border-r border-slate-800/80 transition-all duration-300 flex flex-col ${
+                className={`fixed top-16 bottom-0 left-0 z-40 bg-[#0a0e17] border-r border-slate-800/80 transition-all duration-300 flex flex-col ${
                     mobileDrawerOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0'
                 } ${sidebarExpanded ? 'md:w-64' : 'md:w-20'}`}
             >
-                {/* Header du Sidebar avec Toggle Hamburger */}
-                <div className="p-4 flex items-center justify-between border-b border-slate-800/60 shrink-0">
-                    <div className="flex items-center gap-3 overflow-hidden">
-                        <button
-                            onClick={() => setSidebarExpanded(!sidebarExpanded)}
-                            className="p-2 rounded-lg hover:bg-white/5 text-slate-400 hover:text-white transition-colors"
-                            title="Réduire / Agrandir le menu"
-                        >
-                            <Menu size={20} />
-                        </button>
-                        {(sidebarExpanded || mobileDrawerOpen) && (
-                            <span className="font-bold text-sm text-white tracking-wide truncate">
-                                Admin Studio
-                            </span>
-                        )}
-                    </div>
-                    {mobileDrawerOpen && (
+                {/* Header du Drawer pour Mobile */}
+                {mobileDrawerOpen && (
+                    <div className="p-3 flex items-center justify-between border-b border-slate-800/60 shrink-0 md:hidden">
+                        <span className="font-bold text-sm text-white px-2">Menu Studio</span>
                         <button
                             onClick={() => setMobileDrawerOpen(false)}
-                            className="p-2 text-slate-400 hover:text-white md:hidden"
+                            className="p-1.5 text-slate-400 hover:text-white"
                         >
-                            <X size={20} />
+                            <X size={18} />
                         </button>
-                    )}
-                </div>
+                    </div>
+                )}
 
                 {/* Contenu Déroulant du Sidebar Vertical */}
                 <div className="flex-1 overflow-y-auto py-3 px-2 space-y-4 scrollbar-thin scrollbar-thumb-slate-800">
@@ -399,48 +411,33 @@ export default function AdminDashboard() {
 
             {/* CONTENU PRINCIPAL À DROITE DU SIDEBAR VERTICAL */}
             <main
-                className={`flex-1 min-w-0 transition-all duration-300 pt-20 md:pt-24 px-4 sm:px-6 lg:px-8 pb-16 ${
+                className={`flex-1 min-w-0 transition-all duration-300 pt-20 px-4 sm:px-6 lg:px-8 pb-16 ${
                     sidebarExpanded ? 'md:ml-64' : 'md:ml-20'
                 }`}
             >
                 {/* Barre Supérieure du Contenu Principal */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8 border-b border-slate-800/80 pb-5">
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={() => {
-                                if (window.innerWidth < 768) {
-                                    setMobileDrawerOpen(true);
-                                } else {
-                                    setSidebarExpanded(!sidebarExpanded);
-                                }
-                            }}
-                            className="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:bg-slate-800 text-slate-300 transition-colors"
-                            title="Menu vertical"
-                        >
-                            <Menu size={20} />
-                        </button>
-                        <div>
-                            <div className="flex items-center gap-3 flex-wrap">
-                                <h1 className="text-2xl sm:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-[#a78bfa]">
-                                    {activeTab === 'overview' && 'Tableau de Bord Admin'}
-                                    {activeTab === 'students' && 'Gestion des Étudiants Inscrits'}
-                                    {activeTab === 'analytics' && 'Analytics & Performance des Cours'}
-                                    {activeTab === 'gamification' && 'Classement des Étudiants & XP'}
-                                    {activeTab === 'hub' && 'Hub Pédagogique & Articles SEO'}
-                                </h1>
-                                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 flex items-center gap-1.5 shadow-sm">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                                    {session?.user?.role || 'ADMIN'}
-                                </span>
-                            </div>
-                            <p className="text-slate-400 text-xs mt-1">
-                                {activeTab === 'overview' && 'Console de pilotage, supervision pédagogique et gestion des accès'}
-                                {activeTab === 'students' && 'Liste complète des utilisateurs et gestion des droits d\'apprentissage'}
-                                {activeTab === 'analytics' && 'Taux d\'inscriptions, avancement et activité récente des apprenants'}
-                                {activeTab === 'gamification' && 'Récompenses, points d\'expérience et cours complétés'}
-                                {activeTab === 'hub' && 'Parcours métiers, articles Google AdSense, fiches mémos et recruteur IA'}
-                            </p>
+                    <div>
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <h1 className="text-2xl sm:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-100 to-[#a78bfa]">
+                                {activeTab === 'overview' && 'Tableau de Bord Admin'}
+                                {activeTab === 'students' && 'Gestion des Étudiants Inscrits'}
+                                {activeTab === 'analytics' && 'Analytics & Performance des Cours'}
+                                {activeTab === 'gamification' && 'Classement des Étudiants & XP'}
+                                {activeTab === 'hub' && 'Hub Pédagogique & Articles SEO'}
+                            </h1>
+                            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30 flex items-center gap-1.5 shadow-sm">
+                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                {session?.user?.role || 'ADMIN'}
+                            </span>
                         </div>
+                        <p className="text-slate-400 text-xs mt-1">
+                            {activeTab === 'overview' && 'Console de pilotage, supervision pédagogique et gestion des accès'}
+                            {activeTab === 'students' && 'Liste complète des utilisateurs et gestion des droits d\'apprentissage'}
+                            {activeTab === 'analytics' && 'Taux d\'inscriptions, avancement et activité récente des apprenants'}
+                            {activeTab === 'gamification' && 'Récompenses, points d\'expérience et cours complétés'}
+                            {activeTab === 'hub' && 'Parcours métiers, articles Google AdSense, fiches mémos et recruteur IA'}
+                        </p>
                     </div>
 
                     {/* Stats Pills en Haut à Droite */}
